@@ -30,6 +30,8 @@ const useFetch = (url, options = {}) => {
     error: null,
   };
 
+  const apiURL = 'https://www.litterapp.sseoll.com/api' + url;
+
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const useFetch = (url, options = {}) => {
       dispatch({type: ACTIONS.FETCH_START});
 
       try {
-        const response = await axios(url, options);
+        const response = await axios(apiURL, options);
         const responseData = await response.data;
 
         dispatch({type: ACTIONS.FETCH_SUCCESS, payload: responseData});
