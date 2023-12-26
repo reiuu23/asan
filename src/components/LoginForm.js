@@ -24,8 +24,8 @@ import CheckBox from '@react-native-community/checkbox';
 import '../utils/FormValidation';
 
 export default function LoginForm() {
-  const {data, loading, error} = useFetch();
   const {session, setSession} = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(null);
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
   return (
@@ -39,27 +39,24 @@ export default function LoginForm() {
       <Formik
         initialValues={{email: '', password: ''}}
         onSubmit={values => {
-          // Fetch({
-          //   API_DIR: '/auth/index.php',
-          //   method: 'post',
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //   },
-          //   data: {
-          //     validationType: 'auth',
-          //     email: values.email,
-          //     password: values.password,
-          //   },
-          // }).then(response => {
-          //   if (response.userToken) {
-          //     setSession(response);
-          //   } else {
-          //     Alert.alert('Failed to Sign In', response);
-          //   }
-          // });
+          try {
+            const {data, loading, error} = useFetch('/auth', values);
+            const {authStatus} = data;
+
+            if (error) throw error;
+
+            if (authStatus) {
+              setSession({token: crypto.randomUUID(), data});
+              setIsLoading(loading);
+            } else {
+              Alert('Invalid credentials!');
+            }
+          } catch (error) {
+            console.log(error);
+          }
+
           console.log('Stringified JSON: ', JSON.stringify(values));
           console.log('Session Token: ', session);
-          // Condition Statement based on the returned value from the custom hook.
         }}
         validationSchema={validationSchema}>
         {formikProps => (
