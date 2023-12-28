@@ -4,29 +4,48 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SafeAreaView,
   TextInput,
-  Button,
   Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-  Dimensions,
   ScrollView,
-  Pressable,
-  TouchableHighlight,
+  ActivityIndicator,
 } from 'react-native';
 import {Formik} from 'formik';
-import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
+import {RFValue} from 'react-native-responsive-fontsize';
 import {AuthContext} from '../context/AuthContext';
 import {validationSchema} from '../utils/FormValidation';
 import useFetch from '../hooks/useFetch';
 import CheckBox from '@react-native-community/checkbox';
+import uuid from 'react-native-uuid';
 import '../utils/FormValidation';
 
 export default function LoginForm() {
-  const {session, setSession} = useContext(AuthContext);
-  const [isLoading, setIsLoading] = useState(null);
+  // States
+  const {data, loading, error, fetchData} = useFetch(); // Custom useFetch hook
+  const {session, setSession} = useContext(AuthContext); // Session Context
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
+
+  // Authentication Handler
+
+  const handleAuth = async values => {
+    await fetchData('/auth/', 'post', values); // API request to validate the authentication.
+    if (error) console.error('Authentication failed: ', error);
+  };
+
+  // UseEffect Hook to validate the authentication status (if true, add the session and proceed to the app. Else, pop up the alert box)
+
+  useEffect(() => {
+    console.log('Returned Data: ', data);
+
+    if (data.hasOwnProperty('authStatus') && data.authStatus === true) {
+      setSession({token: uuid.v4(), data: data});
+      console.log('Authentication successful:');
+      console.log('Session Token: ', session);
+    }
+
+    if (data.hasOwnProperty('authStatus') && data.authStatus === false) {
+      Alert.alert('Invalid credentials!');
+    }
+  }, [data]);
 
   return (
     <ScrollView
@@ -38,26 +57,7 @@ export default function LoginForm() {
       </View>
       <Formik
         initialValues={{email: '', password: ''}}
-        onSubmit={values => {
-          try {
-            const {data, loading, error} = useFetch('/auth', values);
-            const {authStatus} = data;
-
-            if (error) throw error;
-
-            if (authStatus) {
-              setSession({token: crypto.randomUUID(), data});
-              setIsLoading(loading);
-            } else {
-              Alert('Invalid credentials!');
-            }
-          } catch (error) {
-            console.log(error);
-          }
-
-          console.log('Stringified JSON: ', JSON.stringify(values));
-          console.log('Session Token: ', session);
-        }}
+        onSubmit={handleAuth}
         validationSchema={validationSchema}>
         {formikProps => (
           <>
@@ -99,7 +99,11 @@ export default function LoginForm() {
               <TouchableOpacity
                 onPress={formikProps.handleSubmit}
                 style={styles.formSubmitBtn}>
-                <Text style={styles.formSubmitBtnText}>Sign In</Text>
+                {loading ? (
+                  <ActivityIndicator size="small"></ActivityIndicator>
+                ) : (
+                  <Text style={styles.formSubmitBtnText}>Sign In</Text>
+                )}
               </TouchableOpacity>
               <View style={styles.footerHelpContainer}>
                 <Text style={styles.footerHeaderText}>
