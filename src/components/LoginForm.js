@@ -34,7 +34,7 @@ export default function LoginForm() {
   // UseEffect Hook to validate the authentication status (if true, add the session and proceed to the app. Else, pop up the alert box)
 
   useEffect(() => {
-    console.log('Returned Data: ', data);
+    console.log('Returned Data: ', data); // Return
 
     if (data.hasOwnProperty('authStatus') && data.authStatus === true) {
       setSession({token: uuid.v4(), data: data});
@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+    marginTop: 50,
   },
   checkBoxContainer: {
     alignItems: 'center',
