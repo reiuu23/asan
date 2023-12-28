@@ -1,32 +1,32 @@
-import {View, Text, Image, TouchableOpacity, StatusBar} from 'react-native';
-import React from 'react';
+import {View, Text, Image, TouchableOpacity} from 'react-native';
 import {SafeAreaView, StyleSheet} from 'react-native';
+import {RFValue} from 'react-native-responsive-fontsize';
 
 const AuthOnboarding = ({navigation}) => {
   return (
     <SafeAreaView style={styles.wrapper}>
-      <Text style={styles.onboardingHeader}>
-        Warehouse management on the go!
-      </Text>
+      <Text style={styles.onboardingHeader}>Stock management on the go!</Text>
       <Image
         source={require('../../assets/img/auth-select-mainpic.jpg')}
         style={styles.onboardingPic}></Image>
-      <View style={styles.footerContainer}>
-        <Text style={styles.footerHeaderText}>Are you a?</Text>
-        {/* <TouchableOpacity>
-            <Text style={styles.helpBtnText}>Click Here</Text>
-          </TouchableOpacity> */}
-      </View>
       <View style={styles.authBtnContainer}>
+        <TouchableOpacity
+          style={styles.signUpBtn}
+          onPress={() => navigation.navigate('Login', {userType: 'owner'})}>
+          <Text style={styles.signUpBtnText}>Sign Up</Text>
+        </TouchableOpacity>
+        <Text style={styles.footerHeaderText}>
+          Already have an account? Sign in as a
+        </Text>
         <TouchableOpacity
           style={styles.loginBtn}
           onPress={() => navigation.navigate('Login', {userType: 'owner'})}>
-          <Text style={styles.loginBtnText}>Warehouse Owner</Text>
+          <Text style={styles.loginBtnText}>Scrapyard Owner</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.signUpBtn}
+          style={styles.signInBtn}
           onPress={() => navigation.navigate('Login', {userType: 'buyer'})}>
-          <Text style={styles.signUpBtnText}>Scrap Buyer</Text>
+          <Text style={styles.signInBtnText}>Scrap Buyer</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -43,20 +43,20 @@ const styles = StyleSheet.create({
     color: '#46574C',
     flexWrap: 'wrap',
     fontFamily: 'Inter-Bold',
-    fontSize: 25,
+    fontSize: RFValue(25),
     marginTop: 10,
-    width: 300,
+    width: 200,
     flex: 3,
     // backgroundColor: 'red',
   },
   onboardingPic: {
-    flex: 6,
+    flex: 3,
     width: '100%',
     resizeMode: 'contain',
     // backgroundColor: 'green',
   },
   authBtnContainer: {
-    flex: 4,
+    flex: 5,
     justifyContent: 'flex-end',
     // backgroundColor: 'blue',
   },
@@ -70,35 +70,42 @@ const styles = StyleSheet.create({
   loginBtnText: {
     color: '#46574C',
     fontFamily: 'Inter-Bold',
-    fontSize: 16,
+    fontSize: RFValue(16),
   },
   signUpBtn: {
     alignItems: 'center',
-    backgroundColor: '#46574C',
+    backgroundColor: '#5D7365',
     borderRadius: 8,
     padding: 15,
   },
   signUpBtnText: {
     color: 'white',
     fontFamily: 'Inter-Bold',
-    fontSize: 16,
+    fontSize: RFValue(16),
   },
-  footerContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    justifyContent: 'center',
-    padding: 10,
-    marginTop: 10,
+  signInBtn: {
+    alignItems: 'center',
+    backgroundColor: '#46574C',
+    borderRadius: 8,
+    padding: 15,
+  },
+  signInBtnText: {
+    color: 'white',
+    fontFamily: 'Inter-Bold',
+    fontSize: RFValue(16),
   },
   footerHeaderText: {
+    alignSelf: 'center',
     color: 'darkgray',
     fontFamily: 'Inter-Bold',
-    fontSize: 14,
+    fontSize: RFValue(14),
+    marginBottom: 20,
+    marginTop: 20,
   },
   helpBtnText: {
     fontFamily: 'Inter-Bold',
     textDecorationLine: 'underline',
-    fontSize: 14,
+    fontSize: RFValue(12),
   },
 });
 
