@@ -1,57 +1,60 @@
-import {useReducer, useEffect} from 'react';
+import {useReducer} from 'react';
 import axios from 'axios';
 
-// Action types specified in an object to prevent unwanted bugs in mistyped reducer function actions.
-const ACTIONS = {
-  FETCH_START: 'FETCH_START',
-  FETCH_SUCCESS: 'FETCH_SUCCESS',
-  FETCH_FAILURE: 'FETCH_FAILURE',
+// Initial State for the useReducer
+
+const initialState = {
+  data: {},
+  error: null,
+  loading: false,
 };
 
-// Reducer function
+// Reducer function for API Request
+
 const reducer = (state, action) => {
   switch (action.type) {
-    case ACTIONS.FETCH_START:
+    case 'REQUEST_START':
       return {...state, loading: true, error: null};
-    case ACTIONS.FETCH_SUCCESS:
+    case 'REQUEST_SUCCESS':
       return {...state, loading: false, data: action.payload};
-    case ACTIONS.FETCH_FAILURE:
+    case 'REQUEST_FAILURE':
       return {...state, loading: false, error: action.payload};
     default:
       return state;
   }
 };
 
-// Custom useFetch hook that can handle all Axios requests.
-const useFetch = (url, options = {}) => {
-  const initialState = {
-    data: null,
-    loading: true,
-    error: null,
-  };
+// useFetch Custom Hook
 
-  const apiURL = 'https://www.litterapp.sseoll.com/api' + url;
-
+const useFetch = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      dispatch({type: ACTIONS.FETCH_START});
+  const fetchData = async (
+    apiEndpoint,
+    method = 'get',
+    body = null,
+    headers = {},
+  ) => {
+    const apiURL = 'https://litterapp.sseoll.com/api' + apiEndpoint;
 
-      try {
-        const response = await axios(apiURL, options);
-        const responseData = await response.data;
+    dispatch({type: 'REQUEST_START'});
 
-        dispatch({type: ACTIONS.FETCH_SUCCESS, payload: responseData});
-      } catch (error) {
-        dispatch({type: ACTIONS.FETCH_FAILURE, payload: error.message});
-      }
-    };
+    console.log(apiURL);
 
-    fetchData();
-  }, [url, options]);
+    try {
+      const response = await axios({
+        url: apiURL,
+        method,
+        data: body,
+        headers: headers,
+      });
+      dispatch({type: 'REQUEST_SUCCESS', payload: response.data});
+    } catch (error) {
+      dispatch({type: 'REQUEST_FAILURE', payload: error});
+    }
+  };
 
-  return state;
+  return {...state, fetchData};
 };
 
 export default useFetch;
