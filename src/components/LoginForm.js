@@ -26,6 +26,10 @@ export default function LoginForm() {
 
   // Authentication Handler
 
+  // Bypass authentication - for easier development on the main application.
+
+  setSession({token: uuid.v4()}); // (Temporary Code)
+
   const handleAuth = async values => {
     await fetchData('/auth/', 'post', values); // API request to validate the authentication.
     if (error) console.error('Authentication failed: ', error);
@@ -37,7 +41,7 @@ export default function LoginForm() {
     console.log('Returned Data: ', data); // Return
 
     if (data.hasOwnProperty('authStatus') && data.authStatus === true) {
-      setSession({token: uuid.v4(), data: data});
+      // setSession({token: uuid.v4(), data: data}); // un-comment once frontend is fully developed.
       console.log('Authentication successful:');
       console.log('Session Token: ', session);
     }
