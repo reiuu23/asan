@@ -1,8 +1,9 @@
-import {View, Text} from 'react-native';
-import React, {useContext} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
+import {useContext, useEffect} from 'react';
 import {AuthContext} from '../../context/AuthContext';
+import React from 'react';
 
-const BuyerHome = () => {
+export default function BuyerHome() {
   const {session} = useContext(AuthContext);
   return (
     <View>
@@ -10,6 +11,6 @@ const BuyerHome = () => {
       <Text>Session Token: {JSON.stringify(session)}</Text>
     </View>
   );
-};
+}
 
-export default BuyerHome;
+const styles = StyleSheet.create({});

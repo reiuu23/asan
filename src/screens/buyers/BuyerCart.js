@@ -1,10 +1,10 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 
-export default function BuyerProfile() {
+export default function BuyerCart() {
   return (
     <View>
-      <Text>BuyerProfile</Text>
+      <Text>BuyerCart</Text>
     </View>
   );
 }
