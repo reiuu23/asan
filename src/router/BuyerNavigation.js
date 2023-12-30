@@ -26,7 +26,16 @@ const Tab = createBottomTabNavigator();
 
 const TabGroup = () => {
   return (
-    <Tab.Navigator initialRouteName="Home">
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        tabBarStyle: {height: 80},
+        tabBarLabelPosition: 'beside-icon',
+        tabBarItemStyle: {
+          borderBottomWidth: 2,
+          borderBottomColor: 'black',
+        },
+      }}>
       <Tab.Screen name="Home" component={BuyerHome}></Tab.Screen>
       <Tab.Screen name="Chat" component={BuyerChat}></Tab.Screen>
       <Tab.Screen name="About" component={BuyerAbout}></Tab.Screen>
