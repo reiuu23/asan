@@ -8,6 +8,7 @@ import {
   NavigationHelpersContext,
 } from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import HomeIcon from 'react-native-vector-icons/AntDesign';
 
 // Litter Buyer Screens
 
@@ -21,6 +22,14 @@ import BuyerProfile from '../screens/buyers/BuyerProfile';
 // Tab Icons
 import LitterTabIcon from '../assets/img/littertablogo.svg';
 import ChatIcon from '../assets/img/chatIcon.svg';
+
+// Bottom Tab Route List
+
+// const Tablist = [
+//   { route: 'Home', label: 'Home', type: }
+// ]
+
+// Initialized a new bottom tab navigator.
 
 const Tab = createBottomTabNavigator();
 
