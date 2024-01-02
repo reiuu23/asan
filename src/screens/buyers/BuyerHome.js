@@ -11,8 +11,6 @@ export default function BuyerHome() {
     <View>
       <Text>BuyerHome</Text>
       <Text>Session Token: {JSON.stringify(session)}</Text>
-      <ChatIcon></ChatIcon>
-      <LitterIcon></LitterIcon>
     </View>
   );
 }
