@@ -10,6 +10,8 @@ import CustomStackNavigator from '../utils/CustomStackNavigator';
 import Onboarding from '../screens/auth/AuthOnboarding';
 import Login from '../screens/auth/AuthUser';
 
+console.log(1);
+
 export default function AuthNavigation() {
   // Stack Navigation Config (Authentication Flow)
   const options = {
