@@ -5,6 +5,8 @@ import OwnerNavigation from '../../router/OwnerNavigation';
 import BuyerNavigation from '../../router/BuyerNavigation';
 
 export default function AuthUser({navigation, route}) {
+  // Session and Root
+
   const {userType} = route.params;
   const [session, setSession] = useState(null);
 
