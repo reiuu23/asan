@@ -7,6 +7,8 @@ export const apiResponseValidator = apiResponse => {
   } = apiResponse;
   const validationFilter = validationType.toLowerCase();
 
+  // Test Block
+
   try {
     if (validationFilter === 'auth') {
       return authValidator(apiResponse);
