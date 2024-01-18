@@ -10,6 +10,12 @@ import OwnerHome from '../screens/owners/OwnerHome';
 import OwnerProfile from '../screens/owners/OwnerProfile';
 
 export default function OwnerNavigation() {
+  // Stack Navigation Config (Authentication Flow)
+  const options = {
+    headerShown: false,
+    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+  };
+
   const ownerScreens = [
     {
       name: 'OwnerHome',
