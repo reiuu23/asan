@@ -35,8 +35,8 @@ const useFetch = () => {
     body = null,
     headers = {},
   ) => {
-    // const apiURL = 'https://litterapp.sseoll.com/api' + apiEndpoint; -- removed endpoint.
-    const apiURL = 'localhost/api/' + apiEndpoint; // New tentative end point.
+    const apiURL = 'https://litterapp.sseoll.com/api' + apiEndpoint; //-- removed endpoint.
+    // const apiURL = 'localhost/api/' + apiEndpoint; // New tentative end point.
 
     dispatch({type: 'REQUEST_START'});
 
@@ -54,7 +54,6 @@ const useFetch = () => {
       dispatch({type: 'REQUEST_FAILURE', payload: error});
     }
   };
-
   return {...state, fetchData};
 };
 
