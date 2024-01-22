@@ -38,7 +38,8 @@ const TabGroup = () => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        tabBarStyle: {height: 80},
+        headerShown: false,
+        tabBarStyle: {height: 81},
         tabBarLabelPosition: 'beside-icon',
         tabBarItemStyle: {
           borderBottomWidth: 2,
