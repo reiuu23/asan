@@ -15,7 +15,7 @@ export default function BuyerHome() {
   const {session} = useContext(AuthContext);
   return (
     <View style={{marginTop: 50}}>
-      <TouchableOpacity>
+      {/* <TouchableOpacity>
         <LitterIcon></LitterIcon>
       </TouchableOpacity>
       <TouchableOpacity>
@@ -29,7 +29,7 @@ export default function BuyerHome() {
       </TouchableOpacity>
       <TouchableOpacity>
         <StatsIcon></StatsIcon>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Text>BuyerHome</Text>
       <Text>Session Token: {JSON.stringify(session)}</Text>
     </View>
