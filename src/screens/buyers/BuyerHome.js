@@ -30,7 +30,6 @@ export default function BuyerHome() {
       <TouchableOpacity>
         <StatsIcon></StatsIcon>
       </TouchableOpacity> */}
-      <Text>BuyerHome</Text>
       <Text>Session Token: {JSON.stringify(session)}</Text>
     </View>
   );
