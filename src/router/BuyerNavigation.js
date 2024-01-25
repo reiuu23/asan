@@ -25,9 +25,7 @@ import ChatIcon from '../assets/img/chatIcon.svg';
 
 // Bottom Tab Route List
 
-// const Tablist = [
-//   { route: 'Home', label: 'Home', type: }
-// ]
+// const Tablist = [{route: 'Home', label: 'Home', type: Items.Icons}];
 
 // Initialized a new bottom tab navigator.
 
@@ -43,7 +41,7 @@ const TabGroup = () => {
         tabBarLabelPosition: 'beside-icon',
         tabBarItemStyle: {
           borderBottomWidth: 2,
-          borderBottomColor: 'black',
+          borderBottomColor: 'white',
         },
       }}>
       <Tab.Screen name="Home" component={BuyerHome}></Tab.Screen>
