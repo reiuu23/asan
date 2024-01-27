@@ -18,14 +18,13 @@ import {
   StatsIcon,
   LogoutIcon,
 } from '../../components/Icons';
+import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 
 export default function BuyerHome() {
   const {session} = useContext(AuthContext);
+
   return (
-    // <View style={{marginTop: 50}}>
-    //   {/* <Text>Session Token: {JSON.stringify(session)}</Text> */}
-    // </View>
     <SafeAreaView>
       <ScrollView>
         <View style={styles.topBarContainer}>
@@ -40,6 +39,7 @@ export default function BuyerHome() {
             <LogoutIcon></LogoutIcon>
           </TouchableOpacity>
         </View>
+        <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
       </ScrollView>
     </SafeAreaView>
   );
