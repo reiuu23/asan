@@ -45,6 +45,6 @@ export const authValidator = apiResponse => {
   }
 };
 
-export const testFunction = apiResponse => {
-  return apiResponse;
-};
+// export const testFunction = apiResponse => {
+//   return apiResponse;
+// };
