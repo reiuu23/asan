@@ -36,9 +36,6 @@ export default function Scraps() {
           <>
             <Image></Image>
             <Text>{scrap.scrapName}</Text>
-            <TouchableOpacity>
-              <Text>Add to Cart</Text>
-            </TouchableOpacity>
           </>
         );
       })}
