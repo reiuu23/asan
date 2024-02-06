@@ -25,6 +25,7 @@ import {
 } from '../../components/Icons';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
+import Scraps from '../../components/Scraps';
 
 export default function BuyerHome() {
   const {session} = useContext(AuthContext);
@@ -101,6 +102,7 @@ export default function BuyerHome() {
         </View>
         <View style={styles.scrap_list__container}>
           <Text style={styles.scrap_list__header}>PLASTIC</Text>
+          <Scraps></Scraps>
         </View>
         <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
       </ScrollView>
