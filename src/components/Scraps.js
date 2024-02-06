@@ -30,35 +30,65 @@ const scrapList = [
 
 export default function Scraps() {
   return (
-    <View style={styles.scrap_list__scrap_item}>
+    <>
       {scrapList.map(scrap => {
         return (
-          <>
-            <Image source={require('../assets/img/plasticImg.png')} />
+          <View style={styles.scrap_list__scrap_item}>
+            <Image
+              style={styles.scrapImage}
+              source={require('../assets/img/plasticImg.png')}
+            />
             <Text>{scrap.scrapName}</Text>
             <View style={styles.scrap_list__scrap_details}>
               <View>
-                <Text>Size:</Text>
-                <Text>Cost:</Text>
-                <Text>Quantity:</Text>
-              </View>
-              <View>
-                <Text>{scrap.scrapSizeVolume + ' ' + scrap.scrapSizeUnit}</Text>
-                <Text>
-                  {scrap.scrapCostCurrency +
-                    ' ' +
-                    scrap.scrapCostValue +
-                    ' / ' +
-                    'kg'}
-                </Text>
-                <Text>{scrap.scrapQuantity + ' pieces'}</Text>
+                <View style={styles.scrap_list__scrap_size}>
+                  <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
+                  <Text style={styles.scrap_list__scrap_size_output}>
+                    {scrap.scrapSizeVolume + ' ' + scrap.scrapSizeUnit}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_cost}>
+                  <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
+                  <Text style={styles.scrap_list__scrap_cost_output}>
+                    {scrap.scrapCostCurrency +
+                      ' ' +
+                      scrap.scrapCostValue +
+                      ' / ' +
+                      'kg'}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_quantity}>
+                  <Text style={styles.scrap_list__scrap_quantity_label}>
+                    Quantity:
+                  </Text>
+                  <Text style={styles.scrap_list__scrap_quantity_output}>
+                    {scrap.scrapQuantity + ' pieces'}
+                  </Text>
+                </View>
               </View>
             </View>
-          </>
+          </View>
         );
       })}
-    </View>
+    </>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  scrap_list__scrap_item: {
+    alignItems: 'center',
+    backgroundColor: 'gray',
+    height: 142,
+    width: 111,
+    marginBottom: 20,
+  },
+  scrap_list__scrap_size: {
+    flexDirection: 'row',
+    position: 'absolute',
+  },
+  scrapImage: {
+    alignSelf: 'center',
+    width: 94,
+    height: 69,
+  },
+});
