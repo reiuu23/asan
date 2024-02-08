@@ -12,6 +12,7 @@ import {
 import {useContext, useEffect} from 'react';
 import {AuthContext} from '../../context/AuthContext';
 import {Shadow} from 'react-native-shadow-2';
+import {Divider} from '@rneui/themed';
 import Svg, {Path} from 'react-native-svg';
 import {
   ChatIcon,
@@ -32,25 +33,21 @@ export default function BuyerHome() {
 
   return (
     <SafeAreaView>
-      <ScrollView>
-        <View style={styles.top_bar__container}>
-          <View style={styles.top_bar__profile_container}>
-            <Image
-              style={styles.top_bar__profile_image}
-              source={require('../../assets/img/chaewon.webp')}
-            />
-            <Text style={styles.top_bar__profile_name}>Hey, Hee</Text>
-          </View>
-          <TouchableOpacity style={styles.top_bar__signout}>
-            <LogoutIcon></LogoutIcon>
-          </TouchableOpacity>
+      <View style={styles.top_bar__container}>
+        <View style={styles.top_bar__profile_container}>
+          <Image
+            style={styles.top_bar__profile_image}
+            source={require('../../assets/img/chaewon.webp')}
+          />
+          <Text style={styles.top_bar__profile_name}>Hey, Hee</Text>
         </View>
-
+        <TouchableOpacity style={styles.top_bar__signout}>
+          <LogoutIcon></LogoutIcon>
+        </TouchableOpacity>
+      </View>
+      <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
+      <ScrollView>
         <View style={styles.top_nav__container}>
-          {/* <TouchableOpacity style={styles.top_nav__search_button}>
-            <SearchIcon></SearchIcon>
-          </TouchableOpacity> */}
-
           <View style={styles.top_nav__searchbar_container}>
             <View style={styles.top_nav__searchbar_icon}>
               <MagnifyIcon></MagnifyIcon>
@@ -61,7 +58,6 @@ export default function BuyerHome() {
               placeholderTextColor={'#3E5A47'}></TextInput>
           </View>
           <Text style={styles.top_nav__menu_header}>Scrap Categories</Text>
-
           {/* Refactor this code asap -- temporary code for debugging */}
           <View style={styles.top_nav__gridnav_container}>
             <View style={styles.top_nav__gridnav_column}>
@@ -100,11 +96,20 @@ export default function BuyerHome() {
             </View>
           </View>
         </View>
-        <View style={styles.scrap_list__container}>
-          <Text style={styles.scrap_list__header}>PLASTIC</Text>
-          <Scraps></Scraps>
-        </View>
-        <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
+        <LinearGradient
+          colors={['#F2F2F2', '#3E5A47']}
+          start={{x: 0, y: 0}}
+          end={{x: 0, y: 1.2}}
+          style={{marginBottom: 80, paddingBottom: 80}}>
+          <View style={styles.scrap_list__container}>
+            <Text style={styles.scrap_list__header}>PLASTIC</Text>
+            <Divider
+              style={{alignSelf: 'center', marginBottom: 25, width: '90%'}}
+              width={1}
+            />
+            <Scraps></Scraps>
+          </View>
+        </LinearGradient>
       </ScrollView>
     </SafeAreaView>
   );
@@ -144,8 +149,8 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingLeft: 28,
     paddingRight: 28,
-    height: 420,
-
+    marginBottom: 30,
+    // height: 420,
     // borderWidth: 1, // For debugging.
   },
   top_nav__searchbar_container: {
@@ -181,6 +186,9 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 25,
   },
+  top_nav__gridnav_container: {
+    flex: 1,
+  },
   top_nav__gridnav_column: {
     justifyContent: 'space-around',
     flexDirection: 'row',
@@ -199,5 +207,6 @@ const styles = StyleSheet.create({
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
     fontSize: 20,
+    marginBottom: 10,
   },
 });
