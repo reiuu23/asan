@@ -2,6 +2,8 @@ import {View, Text, Image, TouchableOpacity} from 'react-native';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import {RFValue} from 'react-native-responsive-fontsize';
 
+// Test change.
+
 const AuthOnboarding = ({navigation}) => {
   return (
     <SafeAreaView style={styles.wrapper}>
