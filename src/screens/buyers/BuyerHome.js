@@ -37,7 +37,7 @@ export default function BuyerHome() {
         <View style={styles.top_bar__profile_container}>
           <Image
             style={styles.top_bar__profile_image}
-            source={require('../../assets/img/chaewon.webp')}
+            source={require('../../assets/img/chaewon.jpg')}
           />
           <Text style={styles.top_bar__profile_name}>Hey, Hee</Text>
         </View>
@@ -96,17 +96,17 @@ export default function BuyerHome() {
             </View>
           </View>
         </View>
+        <Text style={styles.scrap_list__header}>PLASTIC</Text>
+        <Divider
+          style={{alignSelf: 'center', marginBottom: 25, width: '90%'}}
+          width={1}
+        />
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
           start={{x: 0, y: 0}}
           end={{x: 0, y: 1.2}}
-          style={{marginBottom: 80, paddingBottom: 80}}>
+          style={styles.scrap_list__card}>
           <View style={styles.scrap_list__container}>
-            <Text style={styles.scrap_list__header}>PLASTIC</Text>
-            <Divider
-              style={{alignSelf: 'center', marginBottom: 25, width: '90%'}}
-              width={1}
-            />
             <Scraps></Scraps>
           </View>
         </LinearGradient>
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
     height: 115,
     justifyContent: 'space-between',
     paddingTop: 25,
-    paddingLeft: 25,
-    paddingRight: 25,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   top_bar__profile_container: {
     alignItems: 'center',
@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
   },
   top_nav__container: {
     paddingTop: 28,
-    paddingLeft: 28,
-    paddingRight: 28,
+    paddingLeft: 20,
+    paddingRight: 20,
     marginBottom: 30,
     // height: 420,
     // borderWidth: 1, // For debugging.
@@ -187,12 +187,13 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
   },
   top_nav__gridnav_container: {
-    flex: 1,
+    marginHorizontal: 'auto',
   },
   top_nav__gridnav_column: {
-    justifyContent: 'space-around',
+    // justifyContent: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    flex: 1,
     gap: 10,
   },
   top_nav__gridnav_button: {
@@ -208,5 +209,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: 20,
     marginBottom: 10,
+  },
+  scrap_list__card: {
+    marginBottom: 80,
+    paddingBottom: 80,
+    paddingLeft: 25,
   },
 });
