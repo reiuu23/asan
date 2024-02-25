@@ -46,7 +46,7 @@ export default function BuyerHome() {
         </TouchableOpacity>
       </View>
       <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false} overScrollMode="never">
         <View style={styles.top_nav__container}>
           <View style={styles.top_nav__searchbar_container}>
             <View style={styles.top_nav__searchbar_icon}>
@@ -61,6 +61,10 @@ export default function BuyerHome() {
           {/* Refactor this code asap -- temporary code for debugging */}
           <View style={styles.top_nav__gridnav_container}>
             <View style={styles.top_nav__gridnav_column}>
+              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
+                <TouchableOpacity
+                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
+              </Shadow>
               <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
                 <TouchableOpacity
                   style={styles.top_nav__gridnav_button}></TouchableOpacity>
@@ -186,15 +190,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 25,
   },
-  top_nav__gridnav_container: {
-    marginHorizontal: 'auto',
-  },
+  top_nav__gridnav_container: {},
   top_nav__gridnav_column: {
-    // justifyContent: 'flex-start',
+    justifyContent: 'space-evenly',
     flexDirection: 'row',
     flexWrap: 'wrap',
     flex: 1,
-    gap: 10,
+    gap: 20,
   },
   top_nav__gridnav_button: {
     backgroundColor: '#F2F2F2',
@@ -213,6 +215,5 @@ const styles = StyleSheet.create({
   scrap_list__card: {
     marginBottom: 80,
     paddingBottom: 80,
-    paddingLeft: 25,
   },
 });
