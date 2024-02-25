@@ -5,10 +5,8 @@ import {RFValue} from 'react-native-responsive-fontsize';
 const AuthOnboarding = ({navigation}) => {
   return (
     <SafeAreaView style={styles.wrapper}>
-      {/* <Text style={styles.onboardingHeader}>Stock management on the go!</Text>
-      <Image
-        source={require('../../assets/img/auth-select-mainpic.jpg')}
-        style={styles.onboardingPic}></Image> */}
+      <Text style={styles.onboardingHeader}>Stock management on the go!</Text>
+      {/*  */}
       <View style={styles.authBtnContainer}>
         <TouchableOpacity
           style={styles.signUpBtn}
