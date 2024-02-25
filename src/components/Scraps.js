@@ -38,7 +38,12 @@ export default function Scraps() {
               style={styles.scrapImage}
               source={require('../assets/img/plasticImg.png')}
             />
-            <Text>{scrap.scrapName}</Text>
+            <Text
+              numberOfLines={1}
+              // ellipsizeMode="head"
+              style={styles.scrap_list__scrap_name}>
+              {scrap.scrapName}
+            </Text>
             <View style={styles.scrap_list__scrap_details}>
               <View>
                 <View style={styles.scrap_list__scrap_size}>
@@ -77,18 +82,74 @@ export default function Scraps() {
 const styles = StyleSheet.create({
   scrap_list__scrap_item: {
     alignItems: 'center',
-    backgroundColor: 'gray',
-    height: 142,
-    width: 111,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 8,
+    height: 200,
+    width: 140,
+    paddingTop: 10,
     marginBottom: 20,
-  },
-  scrap_list__scrap_size: {
-    flexDirection: 'row',
-    position: 'absolute',
   },
   scrapImage: {
     alignSelf: 'center',
-    width: 94,
-    height: 69,
+    borderRadius: 8,
+    width: 120,
+    height: 88,
+    marginBottom: 10,
+  },
+  scrap_list__scrap_name: {
+    textAlign: 'center',
+    fontFamily: 'Inter-Bold',
+    fontSize: 12,
+    width: 120,
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_size: {
+    flexDirection: 'row',
+    gap: 34,
+    paddingLeft: 1,
+    marginTop: 5,
+  },
+  scrap_list__scrap_size_label: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_size_output: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_cost: {
+    flexDirection: 'row',
+    gap: 32,
+    paddingLeft: 1,
+  },
+  scrap_list__scrap_cost_label: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_cost_output: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_quantity: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingLeft: 1,
+  },
+  scrap_list__scrap_quantity_label: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    color: '#3E5A47',
+  },
+  scrap_list__scrap_quantity_output: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#3E5A47',
   },
 });
