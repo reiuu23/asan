@@ -20,8 +20,8 @@ import BuyerHome from '../screens/buyers/BuyerHome';
 import BuyerProfile from '../screens/buyers/BuyerProfile';
 
 // Tab Icons
-import LitterTabIcon from '../assets/img/littertablogo.svg';
-import ChatIcon from '../assets/img/chatIcon.svg';
+// import LitterTabIcon from '../assets/img/littertablogo.svg';
+// import ChatIcon from '../assets/img/chatIcon.svg';
 
 // Bottom Tab Route List
 
