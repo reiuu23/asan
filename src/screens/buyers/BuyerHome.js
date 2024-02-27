@@ -31,6 +31,19 @@ import Scraps from '../../components/Scraps';
 export default function BuyerHome() {
   const {session} = useContext(AuthContext);
 
+  // Scrap Categories
+
+  const scrapCategories = [
+    {id: 1, categoryName: 'Plastic', iconDir: 'none'},
+    {id: 2, categoryName: 'Paper', iconDir: 'none'},
+    {id: 3, categoryName: 'Metal', iconDir: 'none'},
+    {id: 4, categoryName: 'Silicone', iconDir: 'none'},
+    {id: 5, categoryName: 'Test1', iconDir: 'none'},
+    {id: 6, categoryName: 'Test2', iconDir: 'none'},
+    {id: 7, categoryName: 'Test3', iconDir: 'none'},
+    {id: 8, categoryName: 'Test4', iconDir: 'none'},
+  ];
+
   return (
     <SafeAreaView>
       <View style={styles.top_bar__container}>
@@ -60,43 +73,21 @@ export default function BuyerHome() {
           <Text style={styles.top_nav__menu_header}>Scrap Categories</Text>
           {/* Refactor this code asap -- temporary code for debugging */}
           <View style={styles.top_nav__gridnav_container}>
+            {/* Array Map to prevent code duplication. */}
             <View style={styles.top_nav__gridnav_column}>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
-              <Shadow offset={[0, 3]} distance={1} startColor="#00000040">
-                <TouchableOpacity
-                  style={styles.top_nav__gridnav_button}></TouchableOpacity>
-              </Shadow>
+              {scrapCategories.map(({id, categoryName, iconDir}) => {
+                return (
+                  <Shadow
+                    offset={[0, 3]}
+                    distance={1}
+                    startColor="#00000040"
+                    key={id}>
+                    <TouchableOpacity style={styles.top_nav__gridnav_button}>
+                      <Text>{categoryName}</Text>
+                    </TouchableOpacity>
+                  </Shadow>
+                );
+              })}
             </View>
           </View>
         </View>
@@ -148,6 +139,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter-Regular',
     fontSize: 20,
+    // fontStyle: 'italic',
   },
   top_nav__container: {
     paddingTop: 28,
