@@ -7,12 +7,14 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 
-// This component is strictly made for testing purposes only. Future changes will be made after finalizing the components.
-
-export default function Scraps() {
+export default function Scraps({scrapCategory}) {
   // Scrap List Example
+
+  // useEffect(() => {
+  //   console.log(':' + scrapCategory);
+  // }, [scrapCategory]);
 
   const scrapList = [
     {
@@ -27,8 +29,8 @@ export default function Scraps() {
     },
     {
       scrapID: 2,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Containers',
+      scrapType: 'Paper',
+      scrapName: 'Manila Paper',
       scrapSizeVolume: 1,
       scrapSizeUnit: 'L',
       scrapCostValue: 60,
@@ -37,63 +39,111 @@ export default function Scraps() {
     },
     {
       scrapID: 3,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Containers',
+      scrapType: 'Metal',
+      scrapName: 'Broken Bike Frame',
       scrapSizeVolume: 1,
       scrapSizeUnit: 'L',
       scrapCostValue: 60,
       scrapCostCurrency: 'PHP',
       scrapQuantity: 12,
     },
+    {
+      scrapID: 4,
+      scrapType: 'Plastic',
+      scrapName: 'Plastic Buttlez',
+      scrapSizeVolume: 350,
+      scrapSizeUnit: 'ml',
+      scrapCostValue: 7,
+      scrapCostCurrency: 'PHP',
+      scrapQuantity: 9,
+    },
+    {
+      scrapID: 5,
+      scrapType: 'Plastic',
+      scrapName: 'Plastic Buttlez',
+      scrapSizeVolume: 350,
+      scrapSizeUnit: 'ml',
+      scrapCostValue: 7,
+      scrapCostCurrency: 'PHP',
+      scrapQuantity: 9,
+    },
+    {
+      scrapID: 6,
+      scrapType: 'Plastic',
+      scrapName: 'Plastic Buttlez',
+      scrapSizeVolume: 350,
+      scrapSizeUnit: 'ml',
+      scrapCostValue: 7,
+      scrapCostCurrency: 'PHP',
+      scrapQuantity: 9,
+    },
   ];
 
-  const renderItem = ({item}) => (
-    <View style={styles.scrap_list__scrap_item}>
-      <Image
-        style={styles.scrapImage}
-        source={require('../assets/img/plasticImg.png')}
-      />
-      <Text
-        numberOfLines={1}
-        // ellipsizeMode="head"
-        style={styles.scrap_list__scrap_name}>
-        {item.scrapName}
-      </Text>
-      <View style={styles.scrap_list__scrap_details}>
-        <View>
-          <View style={styles.scrap_list__scrap_size}>
-            <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
-            <Text style={styles.scrap_list__scrap_size_output}>
-              {item.scrapSizeVolume + ' ' + item.scrapSizeUnit}
+  const testArr = [];
+
+  const renderItem = ({item}) => {
+    if (item.scrapType.includes(scrapCategory)) {
+      testArr.push(item);
+      console.log(testArr);
+      for (let i = 0; i <= testArr.length; i++) {
+        console.log('testarr length: ' + testArr.length);
+        return (
+          <View style={styles.scrap_list__scrap_item}>
+            <Image
+              style={styles.scrapImage}
+              source={require('../assets/img/plasticImg.png')}
+            />
+            <Text
+              numberOfLines={1}
+              // ellipsizeMode="head"
+              style={styles.scrap_list__scrap_name}>
+              {testArr[i].scrapName}
             </Text>
+            <View style={styles.scrap_list__scrap_details}>
+              <View>
+                <View style={styles.scrap_list__scrap_size}>
+                  <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
+                  <Text style={styles.scrap_list__scrap_size_output}>
+                    {testArr[i].scrapSizeVolume +
+                      ' ' +
+                      testArr[i].scrapSizeUnit}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_cost}>
+                  <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
+                  <Text style={styles.scrap_list__scrap_cost_output}>
+                    {testArr[i].scrapCostCurrency +
+                      ' ' +
+                      testArr[i].scrapCostValue +
+                      ' / ' +
+                      'kg'}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_quantity}>
+                  <Text style={styles.scrap_list__scrap_quantity_label}>
+                    Quantity:
+                  </Text>
+                  <Text style={styles.scrap_list__scrap_quantity_output}>
+                    {testArr[i].scrapQuantity + ' pieces'}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.scrap_list__scrap_cost}>
-            <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
-            <Text style={styles.scrap_list__scrap_cost_output}>
-              {item.scrapCostCurrency +
-                ' ' +
-                item.scrapCostValue +
-                ' / ' +
-                'kg'}
-            </Text>
-          </View>
-          <View style={styles.scrap_list__scrap_quantity}>
-            <Text style={styles.scrap_list__scrap_quantity_label}>
-              Quantity:
-            </Text>
-            <Text style={styles.scrap_list__scrap_quantity_output}>
-              {item.scrapQuantity + ' pieces'}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
+        );
+      }
+    }
+  };
+
+  // if (!item.scrapType.includes(scrapCategory)) {
+  //   return <Text>No data</Text>;
+  // }
+  //};
 
   return (
-    <ScrollView>
+    <ScrollView onScroll={e => console.log(e.nativeEvent.contentOffset.x)}>
       <FlatList
-        data={scrapList}
+        data={scrapList} // find a way to filter this data first before rendering. (FINAL HINT)
         renderItem={renderItem}
         keyExtractor={item => item.scrapID.toString()}
         overScrollMode="never"
@@ -107,6 +157,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAFAFA',
     borderRadius: 8,
+    borderColor: 'black',
+    borderWidth: 1,
     height: 200,
     width: 140,
     paddingTop: 10,

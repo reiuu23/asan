@@ -9,7 +9,7 @@ import {
   Platform,
   TextInput,
 } from 'react-native';
-import {useContext, useEffect} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../../context/AuthContext';
 import {Shadow} from 'react-native-shadow-2';
 import {Divider} from '@rneui/themed';
@@ -29,9 +29,10 @@ import React from 'react';
 import Scraps from '../../components/Scraps';
 
 export default function BuyerHome() {
+  // Authentication Session Context
   const {session} = useContext(AuthContext);
 
-  // Scrap Categories
+  // Scrap Categories Array
 
   const scrapCategories = [
     {id: 1, categoryName: 'Plastic', iconDir: 'none'},
@@ -43,6 +44,20 @@ export default function BuyerHome() {
     {id: 7, categoryName: 'Test3', iconDir: 'none'},
     {id: 8, categoryName: 'Test4', iconDir: 'none'},
   ];
+
+  // Navigation States
+
+  const [category, setCategory] = useState('Plastic');
+
+  // Navigation Button Function
+
+  const scrapSetter = categoryName => {
+    setCategory(categoryName);
+  };
+
+  // useEffect(() => {
+  //   console.log(category);
+  // }, [category]);
 
   return (
     <SafeAreaView>
@@ -82,7 +97,10 @@ export default function BuyerHome() {
                     distance={1}
                     startColor="#00000040"
                     key={id}>
-                    <TouchableOpacity style={styles.top_nav__gridnav_button}>
+                    <TouchableOpacity
+                      style={styles.top_nav__gridnav_button}
+                      onPress={() => setCategory(categoryName)}>
+                      {/* Icons should be used here. Remove the Text component once done. */}
                       <Text>{categoryName}</Text>
                     </TouchableOpacity>
                   </Shadow>
@@ -102,7 +120,7 @@ export default function BuyerHome() {
           end={{x: 0, y: 1.2}}
           style={styles.scrap_list__card}>
           <View style={styles.scrap_list__container}>
-            <Scraps></Scraps>
+            <Scraps scrapCategory={category}></Scraps>
           </View>
         </LinearGradient>
       </ScrollView>
@@ -188,7 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     flex: 1,
-    gap: 20,
+    gap: 10,
   },
   top_nav__gridnav_button: {
     backgroundColor: '#F2F2F2',
