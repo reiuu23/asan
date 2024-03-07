@@ -14,38 +14,38 @@ import React from 'react';
 export default function Scraps() {
   // Scrap List Example
 
-  const scrapList = [
-    {
-      scrapID: 1,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Bottles',
-      scrapSizeVolume: 350,
-      scrapSizeUnit: 'ml',
-      scrapCostValue: 7,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 9,
-    },
-    {
-      scrapID: 2,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Containers',
-      scrapSizeVolume: 1,
-      scrapSizeUnit: 'L',
-      scrapCostValue: 60,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 12,
-    },
-    {
-      scrapID: 3,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Containers',
-      scrapSizeVolume: 1,
-      scrapSizeUnit: 'L',
-      scrapCostValue: 60,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 12,
-    },
-  ];
+  // const scrapList = [
+  //   {
+  //     scrapID: 1,
+  //     scrapType: 'Plastic',
+  //     scrapName: 'Plastic Bottles',
+  //     scrapSizeVolume: 350,
+  //     scrapSizeUnit: 'ml',
+  //     scrapCostValue: 7,
+  //     scrapCostCurrency: 'PHP',
+  //     scrapQuantity: 9,
+  //   },
+  //   {
+  //     scrapID: 2,
+  //     scrapType: 'Plastic',
+  //     scrapName: 'Plastic Containers',
+  //     scrapSizeVolume: 1,
+  //     scrapSizeUnit: 'L',
+  //     scrapCostValue: 60,
+  //     scrapCostCurrency: 'PHP',
+  //     scrapQuantity: 12,
+  //   },
+  //   {
+  //     scrapID: 3,
+  //     scrapType: 'Plastic',
+  //     scrapName: 'Plastic Containers',
+  //     scrapSizeVolume: 1,
+  //     scrapSizeUnit: 'L',
+  //     scrapCostValue: 60,
+  //     scrapCostCurrency: 'PHP',
+  //     scrapQuantity: 12,
+  //   },
+  // ];
 
   const renderItem = ({item}) => (
     <View style={styles.scrap_list__scrap_item}>
