@@ -8,6 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import React, {useEffect} from 'react';
+import axios from 'axios';
 
 export default function Scraps({scrapCategory}) {
   // Scrap List Example
@@ -16,68 +17,7 @@ export default function Scraps({scrapCategory}) {
   //   console.log(':' + scrapCategory);
   // }, [scrapCategory]);
 
-  const scrapList = [
-    {
-      scrapID: 1,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Bottles',
-      scrapSizeVolume: 350,
-      scrapSizeUnit: 'ml',
-      scrapCostValue: 7,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 9,
-    },
-    {
-      scrapID: 2,
-      scrapType: 'Paper',
-      scrapName: 'Manila Paper',
-      scrapSizeVolume: 1,
-      scrapSizeUnit: 'L',
-      scrapCostValue: 60,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 12,
-    },
-    {
-      scrapID: 3,
-      scrapType: 'Metal',
-      scrapName: 'Broken Bike Frame',
-      scrapSizeVolume: 1,
-      scrapSizeUnit: 'L',
-      scrapCostValue: 60,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 12,
-    },
-    {
-      scrapID: 4,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Buttlez',
-      scrapSizeVolume: 350,
-      scrapSizeUnit: 'ml',
-      scrapCostValue: 7,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 9,
-    },
-    {
-      scrapID: 5,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Buttlez',
-      scrapSizeVolume: 350,
-      scrapSizeUnit: 'ml',
-      scrapCostValue: 7,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 9,
-    },
-    {
-      scrapID: 6,
-      scrapType: 'Plastic',
-      scrapName: 'Plastic Buttlez',
-      scrapSizeVolume: 350,
-      scrapSizeUnit: 'ml',
-      scrapCostValue: 7,
-      scrapCostCurrency: 'PHP',
-      scrapQuantity: 9,
-    },
-  ];
+  const scrapList = require('../data/scraps.json');
 
   const testArr = [];
 
@@ -86,7 +26,6 @@ export default function Scraps({scrapCategory}) {
       testArr.push(item);
       console.log(testArr);
       for (let i = 0; i <= testArr.length; i++) {
-        console.log('testarr length: ' + testArr.length);
         return (
           <View style={styles.scrap_list__scrap_item}>
             <Image
@@ -141,14 +80,13 @@ export default function Scraps({scrapCategory}) {
   //};
 
   return (
-    <ScrollView onScroll={e => console.log(e.nativeEvent.contentOffset.x)}>
-      <FlatList
-        data={scrapList} // find a way to filter this data first before rendering. (FINAL HINT)
-        renderItem={renderItem}
-        keyExtractor={item => item.scrapID.toString()}
-        overScrollMode="never"
-        horizontal></FlatList>
-    </ScrollView>
+    <FlatList
+      data={scrapList} // find a way to filter this data first before rendering. (FINAL HINT)
+      renderItem={renderItem}
+      keyExtractor={item => item.scrapID.toString()}
+      overScrollMode="never"
+      onScroll={e => console.log(e.nativeEvent.contentOffset.x)}
+      horizontal></FlatList>
   );
 }
 
