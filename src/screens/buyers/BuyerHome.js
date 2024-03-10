@@ -60,7 +60,7 @@ export default function BuyerHome() {
   // }, [category]);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <View style={styles.top_bar__container}>
         <View style={styles.top_bar__profile_container}>
           <Image
@@ -73,7 +73,6 @@ export default function BuyerHome() {
           <LogoutIcon></LogoutIcon>
         </TouchableOpacity>
       </View>
-      <LinearGradient colors={['#F2F2F2', '#3E5A47']}></LinearGradient>
       <ScrollView showsVerticalScrollIndicator={false} overScrollMode="never">
         <View style={styles.top_nav__container}>
           <View style={styles.top_nav__searchbar_container}>
@@ -117,7 +116,7 @@ export default function BuyerHome() {
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
           start={{x: 0, y: 0}}
-          end={{x: 0, y: 1.2}}
+          end={{x: 0, y: 0.35}}
           style={styles.scrap_list__card}>
           <View style={styles.scrap_list__container}>
             <Scraps scrapCategory={category}></Scraps>
@@ -223,7 +222,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scrap_list__card: {
-    marginBottom: 80,
+    marginBottom: 50,
     paddingBottom: 80,
+    height: '100%',
   },
 });
