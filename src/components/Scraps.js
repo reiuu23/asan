@@ -11,8 +11,8 @@ import React, {useEffect} from 'react';
 import axios from 'axios';
 
 export default function Scraps({scrapCategory}) {
-
   const scrapList = require('../data/scraps.json');
+  // const scrapList = [];
 
   const testArr = [];
 
@@ -27,10 +27,7 @@ export default function Scraps({scrapCategory}) {
               style={styles.scrapImage}
               source={require('../assets/img/plasticImg.png')}
             />
-            <Text
-              numberOfLines={1}
-              // ellipsizeMode="head"
-              style={styles.scrap_list__scrap_name}>
+            <Text numberOfLines={1} style={styles.scrap_list__scrap_name}>
               {testArr[i].scrapName}
             </Text>
             <View style={styles.scrap_list__scrap_details}>
@@ -69,10 +66,9 @@ export default function Scraps({scrapCategory}) {
     }
   };
 
-  // if (!item.scrapType.includes(scrapCategory)) {
-  //   return <Text>No data</Text>;
-  // }
-  //};
+  const onEmptyList = () => {
+    return <Text>No data</Text>;
+  };
 
   return (
     <FlatList
@@ -81,6 +77,8 @@ export default function Scraps({scrapCategory}) {
       keyExtractor={item => item.scrapID.toString()}
       overScrollMode="never"
       onScroll={e => console.log(e.nativeEvent.contentOffset.x)}
+      showsHorizontalScrollIndicator={false}
+      ListEmptyComponent={onEmptyList}
       horizontal></FlatList>
   );
 }
