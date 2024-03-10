@@ -11,11 +11,6 @@ import React, {useEffect} from 'react';
 import axios from 'axios';
 
 export default function Scraps({scrapCategory}) {
-  // Scrap List Example
-
-  // useEffect(() => {
-  //   console.log(':' + scrapCategory);
-  // }, [scrapCategory]);
 
   const scrapList = require('../data/scraps.json');
 
