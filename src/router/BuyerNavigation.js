@@ -13,10 +13,10 @@ import HomeIcon from 'react-native-vector-icons/AntDesign';
 // Litter Buyer Screens
 
 import BuyerAbout from '../screens/buyers/BuyerAbout';
-import BuyerAnalytics from '../screens/buyers/BuyerAnalytics';
-import BuyerCart from '../screens/buyers/BuyerCart';
 import BuyerChat from '../screens/buyers/BuyerChat';
 import BuyerHome from '../screens/buyers/BuyerHome';
+import BuyerStocks from '../screens/buyers/BuyerStocks';
+import BuyerAnalytics from '../screens/buyers/BuyerAnalytics';
 import BuyerProfile from '../screens/buyers/BuyerProfile';
 
 // Tab Icons
@@ -44,10 +44,10 @@ const TabGroup = () => {
           borderBottomColor: 'white',
         },
       }}>
-      <Tab.Screen name="Home" component={BuyerHome}></Tab.Screen>
-      <Tab.Screen name="Chat" component={BuyerChat}></Tab.Screen>
       <Tab.Screen name="About" component={BuyerAbout}></Tab.Screen>
-      <Tab.Screen name="Cart" component={BuyerCart}></Tab.Screen>
+      <Tab.Screen name="Chat" component={BuyerChat}></Tab.Screen>
+      <Tab.Screen name="Home" component={BuyerHome}></Tab.Screen>
+      <Tab.Screen name="Stocks" component={BuyerStocks}></Tab.Screen>
       <Tab.Screen name="Analytics" component={BuyerAnalytics}></Tab.Screen>
     </Tab.Navigator>
   );

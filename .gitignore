@@ -56,3 +56,4 @@ buck-out/
 # Assets
 
 src/assets/
+src/data/

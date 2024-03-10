@@ -7,98 +7,81 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
+import axios from 'axios';
 
-// This component is strictly made for testing purposes only. Future changes will be made after finalizing the components.
+export default function Scraps({scrapCategory}) {
 
-export default function Scraps() {
-  // Scrap List Example
+  const scrapList = require('../data/scraps.json');
 
-  // const scrapList = [
-  //   {
-  //     scrapID: 1,
-  //     scrapType: 'Plastic',
-  //     scrapName: 'Plastic Bottles',
-  //     scrapSizeVolume: 350,
-  //     scrapSizeUnit: 'ml',
-  //     scrapCostValue: 7,
-  //     scrapCostCurrency: 'PHP',
-  //     scrapQuantity: 9,
-  //   },
-  //   {
-  //     scrapID: 2,
-  //     scrapType: 'Plastic',
-  //     scrapName: 'Plastic Containers',
-  //     scrapSizeVolume: 1,
-  //     scrapSizeUnit: 'L',
-  //     scrapCostValue: 60,
-  //     scrapCostCurrency: 'PHP',
-  //     scrapQuantity: 12,
-  //   },
-  //   {
-  //     scrapID: 3,
-  //     scrapType: 'Plastic',
-  //     scrapName: 'Plastic Containers',
-  //     scrapSizeVolume: 1,
-  //     scrapSizeUnit: 'L',
-  //     scrapCostValue: 60,
-  //     scrapCostCurrency: 'PHP',
-  //     scrapQuantity: 12,
-  //   },
-  // ];
+  const testArr = [];
 
-  const renderItem = ({item}) => (
-    <View style={styles.scrap_list__scrap_item}>
-      <Image
-        style={styles.scrapImage}
-        source={require('../assets/img/plasticImg.png')}
-      />
-      <Text
-        numberOfLines={1}
-        // ellipsizeMode="head"
-        style={styles.scrap_list__scrap_name}>
-        {item.scrapName}
-      </Text>
-      <View style={styles.scrap_list__scrap_details}>
-        <View>
-          <View style={styles.scrap_list__scrap_size}>
-            <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
-            <Text style={styles.scrap_list__scrap_size_output}>
-              {item.scrapSizeVolume + ' ' + item.scrapSizeUnit}
+  const renderItem = ({item}) => {
+    if (item.scrapType.includes(scrapCategory)) {
+      testArr.push(item);
+      console.log(testArr);
+      for (let i = 0; i <= testArr.length; i++) {
+        return (
+          <View style={styles.scrap_list__scrap_item}>
+            <Image
+              style={styles.scrapImage}
+              source={require('../assets/img/plasticImg.png')}
+            />
+            <Text
+              numberOfLines={1}
+              // ellipsizeMode="head"
+              style={styles.scrap_list__scrap_name}>
+              {testArr[i].scrapName}
             </Text>
+            <View style={styles.scrap_list__scrap_details}>
+              <View>
+                <View style={styles.scrap_list__scrap_size}>
+                  <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
+                  <Text style={styles.scrap_list__scrap_size_output}>
+                    {testArr[i].scrapSizeVolume +
+                      ' ' +
+                      testArr[i].scrapSizeUnit}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_cost}>
+                  <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
+                  <Text style={styles.scrap_list__scrap_cost_output}>
+                    {testArr[i].scrapCostCurrency +
+                      ' ' +
+                      testArr[i].scrapCostValue +
+                      ' / ' +
+                      'kg'}
+                  </Text>
+                </View>
+                <View style={styles.scrap_list__scrap_quantity}>
+                  <Text style={styles.scrap_list__scrap_quantity_label}>
+                    Quantity:
+                  </Text>
+                  <Text style={styles.scrap_list__scrap_quantity_output}>
+                    {testArr[i].scrapQuantity + ' pieces'}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.scrap_list__scrap_cost}>
-            <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
-            <Text style={styles.scrap_list__scrap_cost_output}>
-              {item.scrapCostCurrency +
-                ' ' +
-                item.scrapCostValue +
-                ' / ' +
-                'kg'}
-            </Text>
-          </View>
-          <View style={styles.scrap_list__scrap_quantity}>
-            <Text style={styles.scrap_list__scrap_quantity_label}>
-              Quantity:
-            </Text>
-            <Text style={styles.scrap_list__scrap_quantity_output}>
-              {item.scrapQuantity + ' pieces'}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
+        );
+      }
+    }
+  };
+
+  // if (!item.scrapType.includes(scrapCategory)) {
+  //   return <Text>No data</Text>;
+  // }
+  //};
 
   return (
-    <ScrollView>
-      <FlatList
-        data={scrapList}
-        renderItem={renderItem}
-        keyExtractor={item => item.scrapID.toString()}
-        overScrollMode="never"
-        horizontal></FlatList>
-    </ScrollView>
+    <FlatList
+      data={scrapList} // find a way to filter this data first before rendering. (FINAL HINT)
+      renderItem={renderItem}
+      keyExtractor={item => item.scrapID.toString()}
+      overScrollMode="never"
+      onScroll={e => console.log(e.nativeEvent.contentOffset.x)}
+      horizontal></FlatList>
   );
 }
 
@@ -107,6 +90,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAFAFA',
     borderRadius: 8,
+    borderColor: 'black',
+    borderWidth: 1,
     height: 200,
     width: 140,
     paddingTop: 10,
