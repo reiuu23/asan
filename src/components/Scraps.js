@@ -19,7 +19,7 @@ export default function Scraps({scrapCategory}) {
   const renderItem = ({item}) => {
     if (item.scrapType.includes(scrapCategory)) {
       testArr.push(item);
-      console.log(testArr);
+      // console.log(testArr);
       for (let i = 0; i <= testArr.length; i++) {
         return (
           <View style={styles.scrap_list__scrap_item}>
@@ -79,6 +79,7 @@ export default function Scraps({scrapCategory}) {
       onScroll={e => console.log(e.nativeEvent.contentOffset.x)}
       showsHorizontalScrollIndicator={false}
       ListEmptyComponent={onEmptyList}
+      contentOffset={{x: 1, y: 0}}
       horizontal></FlatList>
   );
 }

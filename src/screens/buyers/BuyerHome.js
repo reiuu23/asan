@@ -27,6 +27,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import Scraps from '../../components/Scraps';
+import axios from 'axios';
 
 export default function BuyerHome() {
   // Authentication Session Context
@@ -58,6 +59,30 @@ export default function BuyerHome() {
   // useEffect(() => {
   //   console.log(category);
   // }, [category]);
+
+  const sampleFetch = () => {
+    fetch('http://192.168.100.5:80/test/_get.php')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Do something with the JSON data
+        console.log(data);
+      })
+      .catch(error => {
+        // Handle errors
+        console.error('There was a problem with the fetch operation:', error);
+      });
+  };
+
+  useEffect(() => {
+    console.log(sampleFetch());
+  }, []);
+
+  // console.log(sampleFetch());
 
   return (
     <SafeAreaView style={styles.container}>
