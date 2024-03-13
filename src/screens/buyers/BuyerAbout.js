@@ -38,7 +38,7 @@ export default function BuyerAbout() {
             </Text>
             <Text style={styles.about_section__body_content}>
               We're a team of fourth-year college students from TUP-Manila
-              passionate about sustainability and innovation. Our [Name] App
+              passionate about sustainability and innovation. Our ASAN App
               simplifies warehouse management and improves stock organization
               for local scrapyards. We thank you for supporting our project!
             </Text>
@@ -113,5 +113,7 @@ const styles = StyleSheet.create({
   about_section__image: {
     alignSelf: 'center',
     marginBottom: 20,
+    resizeMode: 'contain',
+    width: '100%',
   },
 });
