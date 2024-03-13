@@ -1,8 +1,20 @@
 import {StyleSheet, Text, View, SafeAreaView, ScrollView} from 'react-native';
 import {Divider} from '@rneui/themed';
+import {
+  VictoryChart,
+  VictoryGroup,
+  VictoryBar,
+  VictoryStack,
+  VictoryAxis,
+  VictoryTheme,
+  VictoryLegend,
+} from 'victory-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function BuyerAnalytics() {
+  const scrapList = require('../../data/analytics.json');
+  const legendList = require('../../data/graphLegend.json');
+
   return (
     <SafeAreaView>
       <View style={styles.top_bar__container}>
@@ -19,21 +31,73 @@ export default function BuyerAnalytics() {
             <Text>Stats: Break Down</Text>
             <Divider
               color="#3E5A47"
-              style={{alignSelf: 'center', marginBottom: 25, width: '100%'}}
+              style={styles.stats_daily__divider}
               width={1}
             />
             <Text>Stats: Break Down</Text>
             <Divider
               color="#3E5A47"
-              style={{
-                alignSelf: 'center',
-                marginBottom: 25,
-                width: '100%',
-              }}
+              style={styles.stats_daily__container}
               width={1}
             />
-            <Text>May 7 - May 13 Scrap Statistics</Text>
+            <Text style={styles.stats_daily__header}>
+              May 7 - May 13 Scrap Statistics
+            </Text>
           </View>
+          {/* Bar Graph Section */}
+          <View style={styles.stats__graphContainer}>
+            {/* Graph */}
+            <Text style={styles.stats__graphLabelX}>
+              weight of scrap per type
+            </Text>
+            <VictoryChart
+              style={styles.chart}
+              theme={VictoryTheme.material}
+              padding={{top: 60, bottom: 60, left: 60, right: 60}}
+              // domain={{y: [0, inventoryLevel === null ? 50 : inventoryLevel]}}
+              // minDomain={{x: 0, y: 0}}
+              maxDomain={{y: 200}}
+              domainPadding={30}>
+              <VictoryStack>
+                {scrapList.map(scraps => {
+                  return (
+                    <VictoryBar
+                      color={scraps.scrap_bar_color}
+                      key={scraps.scrap_id}
+                      data={[
+                        {
+                          x: scraps.scrap_issued_day,
+                          y: scraps.scrap_total_weight,
+                        },
+                      ]}></VictoryBar>
+                  );
+                })}
+              </VictoryStack>
+            </VictoryChart>
+            {/* Graph Legend */}
+            <View style={styles.stats__graph_legend}>
+              {legendList.map(category => {
+                return (
+                  <View
+                    style={styles.stats__graph_legend_inner}
+                    key={category.scrap_category_id}>
+                    <View
+                      style={{
+                        width: 41,
+                        height: 13,
+                        backgroundColor: category.scrap_bar_color,
+                        margin: 10,
+                      }}></View>
+                    <Text style={{textAlign: 'center'}}>
+                      {category.scrap_category}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+            {/* --- */}
+          </View>
+          {/* --- */}
         </LinearGradient>
       </ScrollView>
     </SafeAreaView>
@@ -54,5 +118,54 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter-Bold',
     fontSize: 26,
+  },
+  stats_daily__header: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Medium',
+    fontSize: 15,
+    paddingLeft: 15,
+    marginTop: 20,
+  },
+  stats__graphContainer: {
+    alignSelf: 'center',
+    backgroundColor: 'white',
+    width: '93%',
+    marginTop: 20,
+    marginBottom: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#5E5E5E',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stats__graph_legend: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+    borderColor: '#989E9A',
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 0,
+  },
+  stats__graph_legend_inner: {
+    alignItems: 'center',
+  },
+  stats_daily__divider: {
+    alignSelf: 'center',
+    marginBottom: 25,
+    width: '100%',
+  },
+  stats__graphLabelX: {
+    position: 'absolute',
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: '#5E5E5E',
+    transform: [{rotate: '90deg'}],
+    top: '45%',
+    left: '77%',
   },
 });
