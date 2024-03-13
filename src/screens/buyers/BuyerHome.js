@@ -9,11 +9,6 @@ import {
   Platform,
   TextInput,
 } from 'react-native';
-import {useContext, useEffect, useState} from 'react';
-import {AuthContext} from '../../context/AuthContext';
-import {Shadow} from 'react-native-shadow-2';
-import {Divider} from '@rneui/themed';
-import Svg, {Path} from 'react-native-svg';
 import {
   ChatIcon,
   LitterIcon,
@@ -24,6 +19,11 @@ import {
   SearchIcon,
   MagnifyIcon,
 } from '../../components/Icons';
+import {useContext, useEffect, useState} from 'react';
+import {AuthContext} from '../../context/AuthContext';
+import {Shadow} from 'react-native-shadow-2';
+import {Divider} from '@rneui/themed';
+import Svg, {Path} from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import Scraps from '../../components/Scraps';
