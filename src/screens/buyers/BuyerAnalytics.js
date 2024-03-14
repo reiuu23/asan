@@ -10,10 +10,12 @@ import {
   VictoryLegend,
 } from 'victory-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {AsanIcon} from '../../components/Icons';
 
 export default function BuyerAnalytics() {
   const scrapList = require('../../data/analytics.json');
   const legendList = require('../../data/graphLegend.json');
+  const scrapStats = require('../../data/scrapTotalDate.json');
 
   return (
     <SafeAreaView>
@@ -28,13 +30,46 @@ export default function BuyerAnalytics() {
             marginBottom: 115,
           }}>
           <View style={styles.stats_daily__container}>
-            <Text>Stats: Break Down</Text>
+            <Text style={styles.stats_daily__topheader}>Stats: Break Down</Text>
             <Divider
               color="#3E5A47"
               style={styles.stats_daily__divider}
               width={1}
             />
-            <Text>Stats: Break Down</Text>
+            {/* Stats Dates */}
+            <View
+              style={{
+                flexDirection: 'column',
+                flexWrap: 'wrap',
+                gap: 10,
+                height: 280,
+                alignSelf: 'center',
+                paddingBottom: 10,
+              }}>
+              {scrapStats.map((dateTotal, index) => {
+                return (
+                  <View key={index}>
+                    <Text
+                      style={{
+                        color: '#627D6B',
+                        fontFamily: 'Inter-Regular',
+                        fontSize: 17,
+                        marginRight: 20,
+                      }}>
+                      {dateTotal.scrap_issued_date}
+                    </Text>
+                    <Text
+                      style={{
+                        color: '#3E5A47',
+                        fontFamily: 'Inter-Bold',
+                        fontSize: 20,
+                      }}>
+                      {dateTotal.scrap_total_weight}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
             <Divider
               color="#3E5A47"
               style={styles.stats_daily__container}
@@ -118,6 +153,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter-Bold',
     fontSize: 26,
+  },
+  stats_daily__topheader: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Bold',
+    fontSize: 15,
+    marginTop: 10,
+    marginBottom: 10,
+    paddingLeft: 15,
   },
   stats_daily__header: {
     color: '#3E5A47',
