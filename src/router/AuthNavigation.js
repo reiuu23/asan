@@ -8,7 +8,7 @@ import CustomStackNavigator from '../utils/CustomStackNavigator';
 // Authentication Route Screens
 
 import Onboarding from '../screens/auth/AuthOnboarding';
-import Login from '../screens/auth/AuthUser';
+import Auth from '../screens/auth/AuthUser';
 
 console.log(1);
 
@@ -26,8 +26,8 @@ export default function AuthNavigation() {
       options,
     },
     {
-      name: 'Login',
-      component: Login,
+      name: 'Auth',
+      component: Auth,
       options,
     },
   ];
