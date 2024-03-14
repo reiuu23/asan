@@ -1,29 +1,23 @@
 import {View, Text, Image, TouchableOpacity} from 'react-native';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import {RFValue} from 'react-native-responsive-fontsize';
+import {EllipseSelect} from '../../components/Icons';
 
 const AuthOnboarding = ({navigation}) => {
   return (
     <SafeAreaView style={styles.wrapper}>
-      <Text style={styles.onboardingHeader}>Stock management on the go!</Text>
+      <EllipseSelect style={{position: 'absolute'}}></EllipseSelect>
       {/*  */}
       <View style={styles.authBtnContainer}>
+        <Text style={styles.footerHeaderText}>Are you a?</Text>
         <TouchableOpacity
-          style={styles.signUpBtn}
-          onPress={() => navigation.navigate('Login', {userType: 'owner'})}>
-          <Text style={styles.signUpBtnText}>Sign Up</Text>
-        </TouchableOpacity>
-        <Text style={styles.footerHeaderText}>
-          Already have an account? Sign in as a
-        </Text>
-        <TouchableOpacity
-          style={styles.loginBtn}
-          onPress={() => navigation.navigate('Login', {userType: 'owner'})}>
+          style={[styles.loginBtn, styles.btnShadow]}
+          onPress={() => navigation.navigate('Auth', {userType: 'owner'})}>
           <Text style={styles.loginBtnText}>Scrapyard Owner</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.signInBtn}
-          onPress={() => navigation.navigate('Login', {userType: 'buyer'})}>
+          style={[styles.signInBtn, styles.btnShadow]}
+          onPress={() => navigation.navigate('Auth', {userType: 'buyer'})}>
           <Text style={styles.signInBtnText}>Scrap Buyer</Text>
         </TouchableOpacity>
       </View>
@@ -57,6 +51,9 @@ const styles = StyleSheet.create({
     flex: 5,
     justifyContent: 'flex-end',
     // backgroundColor: 'blue',
+  },
+  btnShadow: {
+    elevation: 5,
   },
   loginBtn: {
     alignItems: 'center',
