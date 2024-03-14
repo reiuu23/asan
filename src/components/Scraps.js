@@ -79,7 +79,7 @@ export default function Scraps({scrapCategory}) {
       onScroll={e => console.log(e.nativeEvent.contentOffset.x)}
       showsHorizontalScrollIndicator={false}
       ListEmptyComponent={onEmptyList}
-      contentOffset={{x: 1, y: 0}}
+      contentOffset={{x: 0, y: 0}}
       horizontal></FlatList>
   );
 }
