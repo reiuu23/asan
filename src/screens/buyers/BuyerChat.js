@@ -1,10 +1,17 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import {
+  AsanIcon,
+  BuyerIcon,
+  EllipseSelect,
+  LitterIcon,
+  OwnerIcon,
+} from '../../components/Icons';
 
 export default function BuyerChat() {
   return (
     <View>
-      <Text>BuyerChat</Text>
+      <LitterIcon></LitterIcon>
     </View>
   );
 }
