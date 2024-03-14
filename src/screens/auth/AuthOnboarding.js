@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: 200,
     flex: 3,
-    // backgroundColor: 'red',
   },
   onboardingPic: {
     flex: 3,
