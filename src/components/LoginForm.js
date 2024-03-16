@@ -1,4 +1,10 @@
 import {useContext, useEffect, useState} from 'react';
+import {Formik} from 'formik';
+import {RFValue} from 'react-native-responsive-fontsize';
+import {AuthContext} from '../context/AuthContext';
+import {validationSchema} from '../utils/FormValidation';
+import {AsanIcon} from './Icons';
+
 import {
   StyleSheet,
   Text,
@@ -10,55 +16,41 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import {Formik} from 'formik';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {AuthContext} from '../context/AuthContext';
-import {validationSchema} from '../utils/FormValidation';
-import useFetch from '../hooks/useFetch';
+
+import useCustomFetch from '../hooks/useCustomFetch';
 import CheckBox from '@react-native-community/checkbox';
 import uuid from 'react-native-uuid';
-import '../utils/FormValidation';
-import {AsanIcon} from './Icons';
 
 export default function LoginForm({navigation}) {
   // States
-  const {loading, error, fetchData} = useFetch(); // Custom useFetch hook
+  const {data, error, loading, fetchData} = useCustomFetch();
   const {session, setSession, userType} = useContext(AuthContext); // Session Context
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
   console.log('Login UT: ', userType);
 
-  // Authentication Handler
-
-  // Bypass authentication - for easier development on the main application.
-
-  // setSession({token: uuid.v4()}); // (Temporary Code)
-
-  // const handleAuth = async values => {
-  //   await fetchData('/auth/', 'post', values); // API request to validate the authentication.
-  //   if (error) console.error('Authentication failed: ', error);
-  // };
-
-  // UseEffect Hook to validate the authentication status (if true, add the session and proceed to the app. Else, pop up the alert box)
-
-  // useEffect(() => {
-  //   console.log('Returned Data: ', data); // Return
-
-  //   if (data.hasOwnProperty('authStatus') && data.authStatus === true) {
-  //     // setSession({token: uuid.v4(), data: data}); // un-comment once frontend is fully developed.
-  //     console.log('Authentication successful:');
-  //     console.log('Session Token: ', session);
-  //   }
-
-  //   if (data.hasOwnProperty('authStatus') && data.authStatus === false) {
-  //     Alert.alert('Invalid credentials!');
-  //     setSession({token: uuid.v4()});
-  //   }
-  // }, [data]);
-
-  const handleAuth = value => {
-    return value;
+  const handleAuth = values => {
+    fetchData('http://192.168.100.5/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(values),
+    });
   };
+
+  useEffect(() => {
+    if (data) {
+      if (data.success) {
+        console.log(data);
+        setSession({token: uuid.v4()});
+      } else {
+        console.log(data);
+        Alert.alert(
+          'Failed signing in.',
+          'You have entered a wrong email or password.',
+        );
+      }
+    }
+  }, [data]);
 
   return (
     <SafeAreaView style={{backgroundColor: 'white', height: '100%'}}>
@@ -113,7 +105,10 @@ export default function LoginForm({navigation}) {
                     onPress={formikProps.handleSubmit}
                     style={styles.formSubmitBtn}>
                     {loading ? (
-                      <ActivityIndicator size="small"></ActivityIndicator>
+                      <View style={{flexDirection: 'row', gap: 10}}>
+                        <Text>Signing you in...</Text>
+                        <ActivityIndicator size="small"></ActivityIndicator>
+                      </View>
                     ) : (
                       <Text style={styles.formSubmitBtnText}>Sign In</Text>
                     )}
