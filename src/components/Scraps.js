@@ -10,60 +10,60 @@ import {
 import React, {useEffect} from 'react';
 import axios from 'axios';
 
-export default function Scraps({scrapCategory}) {
+export default function Scraps() {
   const scrapList = require('../data/scraps.json');
-  // const scrapList = [];
-
-  const testArr = [];
 
   const renderItem = ({item}) => {
-    if (item.scrapType.includes(scrapCategory)) {
-      testArr.push(item);
-      // console.log(testArr);
-      for (let i = 0; i <= testArr.length; i++) {
-        return (
-          <View style={styles.scrap_list__scrap_item}>
-            <Image
-              style={styles.scrapImage}
-              source={require('../assets/img/plasticImg.png')}
-            />
-            <Text numberOfLines={1} style={styles.scrap_list__scrap_name}>
-              {testArr[i].scrapName}
-            </Text>
-            <View style={styles.scrap_list__scrap_details}>
-              <View>
-                <View style={styles.scrap_list__scrap_size}>
-                  <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
-                  <Text style={styles.scrap_list__scrap_size_output}>
-                    {testArr[i].scrapSizeVolume +
-                      ' ' +
-                      testArr[i].scrapSizeUnit}
-                  </Text>
-                </View>
-                <View style={styles.scrap_list__scrap_cost}>
-                  <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
-                  <Text style={styles.scrap_list__scrap_cost_output}>
-                    {testArr[i].scrapCostCurrency +
-                      ' ' +
-                      testArr[i].scrapCostValue +
-                      ' / ' +
-                      'kg'}
-                  </Text>
-                </View>
-                <View style={styles.scrap_list__scrap_quantity}>
-                  <Text style={styles.scrap_list__scrap_quantity_label}>
-                    Quantity:
-                  </Text>
-                  <Text style={styles.scrap_list__scrap_quantity_output}>
-                    {testArr[i].scrapQuantity + ' pieces'}
-                  </Text>
-                </View>
+    const scrapsByCategory = {}; // Initialize empty object array.
+
+    item.forEach(scrap => {
+      if (!scrapsByCategory[scrap.scrapCategory]) {
+        scrapsByCategory[scrap.scrapCategory] = [];
+      }
+      scrapsByCategory[scrap.scrapCategory].push(scrap);
+    });
+
+    Object.keys(scrapsByCategory).map(category =>
+      scrapsByCategory[category].map(scrap => (
+        <View key={scrap.scrapID} style={styles.scrap_list__scrap_item}>
+          <Image
+            style={styles.scrapImage}
+            source={require('../assets/img/plasticImg.png')}
+          />
+          <Text numberOfLines={1} style={styles.scrap_list__scrap_name}>
+            {scrap.scrapName}
+          </Text>
+          <View style={styles.scrap_list__scrap_details}>
+            <View>
+              <View style={styles.scrap_list__scrap_size}>
+                <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
+                <Text style={styles.scrap_list__scrap_size_output}>
+                  {scrap.scrapSizeVolume + ' ' + scrap.scrapSizeUnit}
+                </Text>
+              </View>
+              <View style={styles.scrap_list__scrap_cost}>
+                <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
+                <Text style={styles.scrap_list__scrap_cost_output}>
+                  {scrap.scrapCostCurrency +
+                    ' ' +
+                    scrap.scrapCostValue +
+                    ' / ' +
+                    'kg'}
+                </Text>
+              </View>
+              <View style={styles.scrap_list__scrap_quantity}>
+                <Text style={styles.scrap_list__scrap_quantity_label}>
+                  Quantity:
+                </Text>
+                <Text style={styles.scrap_list__scrap_quantity_output}>
+                  {scrap.scrapQuantity + ' pieces'}
+                </Text>
               </View>
             </View>
           </View>
-        );
-      }
-    }
+        </View>
+      )),
+    );
   };
 
   const onEmptyList = () => {
