@@ -56,34 +56,6 @@ export default function BuyerHome() {
     setCategory(categoryName);
   };
 
-  // useEffect(() => {
-  //   console.log(category);
-  // }, [category]);
-
-  const sampleFetch = () => {
-    fetch('http://192.168.100.5:80/test/_get.php')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Do something with the JSON data
-        console.log(data);
-      })
-      .catch(error => {
-        // Handle errors
-        console.error('There was a problem with the fetch operation:', error);
-      });
-  };
-
-  useEffect(() => {
-    console.log(sampleFetch());
-  }, []);
-
-  // console.log(sampleFetch());
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.top_bar__container}>
@@ -133,7 +105,7 @@ export default function BuyerHome() {
             </View>
           </View>
         </View>
-        <Text style={styles.scrap_list__header}>PLASTIC</Text>
+        <Text style={styles.scrap_list__header}>{category}</Text>
         <Divider
           style={{alignSelf: 'center', marginBottom: 25, width: '90%'}}
           width={1}
