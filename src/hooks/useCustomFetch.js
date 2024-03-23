@@ -65,7 +65,7 @@ const useCustomFetch = () => {
       } finally {
         setLoading(false);
       }
-    }, 5000);
+    }, 1000);
   };
 
   return {data, error, loading, fetchData};
