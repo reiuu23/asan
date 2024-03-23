@@ -7,31 +7,25 @@ import {
   NavigationContainer,
   NavigationHelpersContext,
 } from '@react-navigation/native';
+
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+
 import HomeIcon from 'react-native-vector-icons/AntDesign';
 
 // Litter Buyer Screens
 
-import BuyerAbout from '../screens/buyers/BuyerAbout';
+import BuyerAbout from '../screens/shared/AboutASAN';
 import BuyerChat from '../screens/buyers/BuyerChat';
 import BuyerHome from '../screens/buyers/BuyerHome';
 import BuyerStocks from '../screens/buyers/BuyerStocks';
 import BuyerAnalytics from '../screens/buyers/BuyerAnalytics';
 import BuyerProfile from '../screens/buyers/BuyerProfile';
 
-// Tab Icons
-// import LitterTabIcon from '../assets/img/littertablogo.svg';
-// import ChatIcon from '../assets/img/chatIcon.svg';
-
-// Bottom Tab Route List
-
-// const Tablist = [{route: 'Home', label: 'Home', type: Items.Icons}];
-
-// Initialized a new bottom tab navigator.
-
-const Tab = createBottomTabNavigator();
-
 const TabGroup = () => {
+  // Initialized a new bottom tab navigator.
+
+  const Tab = createBottomTabNavigator();
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
