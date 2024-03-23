@@ -14,7 +14,7 @@ import {Formik} from 'formik';
 import {RFValue} from 'react-native-responsive-fontsize';
 import {AuthContext} from '../context/AuthContext';
 import {validationSchema} from '../utils/FormValidation';
-import useFetch from '../hooks/useFetch';
+import useFetch from '../hooks/useCustomFetch';
 import CheckBox from '@react-native-community/checkbox';
 import uuid from 'react-native-uuid';
 import '../utils/FormValidation';
