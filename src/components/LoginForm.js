@@ -28,9 +28,11 @@ export default function LoginForm({navigation}) {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
   console.log('Login UT: ', userType);
+  // Auth Bypasser (For debugging purposes only.)
+  setSession({token: uuid.v4()});
 
   const handleAuth = values => {
-    fetchData('http://192.168.100.5/api/login', {
+    fetchData('https://jwtdphluugg6.share.zrok.io/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(values),
@@ -40,10 +42,10 @@ export default function LoginForm({navigation}) {
   useEffect(() => {
     if (data) {
       if (data.success) {
-        console.log(data);
+        console.log('data: ', data);
         setSession({token: uuid.v4()});
       } else {
-        console.log(data);
+        console.log('data: ', data);
         Alert.alert(
           'Failed signing in.',
           'You have entered a wrong email or password.',
