@@ -18,16 +18,18 @@ export default function AboutASAN() {
       <ScrollView>
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 0, y: 0.9}}
           style={{
             height: '100%',
-            padding: 35,
+            padding: 30,
             marginBottom: 115,
           }}>
           <View style={styles.about_section__header}>
             <Text style={styles.about_section__header_title}>The ASAN App</Text>
             <Text style={styles.about_section__header_content}>
               Effortlessly manage inventory and track scrap collections with
-              Litter App. Gain valuable insights and improve sustainability
+              ASAN App. Gain valuable insights and improve sustainability
               practices for informed business decisions. Simplify your inventory
               management and take your business to the next level.
             </Text>
