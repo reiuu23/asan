@@ -25,6 +25,8 @@ export default function BuyerAnalytics() {
       <ScrollView>
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 0, y: 0.9}}
           style={{
             height: '100%',
             marginBottom: 115,
@@ -41,7 +43,7 @@ export default function BuyerAnalytics() {
               style={{
                 flexDirection: 'column',
                 flexWrap: 'wrap',
-                gap: 10,
+                gap: 15,
                 height: 280,
                 alignSelf: 'center',
                 paddingBottom: 10,
@@ -54,7 +56,6 @@ export default function BuyerAnalytics() {
                         color: '#627D6B',
                         fontFamily: 'Inter-Regular',
                         fontSize: 17,
-                        marginRight: 20,
                       }}>
                       {dateTotal.scrap_issued_date}
                     </Text>
@@ -89,16 +90,14 @@ export default function BuyerAnalytics() {
               style={styles.chart}
               theme={VictoryTheme.material}
               padding={{top: 60, bottom: 60, left: 60, right: 60}}
-              // domain={{y: [0, inventoryLevel === null ? 50 : inventoryLevel]}}
-              // minDomain={{x: 0, y: 0}}
               maxDomain={{y: 200}}
               domainPadding={30}>
               <VictoryStack>
                 {scrapList.map(scraps => {
                   return (
                     <VictoryBar
-                      color={scraps.scrap_bar_color}
                       key={scraps.scrap_id}
+                      color={scraps.scrap_bar_color}
                       data={[
                         {
                           x: scraps.scrap_issued_day,
