@@ -1,4 +1,16 @@
 import {useContext, useEffect, useState} from 'react';
+import {Formik} from 'formik';
+import {RFValue} from 'react-native-responsive-fontsize';
+import {AuthContext} from '../context/AuthContext';
+import {validationSchema} from '../utils/FormValidation';
+import {AsanIcon} from './Icons';
+
+import useFetch from '../hooks/useCustomFetch';
+import CheckBox from '@react-native-community/checkbox';
+import uuid from 'react-native-uuid';
+
+import '../utils/FormValidation';
+
 import {
   StyleSheet,
   Text,
@@ -10,15 +22,6 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import {Formik} from 'formik';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {AuthContext} from '../context/AuthContext';
-import {validationSchema} from '../utils/FormValidation';
-import useFetch from '../hooks/useCustomFetch';
-import CheckBox from '@react-native-community/checkbox';
-import uuid from 'react-native-uuid';
-import '../utils/FormValidation';
-import {AsanIcon} from './Icons';
 
 export default function RegistrationForm({navigation, route}) {
   // States
@@ -64,7 +67,7 @@ export default function RegistrationForm({navigation, route}) {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: '#3E5A47', height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: '#3E5A47'}}>
       <ScrollView contentContainerStyle={styles.scrollWrapper}>
         <View style={{backgroundColor: '#F4F5F4', padding: 20}}>
           <View style={styles.headerContainer}>
