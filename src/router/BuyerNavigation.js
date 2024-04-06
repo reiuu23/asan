@@ -1,6 +1,7 @@
 import {
   createStackNavigator,
   CardStyleInterpolators,
+  TransitionPresets,
 } from '@react-navigation/stack';
 
 import {
@@ -12,6 +13,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {
   AsanIconBottom,
+  AsanIconBottomB,
   ChatIcon,
   HomeIcon,
   InventoryIcon,
@@ -26,6 +28,7 @@ import BuyerHome from '../screens/buyers/BuyerHome';
 import BuyerStocks from '../screens/buyers/BuyerStocks';
 import BuyerAnalytics from '../screens/buyers/BuyerAnalytics';
 import BuyerProfile from '../screens/buyers/BuyerProfile';
+import BuyerSelection from '../screens/buyers/BuyerSelection';
 
 import {StyleSheet, View} from 'react-native';
 
@@ -37,6 +40,7 @@ const TabGroup = () => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -49,7 +53,7 @@ const TabGroup = () => {
           tabBarIcon: ({focused}) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-              <AsanIconBottom></AsanIconBottom>
+              <AsanIconBottomB></AsanIconBottomB>
             </View>
           ),
         }}></Tab.Screen>
@@ -100,8 +104,31 @@ const TabGroup = () => {
     </Tab.Navigator>
   );
 };
+
 export default function BuyerNavigation() {
-  return <TabGroup></TabGroup>;
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator
+      // initialRouteName="Selection"
+      screenOptions={TransitionPresets.ModalSlideFromBottomIOS}>
+      <Stack.Screen
+        name="Selection"
+        component={BuyerSelection}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={BuyerProfile}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Root"
+        component={TabGroup}
+        options={{headerShown: false}}
+      />
+    </Stack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({
