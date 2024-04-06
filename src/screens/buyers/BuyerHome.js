@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   TextInput,
+  Alert,
 } from 'react-native';
 import {
   ChatIcon,
@@ -18,37 +19,104 @@ import {
   LogoutIcon,
   SearchIcon,
   MagnifyIcon,
+  PlasticIcon,
+  PlasticCatIcon,
+  WhitePaperCat,
+  SelectedPaperCat,
+  KartonCat,
+  AssortedMetalCat,
+  MixedPaperCat,
+  SolidMetalCat,
+  AsanIcon,
+  AsanIconBottom,
 } from '../../components/Icons';
+
 import {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../../context/AuthContext';
 import {Shadow} from 'react-native-shadow-2';
 import {Divider} from '@rneui/themed';
+import {logoutUser} from '../../helper/PostAuthHelper';
+
 import Svg, {Path} from 'react-native-svg';
+
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import Scraps from '../../components/Scraps';
 import axios from 'axios';
+import _ from 'lodash';
 
-export default function BuyerHome() {
+export default function BuyerHome({navigation}) {
   // Authentication Session Context
-  const {session} = useContext(AuthContext);
+  const {session, setSession} = useContext(AuthContext);
+
+  const scrapList = require('../../data/scraps.json');
+
+  const [isActive, setIsActive] = useState(false);
 
   // Scrap Categories Array
 
   const scrapCategories = [
-    {id: 1, categoryName: 'Plastic', iconDir: 'none'},
-    {id: 2, categoryName: 'Paper', iconDir: 'none'},
-    {id: 3, categoryName: 'Metal', iconDir: 'none'},
-    {id: 4, categoryName: 'Silicone', iconDir: 'none'},
-    {id: 5, categoryName: 'Test1', iconDir: 'none'},
-    {id: 6, categoryName: 'Test2', iconDir: 'none'},
-    {id: 7, categoryName: 'Test3', iconDir: 'none'},
-    {id: 8, categoryName: 'Test4', iconDir: 'none'},
+    {
+      id: 1,
+      categoryName: 'Plastic',
+      iconDir: <PlasticCatIcon color={'#3E5A47'} />,
+    },
+    {
+      id: 2,
+      categoryName: 'White Paper',
+      iconDir: <WhitePaperCat color={isActive === 2 ? '#FFFFFF' : '#3E5A47'} />,
+    },
+    {
+      id: 3,
+      categoryName: 'Selected Paper',
+      iconDir: (
+        <SelectedPaperCat color={isActive === 3 ? '#FFFFFF' : '#3E5A47'} />
+      ),
+    },
+    {
+      id: 4,
+      categoryName: 'Karton Paper',
+      iconDir: <KartonCat color={isActive === 4 ? '#FFFFFF' : '#3E5A47'} />,
+    },
+    {
+      id: 5,
+      categoryName: 'Mixed Paper',
+      iconDir: <MixedPaperCat color={isActive === 5 ? '#FFFFFF' : '#3E5A47'} />,
+    },
+    {
+      id: 6,
+      categoryName: 'Solid Metal',
+      iconDir: <SolidMetalCat color={isActive === 6 ? '#FFFFFF' : '#3E5A47'} />,
+    },
+    {
+      id: 7,
+      categoryName: 'Assorted Metal',
+      iconDir: (
+        <AssortedMetalCat color={isActive === 7 ? '#FFFFFF' : '#3E5A47'} />
+      ),
+    },
+    {
+      id: 8,
+      categoryName: 'All',
+      iconDir: (
+        <AsanIconBottom color={isActive === 8 ? '#FFFFFF' : '#3E5A47'} />
+      ),
+    },
   ];
 
   // Navigation States
 
   const [category, setCategory] = useState('Plastic');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSetSearchQuery = _.debounce(text => setSearchQuery(text), 300);
+
+  useEffect(() => {
+    console.log(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    console.log(session);
+  }, [session]);
 
   // Navigation Button Function
 
@@ -56,17 +124,36 @@ export default function BuyerHome() {
     setCategory(categoryName);
   };
 
+  const signOut = () => {
+    Alert.alert('Are you sure?', 'Do you wish to sign out?', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: () => setSession({token: null})},
+    ]);
+  };
+
+  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.top_bar__container}>
         <View style={styles.top_bar__profile_container}>
-          <Image
-            style={styles.top_bar__profile_image}
-            source={require('../../assets/img/chaewon.jpg')}
-          />
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <Image
+              style={styles.top_bar__profile_image}
+              source={require('../../assets/img/chaewon.jpg')}
+            />
+          </TouchableOpacity>
           <Text style={styles.top_bar__profile_name}>Hey, Hee</Text>
         </View>
-        <TouchableOpacity style={styles.top_bar__signout}>
+        <TouchableOpacity
+          style={styles.top_bar__signout}
+          onPress={() => {
+            signOut();
+          }}>
           <LogoutIcon></LogoutIcon>
         </TouchableOpacity>
       </View>
@@ -79,7 +166,8 @@ export default function BuyerHome() {
             <TextInput
               style={styles.top_nav__searchbar}
               placeholder="Search"
-              placeholderTextColor={'#3E5A47'}></TextInput>
+              placeholderTextColor={'#3E5A47'}
+              onChangeText={debouncedSetSearchQuery}></TextInput>
           </View>
           <Text style={styles.top_nav__menu_header}>Scrap Categories</Text>
           {/* Refactor this code asap -- temporary code for debugging */}
@@ -94,10 +182,24 @@ export default function BuyerHome() {
                     startColor="#00000040"
                     key={id}>
                     <TouchableOpacity
-                      style={styles.top_nav__gridnav_button}
-                      onPress={() => setCategory(categoryName)}>
-                      {/* Icons should be used here. Remove the Text component once done. */}
-                      <Text>{categoryName}</Text>
+                      style={[
+                        styles.top_nav__gridnav_button,
+                        isActive === id &&
+                          styles.top_nav__gridnav_button_active,
+                      ]}
+                      onPress={() => {
+                        setCategory(categoryName);
+                        setIsActive(id);
+                      }}>
+                      <View style={{marginBottom: 10}}>{iconDir}</View>
+                      <Text
+                        style={[
+                          styles.top_nav_gridnav_button_header,
+                          isActive === id &&
+                            styles.top_nav_gridnav_button_header_active,
+                        ]}>
+                        {categoryName}
+                      </Text>
                     </TouchableOpacity>
                   </Shadow>
                 );
@@ -116,7 +218,7 @@ export default function BuyerHome() {
           end={{x: 0, y: 0.35}}
           style={styles.scrap_list__card}>
           <View style={styles.scrap_list__container}>
-            <Scraps scrapCategory={category}></Scraps>
+            <Scraps scrapCategory={category} searchQuery={searchQuery} />
           </View>
         </LinearGradient>
       </ScrollView>
@@ -205,11 +307,31 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   top_nav__gridnav_button: {
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#F2F2F2',
     borderRadius: 3,
     width: 80.34,
     height: 99,
     marginBottom: 15,
+  },
+  top_nav__gridnav_button_active: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3E5A47',
+    borderRadius: 3,
+    width: 80.34,
+    height: 99,
+    marginBottom: 15,
+  },
+  top_nav_gridnav_button_header: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Bold',
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  top_nav_gridnav_button_header_active: {
+    color: '#FFFFFF',
   },
   scrap_list__header: {
     alignSelf: 'center',
