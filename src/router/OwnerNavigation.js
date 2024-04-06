@@ -1,18 +1,25 @@
-import {View, Text, TouchableOpacity, Image, Button, Alert} from 'react-native';
-import {useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Button,
+  Alert
+} from 'react-native';
+import { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
-  DrawerItem,
+  DrawerItem
 } from '@react-navigation/drawer';
 
 import {
   createStackNavigator,
-  CardStyleInterpolators,
+  CardStyleInterpolators
 } from '@react-navigation/stack';
 
 import CustomStackNavigator from '../utils/CustomStackNavigator';
@@ -41,20 +48,20 @@ import {
   SidebarHome,
   SidebarLogout,
   SidebarPlans,
-  SidebarStocks,
+  SidebarStocks
 } from '../components/Icons';
 
 const CustomDrawerContent = (props, navigation) => {
   return (
     <>
-      <View style={{marginTop: 50}}>
+      <View style={{ marginTop: 50 }}>
         <TouchableOpacity
           style={{
             width: 80,
             height: 80,
             borderRadius: 50,
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}>
           <Image
             style={{
@@ -64,7 +71,7 @@ const CustomDrawerContent = (props, navigation) => {
               width: '100%',
               height: '100%',
               marginLeft: 35,
-              resizeMode: 'contain',
+              resizeMode: 'contain'
             }}
             source={require('../assets/img/chaewon.jpg')}></Image>
         </TouchableOpacity>
@@ -75,7 +82,7 @@ const CustomDrawerContent = (props, navigation) => {
             fontSize: 20,
             color: '#3E5A47',
             marginTop: 10,
-            marginLeft: 20,
+            marginLeft: 20
           }}>
           Kim Chaewon
         </Text>
@@ -87,7 +94,7 @@ const CustomDrawerContent = (props, navigation) => {
           labelStyle={{
             color: '#3E5A47',
             fontFamily: 'Inter-Medium',
-            fontSize: 16,
+            fontSize: 16
           }}
           onPress={() =>
             Alert.alert('Sign Out', 'Do you wish to sign out of ASAN?')
@@ -106,19 +113,21 @@ const BottomTab = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Home1"
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {height: 81},
+        tabBarShowLabel: false,
+        tabBarStyle: { height: 81 },
         tabBarLabelPosition: 'beside-icon',
         tabBarItemStyle: {
           borderBottomWidth: 2,
-          borderBottomColor: 'white',
-        },
+          borderBottomColor: 'white'
+        }
       }}>
       <Tab.Screen name="About" component={About}></Tab.Screen>
       <Tab.Screen name="Chat" component={Chat}></Tab.Screen>
-      <Tab.Screen name="Home" component={Home}></Tab.Screen>
+      <Tab.Screen name="Home1" component={Home}></Tab.Screen>
       <Tab.Screen name="Analytics" component={Analytics}></Tab.Screen>
       <Tab.Screen name="Notifications" component={Notifications}></Tab.Screen>
     </Tab.Navigator>
@@ -133,20 +142,21 @@ const Sidebar = () => {
   return (
     <Drawer.Navigator
       initialRouteName="Home"
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         drawerStyle: {
           width: '60%',
-          backgroundColor: '#F4F5F4',
+          backgroundColor: '#F4F5F4'
         },
         drawerLabelStyle: {
           color: '#3E5A47',
           fontFamily: 'Inter-Medium',
           fontSize: 16,
-          width: '123%',
+          width: '123%'
         },
-        itemStyle: {marginVertical: 0},
-        contentContainerStyle: {paddingVertical: 0},
+        itemStyle: { marginVertical: 0 },
+        contentContainerStyle: { paddingVertical: 0 }
       }}
       drawerContent={props => <CustomDrawerContent {...props} />}>
       {!verified && (
@@ -160,17 +170,17 @@ const Sidebar = () => {
               fontFamily: 'Inter-Medium',
               fontSize: 16,
               width: '123%',
-              textAlign: 'center',
+              textAlign: 'center'
             },
-            headerStyle: {backgroundColor: '#3498db'},
+            headerStyle: { backgroundColor: '#3498db' },
             drawerItemStyle: {
               backgroundColor: '#627D6B',
               borderRadius: 10,
               width: '90%',
               height: 50,
               marginBottom: 50,
-              gap: 0,
-            },
+              gap: 0
+            }
           }}
         />
       )}
@@ -180,7 +190,7 @@ const Sidebar = () => {
         options={{
           drawerIcon: () => {
             return <SidebarHome />;
-          },
+          }
         }}
       />
       <Drawer.Screen
@@ -189,7 +199,7 @@ const Sidebar = () => {
         options={{
           drawerIcon: () => {
             return <SidebarCategories />;
-          },
+          }
         }}
       />
       <Drawer.Screen
@@ -198,7 +208,7 @@ const Sidebar = () => {
         options={{
           drawerIcon: () => {
             return <SidebarStocks />;
-          },
+          }
         }}
       />
       <Drawer.Screen
@@ -207,7 +217,7 @@ const Sidebar = () => {
         options={{
           drawerIcon: () => {
             return <SidebarPlans />;
-          },
+          }
         }}
       />
     </Drawer.Navigator>
