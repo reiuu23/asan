@@ -68,6 +68,8 @@ const useCustomFetch = () => {
     }, 1000);
   };
 
+  console.log("data:", data?.body);
+
   return {data, error, loading, fetchData};
 };
 
