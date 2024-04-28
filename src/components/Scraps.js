@@ -1,27 +1,35 @@
-import {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, Image, FlatList} from 'react-native';
+import { useField } from 'formik';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, FlatList } from 'react-native';
 
-export default function Scraps({scrapCategory, searchQuery}) {
+export default function Scraps({ scrapCategory, searchQuery, scrapData }) {
   const scrapList = require('../data/scraps.json');
-  const [isEmptyData, setIsEmptyData] = useState(false);
   const [scrollStatus, setScrollStatus] = useState(true);
 
+  const data = !Array.isArray(scrapData) ? [scrapData] : scrapData;
+
   useEffect(() => {
-    console.log('Empty Data: ', isEmptyData);
-    if (isEmptyData) return setScrollStatus(false);
-    setScrollStatus(true);
-  }, [isEmptyData]);
+    console.log('scrapData (scraps): ', scrapData);
+  }, [scrapData]);
 
-  const filteredScraps = scrapList.filter(item =>
-    item.scrapType.includes(scrapCategory),
+  useEffect(() => {
+    if (scrapData) return setScrollStatus(true);
+    setScrollStatus(false);
+  }, [scrapData]);
+
+  const filteredScraps = data.filter(item =>
+    item.scrap_category.includes(scrapCategory)
   );
 
-  const filteredAndSearchedScraps = filteredScraps.filter(item =>
-    item.scrapName.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredScrapsByCategory = filteredScraps.filter(item =>
+    item.scrap_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderItem = ({item}) => {
-    setIsEmptyData(false);
+  const filteredScrapsByAll = data.filter(item =>
+    item.scrap_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const renderItem = ({ item }) => {
     return (
       <View style={styles.scrap_list__scrap_item}>
         <Image
@@ -29,24 +37,20 @@ export default function Scraps({scrapCategory, searchQuery}) {
           source={require('../assets/img/plasticImg.png')}
         />
         <Text numberOfLines={1} style={styles.scrap_list__scrap_name}>
-          {item.scrapName}
+          {item.scrap_name}
         </Text>
         <View style={styles.scrap_list__scrap_details}>
           <View>
             <View style={styles.scrap_list__scrap_size}>
               <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
               <Text style={styles.scrap_list__scrap_size_output}>
-                {item.scrapSizeVolume + ' ' + item.scrapSizeUnit}
+                {item.scrap_size + ' ' + item.scrap_size_unit}
               </Text>
             </View>
             <View style={styles.scrap_list__scrap_cost}>
               <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
               <Text style={styles.scrap_list__scrap_cost_output}>
-                {item.scrapCostCurrency +
-                  ' ' +
-                  item.scrapCostValue +
-                  ' / ' +
-                  'kg'}
+                {'PHP' + ' ' + item.scrap_cost + ' / ' + 'kg'}
               </Text>
             </View>
             <View style={styles.scrap_list__scrap_quantity}>
@@ -54,7 +58,7 @@ export default function Scraps({scrapCategory, searchQuery}) {
                 Quantity:
               </Text>
               <Text style={styles.scrap_list__scrap_quantity_output}>
-                {item.scrapQuantity + ' pieces'}
+                {item.scrap_quantity + ' pieces'}
               </Text>
             </View>
           </View>
@@ -64,17 +68,16 @@ export default function Scraps({scrapCategory, searchQuery}) {
   };
 
   const onEmptyList = () => {
-    setIsEmptyData(true);
-    return (
-      <Text style={styles.onEmptyData}>There are no current data yet.</Text>
-    );
+    return <Text style={styles.onEmptyData}>No results found.</Text>;
   };
 
   return (
     <FlatList
-      data={filteredAndSearchedScraps}
+      data={
+        scrapCategory !== 'All' ? filteredScrapsByCategory : filteredScrapsByAll
+      }
       renderItem={renderItem}
-      keyExtractor={item => item.scrapID.toString()}
+      keyExtractor={item => item.scrap_id.toString()}
       ListEmptyComponent={onEmptyList}
       scrollEnabled={scrollStatus}
       horizontal
@@ -84,12 +87,11 @@ export default function Scraps({scrapCategory, searchQuery}) {
 
 const styles = StyleSheet.create({
   onEmptyData: {
-    textAlign: 'center',
     color: '#3E5A47',
     fontFamily: 'Inter-Medium',
-    fontSize: 22,
+    fontSize: 16,
     marginTop: 30,
-    paddingLeft: 50,
+    marginBottom: 30,
   },
   scrap_list__scrap_item: {
     alignItems: 'center',
@@ -101,69 +103,69 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     marginBottom: 20,
     marginLeft: 15,
-    marginRight: 10,
+    marginRight: 10
   },
   scrapImage: {
     alignSelf: 'center',
     borderRadius: 8,
     width: 120,
     height: 88,
-    marginBottom: 10,
+    marginBottom: 10
   },
   scrap_list__scrap_name: {
     textAlign: 'center',
     fontFamily: 'Inter-Bold',
     fontSize: 12,
     width: 120,
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_size: {
     flexDirection: 'row',
     gap: 34,
     paddingLeft: 1,
-    marginTop: 5,
+    marginTop: 5
   },
   scrap_list__scrap_size_label: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_size_output: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_cost: {
     flexDirection: 'row',
     gap: 32,
-    paddingLeft: 1,
+    paddingLeft: 1
   },
   scrap_list__scrap_cost_label: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_cost_output: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_quantity: {
     flexDirection: 'row',
     gap: 12,
-    paddingLeft: 1,
+    paddingLeft: 1
   },
   scrap_list__scrap_quantity_label: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
-    color: '#3E5A47',
+    color: '#3E5A47'
   },
   scrap_list__scrap_quantity_output: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#3E5A47',
-  },
+    color: '#3E5A47'
+  }
 });

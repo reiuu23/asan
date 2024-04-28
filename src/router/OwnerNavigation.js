@@ -4,11 +4,13 @@ import {
   TouchableOpacity,
   Image,
   Button,
-  Alert
+  Alert,
+  StyleSheet
 } from 'react-native';
 import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { TransitionPresets } from '@react-navigation/stack';
 
 import {
   createDrawerNavigator,
@@ -43,6 +45,11 @@ import OwnerHome from '../screens/owners/OwnerHome';
 import OwnerProfile from '../screens/owners/OwnerProfile';
 
 import {
+  AnalyticsBottomIcon,
+  AsanIconBottomB,
+  ChatIcon,
+  HomeIcon,
+  NotifBellIcon,
   SidebarAnalytics,
   SidebarCategories,
   SidebarHome,
@@ -51,18 +58,20 @@ import {
   SidebarStocks
 } from '../components/Icons';
 
-const CustomDrawerContent = (props, navigation) => {
+const CustomDrawerContent = (props) => {
   return (
     <>
       <View style={{ marginTop: 50 }}>
         <TouchableOpacity
           style={{
-            width: 80,
-            height: 80,
+            width: 100,
+            height: 100,
             borderRadius: 50,
             alignItems: 'center',
             justifyContent: 'center'
-          }}>
+          }}
+          onPress={() => props.navigation.navigate('Profile')}
+          >
           <Image
             style={{
               borderRadius: 50,
@@ -123,13 +132,63 @@ const BottomTab = () => {
         tabBarItemStyle: {
           borderBottomWidth: 2,
           borderBottomColor: 'white'
-        }
+        },
       }}>
-      <Tab.Screen name="About" component={About}></Tab.Screen>
-      <Tab.Screen name="Chat" component={Chat}></Tab.Screen>
-      <Tab.Screen name="Home1" component={Home}></Tab.Screen>
-      <Tab.Screen name="Analytics" component={Analytics}></Tab.Screen>
-      <Tab.Screen name="Notifications" component={Notifications}></Tab.Screen>
+      <Tab.Screen
+        name="About"
+        component={About}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <AsanIconBottomB></AsanIconBottomB>
+            </View>
+          )
+        }}></Tab.Screen>
+      <Tab.Screen
+        name="Chat"
+        component={Chat}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <ChatIcon></ChatIcon>
+            </View>
+          )
+        }}></Tab.Screen>
+      <Tab.Screen
+        name="Home1"
+        component={Home}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <HomeIcon></HomeIcon>
+            </View>
+          )
+        }}></Tab.Screen>
+      <Tab.Screen
+        name="Analytics"
+        component={Analytics}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <AnalyticsBottomIcon></AnalyticsBottomIcon>
+            </View>
+          )
+        }}></Tab.Screen>
+      <Tab.Screen
+        name="Notifications"
+        component={Notifications}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <NotifBellIcon></NotifBellIcon>
+            </View>
+          )
+        }}></Tab.Screen>
     </Tab.Navigator>
   );
 };
@@ -168,16 +227,19 @@ const Sidebar = () => {
             drawerLabelStyle: {
               color: '#F4F5F4',
               fontFamily: 'Inter-Medium',
-              fontSize: 16,
-              width: '123%',
-              textAlign: 'center'
+              fontSize: 14,
+              marginLeft: 35,
+              textAlign: 'center',
+              position: 'relative',
+              // borderWidth: 1
             },
             headerStyle: { backgroundColor: '#3498db' },
             drawerItemStyle: {
+              alignSelf: 'center',
               backgroundColor: '#627D6B',
               borderRadius: 10,
               width: '90%',
-              height: 50,
+              height: 45,
               marginBottom: 50,
               gap: 0
             }
@@ -225,5 +287,30 @@ const Sidebar = () => {
 };
 
 export default function OwnerNavigation() {
-  return <Sidebar></Sidebar>;
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator
+      initialRouteName="Root"
+      screenOptions={TransitionPresets.ModalSlideFromBottomIOS}>
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Root"
+        component={Sidebar}
+        options={{ headerShown: false }}
+      />       
+    </Stack.Navigator>
+  );
 }
+
+const styles = StyleSheet.create({
+  activeTabBarIcon: {
+    paddingBottom: 5,
+    borderBottomWidth: 3, // Add underline
+    borderColor: '#3E5A47' // Color of the underline
+  }
+});

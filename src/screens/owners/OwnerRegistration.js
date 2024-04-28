@@ -37,15 +37,41 @@ export default function RegistrationForm({ navigation, route }) {
 
   const handleAuth = values => {
     const endpoint = 'owners/register';
+    const payload = {
+      ...values,
+      subPlan: 'BaseMode',
+      subPlanStart: null,
+      subPlanEnd: null
+    };
+    console.log(payload);
     fetchData(`https://ls2tngnk9ytt.share.zrok.io/${endpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
       },
-      body: JSON.stringify(values)
+      body: JSON.stringify(payload)
     });
   };
+
+  useEffect(() => {
+    if (data) {
+      if (data.success) {
+        console.log('payload: ', data);
+        Alert.alert(
+          'Welcome aboard!',
+          'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
+        );
+        navigation.goBack();
+      } else {
+        Alert.alert(
+          'Sign-up failed',
+          'Encountered an error while trying to register your account, try again later!.'
+        );
+      }
+    }
+  }, [data]);
+
 
   return (
     <SafeAreaView style={{ backgroundColor: '#3E5A47' }}>
@@ -56,8 +82,8 @@ export default function RegistrationForm({ navigation, route }) {
           </View>
           <Formik
             initialValues={{
-              name: '',
-              company: '',
+              full_name: '',
+              scrapyard_name: '',
               location: '',
               email: '',
               password: ''
@@ -80,11 +106,11 @@ export default function RegistrationForm({ navigation, route }) {
                   <Text style={styles.formInputHeader}>Scrapyard Name</Text>
                   <TextInput
                     style={styles.formInput}
-                    onChangeText={formikProps.handleChange('company')}
+                    onChangeText={formikProps.handleChange('scrapyard_name')}
                     placeholderTextColor={'#8d929f'}
                     placeholder="Enter your scrapyard name"></TextInput>
                   <Text style={styles.formErrorText}>
-                    {formikProps.touched.company && formikProps.errors.company}
+                    {formikProps.touched.scrapyard_name && formikProps.errors.scrapyard_name}
                   </Text>
                   <Text style={styles.formInputHeader}>Location</Text>
                   <TextInput

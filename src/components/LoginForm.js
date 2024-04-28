@@ -1,9 +1,9 @@
-import {useContext, useEffect, useState} from 'react';
-import {Formik} from 'formik';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {AuthContext} from '../context/AuthContext';
-import {validationSchema} from '../utils/FormValidation';
-import {AsanIcon} from './Icons';
+import { useContext, useEffect, useState } from 'react';
+import { Formik } from 'formik';
+import { RFValue } from 'react-native-responsive-fontsize';
+import { AuthContext } from '../context/AuthContext';
+import { validationSchema } from '../utils/FormValidation';
+import { AsanIcon } from './Icons';
 
 import {
   StyleSheet,
@@ -14,61 +14,80 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
-  SafeAreaView,
+  SafeAreaView
 } from 'react-native';
 
 import useCustomFetch from '../hooks/useCustomFetch';
 import CheckBox from '@react-native-community/checkbox';
 import uuid from 'react-native-uuid';
 
-export default function LoginForm({navigation}) {
-  // States
-  const {data, error, loading, fetchData} = useCustomFetch();
-  const {session, setSession, userType} = useContext(AuthContext); // Session Context
+export default function LoginForm({ navigation }) {
+
+  const { data, error, loading, fetchData } = useCustomFetch();
+  const { session, setSession, userType } = useContext(AuthContext); 
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
-  console.log('Login UT: ', userType);
   // Auth Bypasser (For debugging purposes only.)
-  setSession({token: uuid.v4()});
+  // setSession({
+  //   token: uuid.v4(),
+  //   userType: userType,
+  //   subPlan: 'Free',
+  //   selectedWarehouse: 'abcd01',
+  // });
 
   const handleAuth = values => {
-    fetchData('https://jwtdphluugg6.share.zrok.io/login', {
+    const endpoint = userType === 'owner' ? 'owners/login' : 'buyers/login';
+    console.log(endpoint, values);
+    fetchData(`http://192.168.100.5/rest/${endpoint}`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(values),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
+      },
+      body: JSON.stringify(values)
     });
   };
 
   useEffect(() => {
     if (data) {
-      if (data.success) {
+      if (data.uuid) {
         console.log('data: ', data);
-        setSession({token: uuid.v4()});
+        setSession({
+          token: data.uuid,
+          userImage: data.image,
+          userType: userType,
+          subPlan: data.SP,
+          selectedWarehouse: null,
+          profile: {
+            fullName: data.fullName,
+            company: data.company,
+            location: data.location,
+            email: data.email,
+          }
+        });
       } else {
-        console.log('data: ', data);
         Alert.alert(
           'Failed signing in.',
-          'You have entered a wrong email or password.',
+          'You have entered a wrong email or password.'
         );
       }
     }
   }, [data]);
 
   return (
-    <SafeAreaView style={{backgroundColor: 'white', height: '100%'}}>
-      <ScrollView contentContainerStyle={styles.scrollWrapper}>
-        <View style={{backgroundColor: '#3E5A47', padding: 20}}>
+    <ScrollView contentContainerStyle={styles.scrollWrapper}>
+        <View style={{ backgroundColor: '#3E5A47', padding: 20, flex: 1 }}>
           <AsanIcon
             style={{
               alignSelf: 'center',
               marginTop: 50,
-              marginBottom: 20,
+              marginBottom: 20
             }}></AsanIcon>
           <View style={styles.headerContainer}>
             <Text style={styles.loginHeader}>SIGN IN TO YOUR ACCOUNT</Text>
           </View>
           <Formik
-            initialValues={{email: '', password: ''}}
+            initialValues={{ email: '', password: '' }}
             onSubmit={handleAuth}
             validationSchema={validationSchema}>
             {formikProps => (
@@ -107,7 +126,7 @@ export default function LoginForm({navigation}) {
                     onPress={formikProps.handleSubmit}
                     style={styles.formSubmitBtn}>
                     {loading ? (
-                      <View style={{flexDirection: 'row', gap: 10}}>
+                      <View style={{ flexDirection: 'row', gap: 10 }}>
                         <Text>Signing you in...</Text>
                         <ActivityIndicator size="small"></ActivityIndicator>
                       </View>
@@ -130,17 +149,15 @@ export default function LoginForm({navigation}) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollWrapper: {
-    // height: '100%',
-    // justifyContent: 'space-around',
+    flexGrow: 1,
   },
   headerContainer: {
-    marginBottom: 50,
+    marginBottom: 50
   },
   loginHeader: {
     alignSelf: 'center',
@@ -148,24 +165,23 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     fontFamily: 'Inter-Bold',
     fontSize: 20,
-    marginTop: 20,
+    marginTop: 20
   },
   loginSubHeader: {
     color: '#F4F5F4',
     flexWrap: 'wrap',
     fontFamily: 'Inter-Medium',
     fontSize: RFValue(20),
-    marginTop: 10,
-    // width: 290,
+    marginTop: 10
   },
   formContainer: {
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   formInputHeader: {
     color: '#F4F5F4',
     fontFamily: 'Inter-SemiBold',
     fontSize: 13,
-    paddingLeft: 10,
+    paddingLeft: 10
   },
   formInput: {
     borderColor: '#F4F5F4',
@@ -177,31 +193,31 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 10,
-    paddingRight: 20,
+    paddingRight: 20
   },
   formOptionContainer: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 20
   },
   checkBoxContainer: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   checkBoxText: {
     color: '#5D7365',
     fontFamily: 'Inter-Bold',
     fontSize: RFValue(14),
-    marginBottom: 3,
+    marginBottom: 3
   },
   forgotPwText: {
     color: '#F4F5F4',
     fontFamily: 'Inter-Bold',
     fontSize: RFValue(14),
     textDecorationLine: 'underline',
-    marginBottom: 3,
+    marginBottom: 3
   },
   formSubmitBtn: {
     alignItems: 'center',
@@ -209,36 +225,38 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 10,
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 10
   },
   formSubmitBtnText: {
     color: '#3E5A47',
     fontFamily: 'Inter-SemiBold',
-    fontSize: RFValue(16),
+    fontSize: RFValue(16)
   },
   formErrorText: {
     fontFamily: 'Inter-Medium',
     color: 'red',
     marginTop: 5,
     marginLeft: 5,
-    marginBottom: 5,
+    marginBottom: 5
   },
   footerHelpContainer: {
+    alignItems: 'center',
     flexDirection: 'row',
+    flex: 1,
     gap: 8,
     justifyContent: 'center',
-    padding: 10,
-    marginTop: 40,
-    marginBottom: 10,
+    paddingTop: 25,
+    paddingBottom: 25
   },
   footerHeaderText: {
     fontFamily: 'Inter-Bold',
     fontSize: RFValue(14),
+    color: '#3E5847',
   },
   registerBtnText: {
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
     fontSize: RFValue(14),
-    textDecorationLine: 'underline',
-  },
+    textDecorationLine: 'underline'
+  }
 });

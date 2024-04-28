@@ -4,7 +4,7 @@ import {analytics, global} from '../../styles/_globalLayout';
 
 import React from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {BoxIcon, UsersIcon} from '../../components/Icons';
+import {BackButtonIcon, BoxIcon, UsersIcon} from '../../components/Icons';
 import {Divider} from '@rneui/base';
 
 export default function OwnerAnalytics({navigation, route}) {
@@ -19,14 +19,16 @@ export default function OwnerAnalytics({navigation, route}) {
       <View style={analytics.stats_top_container}>
         <View style={analytics.stats_header_tab}>
           <View style={analytics.stats_header_tab_top}>
-            <TouchableOpacity>
-              <Text style={analytics.stats_header_tab_text}>-</Text>
+            <TouchableOpacity
+              style={analytics.backButton}
+              onPress={() => navigation.goBack()}>
+              <BackButtonIcon color={'#3E5A47'}></BackButtonIcon>
             </TouchableOpacity>
             <Text style={analytics.stats_header_tab_text}>Reports</Text>
           </View>
           <React.Fragment>
             <Text
-              style={[analytics.stats_header_tab_text, {textAlign: 'right'}]}>
+              style={[analytics.stats_header_tab_text, { textAlign: 'right' }]}>
               & Analytics
             </Text>
           </React.Fragment>

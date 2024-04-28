@@ -1,6 +1,7 @@
 // Global Styles
 
 import {StyleSheet} from 'react-native';
+import { BackButtonIcon } from '../components/Icons';
 
 export const global = StyleSheet.create({
   container: {
@@ -90,4 +91,7 @@ export const analytics = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: 20,
   },
+  backButton: {
+    marginTop: 10
+  }
 });
