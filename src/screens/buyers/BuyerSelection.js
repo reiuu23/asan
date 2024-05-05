@@ -8,51 +8,28 @@ import {
   TouchableOpacity,
   ActivityIndicator
 } from 'react-native';
-import React, { useContext, useEffect } from 'react';
-import LinearGradient from 'react-native-linear-gradient';
 import { AuthContext } from '../../context/AuthContext';
+import { index } from '../../services/warehouseService';
+import React, { useContext, useEffect, useState } from 'react';
+import LinearGradient from 'react-native-linear-gradient';
 import useCustomFetch from '../../hooks/useCustomFetch';
-import { color } from '@rneui/base';
-
-const temp = [
-  {
-    warehouse_id: 1001,
-    warehouse_name: 'Ligaya Corp',
-    warehouse_owner: 'Angus Ligaya',
-    warehouse_location: '1197 Pasong Tamo, QC'
-  },
-  {
-    warehouse_id: 1002,
-    warehouse_name: 'Angya Corp',
-    warehouse_owner: 'Angya Haraya',
-    warehouse_location: '9962 Pasong Tamo, QC'
-  }
-];
-
-console.log(temp.length);
 
 export default function BuyerSelection({ navigation }) {
   const { session, setSession } = useContext(AuthContext);
-  const { data, loading, error, fetchData } = useCustomFetch();
+  const [data, setData] = useState(null);
+
+  const retrieveWarehouseList = async () => {
+    try {
+      const response = await index(session.token);
+      setData(response);
+    } catch (error) {
+      console.log('Error retrieving warehouse data: ', error);
+    }
+  }
 
   useEffect(() => {
-    const endpoint = 'warehouse';
-    fetchData(`http://192.168.100.5/rest/${endpoint}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      }
-    });
-  }, [session]);
-
-  useEffect(() => {
-    console.log('warehouse data (user selection): ', data);
-  }, [data]);
-
-  useEffect(() => {
-    console.log('warehouse: ', session);
-  }, [session]);
+    retrieveWarehouseList();
+  }, []);
 
   return (
     <SafeAreaView>
@@ -60,7 +37,7 @@ export default function BuyerSelection({ navigation }) {
         <Text style={styles.top_bar__container_header}>Welcome!</Text>
       </View>
       <ScrollView>
-        <View style={{ height: temp.length < 5 ? 800 : 'auto' }}>
+        <View style={{ height: data?.length < 5 ? 800 : 'auto' }}>
           <LinearGradient
             colors={['#F2F2F2', '#3E5A47']}
             start={{ x: 0, y: 0.5 }}
@@ -87,10 +64,10 @@ export default function BuyerSelection({ navigation }) {
                     Warehouse {index + 1}
                   </Text>
                   <Text style={styles.button_value}>
-                    Warehouse Owner: {warehouse.warehouse_owner}
+                    Warehouse Owner: {warehouse.warehouse_name}
                   </Text>
                   <Text style={styles.button_value}>
-                    Location: {warehouse.location}
+                    Location: {warehouse.warehouse_location}
                   </Text>
                 </TouchableOpacity>
               ))

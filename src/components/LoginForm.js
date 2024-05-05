@@ -2,8 +2,11 @@ import { useContext, useEffect, useState } from 'react';
 import { Formik } from 'formik';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { AuthContext } from '../context/AuthContext';
-import { validationSchema } from '../utils/FormValidation';
+import { validationSchema } from '../utils/InputValidation';
 import { AsanIcon } from './Icons';
+import { login } from '../services/authService';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   StyleSheet,
@@ -20,12 +23,14 @@ import {
 import useCustomFetch from '../hooks/useCustomFetch';
 import CheckBox from '@react-native-community/checkbox';
 import uuid from 'react-native-uuid';
+import axios from 'axios';
 
-export default function LoginForm({ navigation }) {
-
-  const { data, error, loading, fetchData } = useCustomFetch();
-  const { session, setSession, userType } = useContext(AuthContext); 
+export default function LoginForm({ navigation, route }) {
+  const { session, setSession, userType } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
+
+  console.log("login form: ", userType);
 
   // Auth Bypasser (For debugging purposes only.)
   // setSession({
@@ -35,120 +40,110 @@ export default function LoginForm({ navigation }) {
   //   selectedWarehouse: 'abcd01',
   // });
 
-  const handleAuth = values => {
-    const endpoint = userType === 'owner' ? 'owners/login' : 'buyers/login';
-    console.log(endpoint, values);
-    fetchData(`http://192.168.100.5/rest/${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(values)
-    });
-  };
-
-  useEffect(() => {
-    if (data) {
-      if (data.uuid) {
-        console.log('data: ', data);
-        setSession({
-          token: data.uuid,
-          userImage: data.image,
-          userType: userType,
-          subPlan: data.SP,
-          selectedWarehouse: null,
-          profile: {
-            fullName: data.fullName,
-            company: data.company,
-            location: data.location,
-            email: data.email,
-          }
-        });
-      } else {
-        Alert.alert(
-          'Failed signing in.',
-          'You have entered a wrong email or password.'
-        );
+  const handleLogin = async values => {
+    setLoading(true);
+    try {
+      const data = {
+        identifier: values.identifier,
+        password: values.password,
+        user_type: userType
       }
+      console.log(data);
+      const response = await login(data);
+      setLoading(false);
+      // console.log(JSON.stringify(response, null, 2));
+      console.log(response);
+
+      setSession({
+        token: response.token,
+        userImage: response.user.profile_image,
+        userType: response.user.user_type,
+        fullName: response.user.full_name,
+        firstName: response.user.first_name,
+        subPlan: null,
+        selectedWarehouse: null
+      });
+      
+    } catch (error) {
+      Alert.alert('Login unsuccessful', error.message);
+      setLoading(false);
     }
-  }, [data]);
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollWrapper}>
-        <View style={{ backgroundColor: '#3E5A47', padding: 20, flex: 1 }}>
-          <AsanIcon
-            style={{
-              alignSelf: 'center',
-              marginTop: 50,
-              marginBottom: 20
-            }}></AsanIcon>
-          <View style={styles.headerContainer}>
-            <Text style={styles.loginHeader}>SIGN IN TO YOUR ACCOUNT</Text>
-          </View>
-          <Formik
-            initialValues={{ email: '', password: '' }}
-            onSubmit={handleAuth}
-            validationSchema={validationSchema}>
-            {formikProps => (
-              <>
-                <View>
-                  <Text style={styles.formInputHeader}>E-mail</Text>
-                  <TextInput
-                    style={styles.formInput}
-                    onChangeText={formikProps.handleChange('email')}
-                    placeholderTextColor={'#8d929f'}
-                    placeholder="Enter your email"
-                    autoFocus></TextInput>
-                  <Text style={styles.formErrorText}>
-                    {formikProps.touched.email && formikProps.errors.email}
-                  </Text>
-                  <Text style={styles.formInputHeader}>Password</Text>
-                  <TextInput
-                    style={styles.formInput}
-                    onChangeText={formikProps.handleChange('password')}
-                    placeholderTextColor={'#8d929f'}
-                    placeholder="Enter your password"
-                    secureTextEntry
-                    autoFocus></TextInput>
-                  <Text style={styles.formErrorText}>
-                    {formikProps.touched.password &&
-                      formikProps.errors.password}
-                  </Text>
-                </View>
-                <View style={styles.formOptionContainer}>
-                  <TouchableOpacity onPress={() => console.log('pressed')}>
-                    <Text style={styles.forgotPwText}>Forgot Password?</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.footerContainer}>
-                  <TouchableOpacity
-                    onPress={formikProps.handleSubmit}
-                    style={styles.formSubmitBtn}>
-                    {loading ? (
-                      <View style={{ flexDirection: 'row', gap: 10 }}>
-                        <Text>Signing you in...</Text>
-                        <ActivityIndicator size="small"></ActivityIndicator>
-                      </View>
-                    ) : (
-                      <Text style={styles.formSubmitBtnText}>Sign In</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </Formik>
+      <View style={{ backgroundColor: '#3E5A47', padding: 20, flex: 1 }}>
+        <AsanIcon
+          style={{
+            alignSelf: 'center',
+            marginTop: 50,
+            marginBottom: 20
+          }}></AsanIcon>
+        <View style={styles.headerContainer}>
+          <Text style={styles.loginHeader}>SIGN IN TO YOUR ACCOUNT</Text>
         </View>
-        <View style={styles.footerHelpContainer}>
-          <Text style={styles.footerHeaderText}>Don't have an account?</Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Register');
-            }}>
-            <Text style={styles.registerBtnText}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        <Formik
+          initialValues={{ identifier: '', password: '' }}
+          onSubmit={handleLogin}
+          validationSchema={validationSchema}>
+          {formikProps => (
+            <>
+              <View>
+                <Text style={styles.formInputHeader}>E-mail / Username</Text>
+                <TextInput
+                  style={styles.formInput}
+                  onChangeText={formikProps.handleChange('identifier')}
+                  placeholderTextColor={'#8d929f'}
+                  placeholder="Enter your email or username"
+                  autoFocus></TextInput>
+                <Text style={styles.formErrorText}>
+                  {formikProps.touched.identifier && formikProps.errors.identifier}
+                </Text>
+                <Text style={styles.formInputHeader}>Password</Text>
+                <TextInput
+                  style={styles.formInput}
+                  onChangeText={formikProps.handleChange('password')}
+                  placeholderTextColor={'#8d929f'}
+                  placeholder="Enter your password"
+                  secureTextEntry
+                  autoFocus></TextInput>
+                <Text style={styles.formErrorText}>
+                  {formikProps.touched.password && formikProps.errors.password}
+                </Text>
+              </View>
+              <View style={styles.formOptionContainer}>
+                <TouchableOpacity onPress={() => console.log('pressed')}>
+                  <Text style={styles.forgotPwText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.footerContainer}>
+                <TouchableOpacity
+                  onPress={formikProps.handleSubmit}
+                  style={styles.formSubmitBtn}>
+                  {loading ? (
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text>Signing you in...</Text>
+                      <ActivityIndicator size="small"></ActivityIndicator>
+                    </View>
+                  ) : (
+                    <Text style={styles.formSubmitBtnText}>Sign In</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </Formik>
+      </View>
+      <View style={styles.footerHelpContainer}>
+        <Text style={styles.footerHeaderText}>Don't have an account?</Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Register');
+          }}>
+          <Text style={styles.registerBtnText}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 

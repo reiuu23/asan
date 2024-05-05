@@ -672,7 +672,7 @@ const UserVerification = ({ navigation }) => {
         style={styles.pager}
         initialPage={currentPage}
         onPageSelected={onPageSelected}
-        scrollEnabled={false}>
+        scrollEnabled={true}>
         <Page1 />
         <Page2 />
         <Page3 />

@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
-  Platform,
   TextInput,
   Alert,
   RefreshControl
@@ -29,10 +28,6 @@ import { AuthContext } from '../../context/AuthContext';
 import { ScrapContext } from '../../context/ScrapContext';
 import { Shadow } from 'react-native-shadow-2';
 import { Divider } from '@rneui/themed';
-import { logoutUser } from '../../helper/PostAuthHelper';
-import { splitFullName } from '../../utils/nameSplitter';
-
-import Svg, { Path } from 'react-native-svg';
 
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
@@ -48,7 +43,6 @@ export default function BuyerHome({ navigation }) {
 
   const { session, setSession } = useContext(AuthContext);
   const { scrapData, loadScrap } = useContext(ScrapContext);
-  const { firstName } = splitFullName(session.profile.fullName);
 
   const fetchScraps = () => {
     const local = 'http://192.168.100.5/rest/scrapdata/read';
@@ -158,7 +152,6 @@ export default function BuyerHome({ navigation }) {
             /> */}
             {session.userImage ? (
               <Image
-                key={new Date().getTime()}
                 style={styles.top_bar__profile_image}
                 source={{
                   uri: session.userImage
@@ -169,7 +162,7 @@ export default function BuyerHome({ navigation }) {
                 source={require('../../assets/img/placeholderUser.jpg')}></Image>
             )}
           </TouchableOpacity>
-          <Text style={styles.top_bar__profile_name}>Hey, {firstName}</Text>
+          <Text style={styles.top_bar__profile_name}>Hey, {session.firstName}</Text>
         </View>
         <TouchableOpacity
           style={styles.top_bar__signout}

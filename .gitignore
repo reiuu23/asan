@@ -38,6 +38,7 @@ node_modules/
 buck-out/
 \.buckd/
 *.keystore
+.env
 
 # Fastlane
 #

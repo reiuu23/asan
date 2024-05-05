@@ -21,7 +21,7 @@ export default function AuthUser({ navigation, route }) {
   const [session, setSession] = useState({
     token: null,
     userImage: null,
-    userType: userType,
+    userType: null,
     subPlan: null,
     selectedWarehouse: null,
   });
@@ -105,28 +105,18 @@ export default function AuthUser({ navigation, route }) {
     <>
       <AuthContext.Provider
         value={{ session, setSession, userType, sessionUpdate }}>
-        {userType === 'owner' ? (
-          <>
-            {session.token ? (
-              <ScrapContext.Provider value={{ scrapData, loadScrap }}>
-                <OwnerNavigation></OwnerNavigation>
-              </ScrapContext.Provider>
-            ) : (
-              <CustomStackNavigator
-                screens={authScreens}></CustomStackNavigator>
-            )}
-          </>
+        {session.userType ? (
+          session.userType === 'owner' ? (
+            <ScrapContext.Provider value={{ scrapData, loadScrap }}>
+              <OwnerNavigation></OwnerNavigation>
+            </ScrapContext.Provider>
+          ) : (
+            <ScrapContext.Provider value={{ scrapData, loadScrap }}>
+              <BuyerNavigation></BuyerNavigation>
+            </ScrapContext.Provider>
+          )
         ) : (
-          <>
-            {session.token ? (
-              <ScrapContext.Provider value={{ scrapData, loadScrap }}>
-                <BuyerNavigation></BuyerNavigation>
-              </ScrapContext.Provider>
-            ) : (
-              <CustomStackNavigator
-                screens={authScreens}></CustomStackNavigator>
-            )}
-          </>
+          <CustomStackNavigator screens={authScreens}></CustomStackNavigator>
         )}
       </AuthContext.Provider>
     </>

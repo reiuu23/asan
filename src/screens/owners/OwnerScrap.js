@@ -9,11 +9,14 @@ import {
   FlatList,
   Modal,
   Alert,
-  TextInput
+  TextInput,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Image
 } from 'react-native';
 
 import { useForm, Controller } from 'react-hook-form';
-import { BackButtonIcon, SearchIconVar, UploadIcon } from '../../components/Icons';
+import { BackButtonIcon, CameraIcon, CheckIcon, GlassIcon, MagnifyIcon, PhotoIcon, SearchIcon, SearchIconVar, UploadIcon } from '../../components/Icons';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   BottomSheetModal,
@@ -21,6 +24,7 @@ import {
   BottomSheetBackdrop
 } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
+import { SelectList } from 'react-native-dropdown-select-list';
 import ImagePicker from 'react-native-image-crop-picker';
 
 const OwnerScrap = () => {
@@ -34,18 +38,17 @@ const OwnerScrap = () => {
   const [editName, setEditName] = useState('');
   const [editWeight, setEditWeight] = useState('');
 
+  const [selected, setSelected] = useState(null);
+
+  const [image, setImage] = useState(null);
+
   const bottomSheetModalRef = useRef(null);
-  const snapPoints = ['90%'];
 
   const {
     control,
     handleSubmit,
     formState: { errors }
   } = useForm();
-
-  const handlePresentModal = () => {
-    bottomSheetModalRef.current?.present();
-  };
 
   const handleCloseModalPress = () => {
     Alert.alert('Cancel?', 'Do you wish to cancel adding a new scrap entry?', [
@@ -54,12 +57,8 @@ const OwnerScrap = () => {
         onPress: () => console.log('Cancelled adding a new scrap entry.'),
         style: 'cancel'
       },
-      { text: 'Yes', onPress: () => bottomSheetModalRef.current?.close() }
+      { text: 'Yes', onPress: () => setModalVisible(false) }
     ]);
-  };
-
-  const handleBackdropPress = () => {
-    bottomSheetModalRef.current?.close();
   };
 
   const handleNumericInput = text => {
@@ -163,6 +162,44 @@ const OwnerScrap = () => {
     </View>
   );
 
+  // -------
+
+  const onSubmit = data => {
+    console.log("submitted data (scraps): ", { "scrap_category": selected, ...data, "scrap_image": image.uri});
+  }
+
+  const handleSelectImage = () => {
+    ImagePicker.openPicker({
+      cropping: true,
+      mediaType: 'photo'
+    })
+      .then(image => {
+        const source = { uri: image.path };
+        setImage(source);
+      })
+      .catch(error => {
+        console.log('ImagePicker Error: ', error);
+      });
+  };
+
+  const handleOpenCamera = () => {
+    ImagePicker.openCamera({
+      width: 200,
+      height: 200,
+      cropping: true,
+      mediaType: 'photo'
+    })
+      .then(image => {
+        const source = { uri: image.path };
+        setImage(source);
+      })
+      .catch(error => {
+        console.log('Camera Error: ', error);
+      });
+  };
+
+  const categories = require('../../data/categories.json');
+
   return (
     <SafeAreaView style={styles.container}>
       <BottomSheetModalProvider>
@@ -183,109 +220,157 @@ const OwnerScrap = () => {
         </View>
         <TouchableOpacity
           style={styles.addBtnWrapper}
-          onPress={() => handlePresentModal()}>
+          onPress={() => setModalVisible(true)}>
           <Text style={styles.addBtn}>Add a New Scrap</Text>
         </TouchableOpacity>
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={0}
-          snapPoints={snapPoints}
-          backgroundStyle={{ borderRadius: 40 }}
-          backdropComponent={props => (
-            <BottomSheetBackdrop
-              {...props}
-              disappearsOnIndex={-1}
-              appearsOnIndex={0}
-            />
-          )}
-          onBackdropPress={handleBackdropPress}>
-          <View style={styles.bottomSheetWrapper}>
-            <View style={styles.modalForm}>
-              <Text style={styles.formModalHeader}>Add New Entry</Text>
-              <Text style={styles.formInputHeader}>Scrap Name</Text>
-              <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.formInput}
-                    placeholder="Enter the scrap name (e.g. Plastic)"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                  />
-                )}
-                name="scrap_name"
-              />
+        <Modal
+          animationType="slide"
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}>
+          <ScrollView contentContainerStyle={styles.modalContainer}>
+            <View style={styles.bottomSheetWrapper}>
+              <View style={styles.modalForm}>
+                <Text style={styles.formModalHeader}>Add New Entry</Text>
+                <Text style={styles.formInputHeader}>Scrap Category</Text>
+                <SelectList
+                  placeholder="Select Scrap Category"
+                  setSelected={val => setSelected(val)}
+                  maxHeight={300}
+                  data={categories}
+                  save="value"
+                  fontFamily="Inter-Medium"
+                  boxStyles={{
+                    borderStyle: 'solid',
+                    marginBottom: 20,
+                    marginHorizontal: 5,
+                    marginTop: 15
+                  }}
+                  inputStyles={{ color: '#3E5A47' }}
+                  dropdownStyles={{ marginBottom: 20 }}
+                  dropdownTextStyles={{ color: '#3E5A47' }}
+                />
+                <Text style={styles.formInputHeader}>Scrap Name</Text>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.formInput}
+                      placeholder="Enter the scrap name (e.g. Plastic)"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                  )}
+                  name="scrap_name"
+                />
 
-              <Text style={styles.formInputHeader}>
-                Scrap Volume (Optional)
-              </Text>
-              <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.formInput}
-                    placeholder="(e.g. 1 Liter)"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                  />
-                )}
-                name="scrap_volume"
-              />
+                <Text style={styles.formInputHeader}>
+                  Scrap Volume (Optional)
+                </Text>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.formInput}
+                      placeholder="(e.g. 1 Liter)"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                  )}
+                  name="scrap_volume"
+                />
 
-              <Text style={styles.formInputHeader}>Price (per kg)</Text>
-              <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.formInput}
-                    placeholder="Enter the price value"
-                    keyboardType="numeric"
-                    onBlur={onBlur}
-                    onChangeText={input => onChange(handleNumericInput(input))}
-                    value={value}
-                  />
-                )}
-                name="scrap_cost"
-              />
+                <Text style={styles.formInputHeader}>Price (per kg)</Text>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.formInput}
+                      placeholder="Enter the price value"
+                      keyboardType="numeric"
+                      onBlur={onBlur}
+                      onChangeText={input =>
+                        onChange(handleNumericInput(input))
+                      }
+                      value={value}
+                    />
+                  )}
+                  name="scrap_cost"
+                />
 
-              <Text style={styles.formInputHeader}>Quantity</Text>
-              <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.formInput}
-                    placeholder="Enter the number of quantity"
-                    keyboardType="numeric"
-                    onBlur={onBlur}
-                    onChangeText={input => onChange(handleNumericInput(input))}
-                    value={value}
-                  />
+                <Text style={styles.formInputHeader}>Quantity</Text>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.formInput}
+                      placeholder="Enter the number of quantity"
+                      keyboardType="numeric"
+                      onBlur={onBlur}
+                      onChangeText={input =>
+                        onChange(handleNumericInput(input))
+                      }
+                      value={value}
+                    />
+                  )}
+                  name="scrap_quantity"
+                />
+
+                {image ? (
+                  <>
+                    <Text style={styles.formInputHeader}>Image Preview</Text>
+                    <View>
+                      <Image
+                        source={{ uri: image.uri }}
+                        style={{
+                          alignSelf: 'center',
+                          width: 200,
+                          height: 200,
+                          borderColor: '#3E5A47',
+                          borderWidth: 1,
+                          marginVertical: 20,
+                        }}
+                      />
+                    </View>
+                  </>
+                ) : (
+                  ''
                 )}
-                name="scrap_quantity"
-              />
+              </View>
+
+              <View style={styles.btnWrapper}>
+                <TouchableOpacity
+                  style={styles.uploadImageBtnWrapper}
+                  onPress={handleSelectImage}>
+                  <UploadIcon color={'#3E5A47'}></UploadIcon>
+                  <Text style={styles.uploadImageBtn}>Upload an Image</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.uploadImageBtnWrapper}
+                  onPress={handleOpenCamera}>
+                  <CameraIcon color={'#3E5A47'}></CameraIcon>
+                  <Text style={styles.uploadImageBtn}>Take a Photo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.submitBtnWrapper}
+                  onPress={handleSubmit(onSubmit)}>
+                  <Text style={styles.submitBtn}>Submit</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.cancelBtnWrapper}
+                  onPress={handleCloseModalPress}>
+                  <Text style={styles.cancelBtn}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <View style={styles.btnWrapper}>
-              <TouchableOpacity style={styles.uploadImageBtnWrapper}>
-                <UploadIcon></UploadIcon>
-                <Text style={styles.uploadImageBtn}>Upload Image</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.submitBtnWrapper}>
-                <Text style={styles.submitBtn}>Submit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.cancelBtnWrapper}
-                onPress={handleCloseModalPress}>
-                <Text style={styles.cancelBtn}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </BottomSheetModal>
-
+          </ScrollView>
+        </Modal>
         {items.length === 0 ? (
           <View style={styles.onEmptyList}>
             <Text style={styles.emptyText}>
@@ -316,12 +401,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1
   },
+  btnWrapper: {
+    marginTop: 10
+  },
   emptyText: {
     alignSelf: 'center',
     color: '#3E5A47',
     fontFamily: 'Inter-SemiBold',
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: 'center',
+    paddingHorizontal: 20
   },
   top_bar__container: {
     // borderBottomWidth: 1,
@@ -367,14 +456,15 @@ const styles = StyleSheet.create({
   bottomSheetWrapper: {
     paddingLeft: 20,
     paddingRight: 20,
-    paddingTop: 20
+    paddingTop: 20,
+    marginBottom: 20
   },
   formModalHeader: {
     alignSelf: 'center',
     color: '#3E5A47',
     fontFamily: 'Inter-SemiBold',
     fontSize: 20,
-    marginBottom: 30
+    marginVertical: 40
   },
   formInputHeader: {
     color: '#95B6A0',
@@ -406,7 +496,7 @@ const styles = StyleSheet.create({
     color: '#3E5A47',
     fontFamily: 'Inter-Regular',
     fontSize: 18,
-    textDecorationLine: 'underline'
+    // textDecorationLine: 'underline'
   },
   addBtnWrapper: {
     alignItems: 'center',
