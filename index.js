@@ -13,3 +13,5 @@ TextInput.defaultProps = Text.defaultProps || {};
 TextInput.defaultProps.maxFontSizeMultiplier = 1.1; // the maximum amount the font size will scale.
 
 AppRegistry.registerComponent(appName, () => App);
+
+// TEST COMMIT
