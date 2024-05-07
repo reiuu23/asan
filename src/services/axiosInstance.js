@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const BASE_URL = process.env.BASE_API;
 
-console.log(BASE_URL);
+console.log(">:", BASE_URL);
 //
 
 const axiosInstance = axios.create({
