@@ -1,26 +1,29 @@
-import { StyleSheet, Text, View } from 'react-native'
-import { useChat, disconnectUserChat } from '../../services/streamChatClient'
-import React, { useContext, useEffect } from 'react'
-import { AuthContext } from '../../context/AuthContext'
+import React, { useContext } from 'react';
+import { Chat, Channel, ChannelList, MessageList, MessageInput, OverlayProvider } from 'stream-chat-react-native';
+import { useChat } from '../../services/streamChatClient';
+import { AuthContext } from '../../context/AuthContext';
 
-// Create & Connect User
+const OwnerChat = () => {
 
+  const { session } = useContext(AuthContext);
 
-export default function OwnerChat() {
+  const chatClient = useChat(session);
 
-  const {session} = useContext(AuthContext);
-
-  // const chatClient = useChat(session);
-
-  useEffect(() => {
-    useChat(session);
-  }, [session]);
+  if (!chatClient) {
+    return null;
+  }
 
   return (
-    <View>
-      <Text>OwnerChat</Text>
-    </View>
-  )
-}
+    <OverlayProvider>
+      <Chat client={chatClient}>
+        <ChannelList filters={{ type: 'messaging', members: { $in: ['buyer'] } }} />
+        <Channel>
+          <MessageList />
+          <MessageInput />
+        </Channel>
+      </Chat>
+    </OverlayProvider>
+  );
+};
 
-const styles = StyleSheet.create({})
+export default OwnerChat;
