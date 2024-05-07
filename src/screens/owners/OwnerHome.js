@@ -27,6 +27,8 @@ export default function OwnerHome({ navigation, route }) {
 
   const { session } = useContext(AuthContext);
 
+  // console.log("session (home): ", session);
+
   const scrapList = require('../../data/analytics.json');
   const legendList = require('../../data/graphLegend.json');
   const scrapStats = require('../../data/scrapTotalDate.json');
@@ -93,7 +95,7 @@ export default function OwnerHome({ navigation, route }) {
               style={styles.chart}
               theme={VictoryTheme.material}
               padding={{ top: 60, bottom: 60, left: 70, right: 70 }}
-              maxDomain={{ y: 200 }}
+              maxDomain={{ y: 150 }}
               domainPadding={30}>
               <VictoryStack>
                 {scrapList.map(scraps => {
