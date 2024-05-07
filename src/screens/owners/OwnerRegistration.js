@@ -56,6 +56,8 @@ export default function RegistrationForm({ navigation, route }) {
         'Welcome aboard!',
         'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
       );
+
+      navigation.navigate('Login');
     } catch (error) {
       console.error(error);
       Alert.alert(

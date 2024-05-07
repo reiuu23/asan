@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { validationSchema } from '../utils/InputValidation';
 import { AsanIcon } from './Icons';
 import { login } from '../services/authService';
+import { useChat, disconnectUserChat } from '../services/streamChatClient';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -40,6 +41,12 @@ export default function LoginForm({ navigation, route }) {
     selectedWarehouse: 'abcd01',
   });
 
+  // Check if a stream chat connection is still open.
+
+  useEffect(() => {
+    disconnectUserChat();
+  }, []);
+
   const handleLogin = async values => {
     setLoading(true);
     try {
@@ -56,15 +63,18 @@ export default function LoginForm({ navigation, route }) {
 
       setSession({
         token: response.token,
+        chatToken: response.stream_token,
+        userId: response.user.access_uuid,
         userImage: response.user.profile_image,
         userType: response.user.user_type,
-        fullName: response.user.full_name,
+        fullName: response.user.fullname,
         firstName: response.user.first_name,
         subPlan: null,
         selectedWarehouse: null
       });
       
     } catch (error) {
+      console.log("Error: ", error.message);
       Alert.alert('Login unsuccessful', error.message);
       setLoading(false);
     }

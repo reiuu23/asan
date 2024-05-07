@@ -57,6 +57,8 @@
     "react-native-vector-icons": "^10.0.3",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "stream-chat": "^8.31.0",
+    "stream-chat-react-native": "^5.29.0",
     "uuid": "^9.0.1",
     "victory-native": "^36.9.1",
     "yup": "^1.4.0"

@@ -27,6 +27,8 @@ export default function OwnerHome({ navigation, route }) {
 
   const { session } = useContext(AuthContext);
 
+  // console.log("session (home): ", session);
+
   const scrapList = require('../../data/analytics.json');
   const legendList = require('../../data/graphLegend.json');
   const scrapStats = require('../../data/scrapTotalDate.json');
@@ -55,16 +57,16 @@ export default function OwnerHome({ navigation, route }) {
                     <Text style={styles.scrapsStatValue}>14</Text>
                   </View>
                   <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text>{'>'}</Text>
+                    <Text style={{color: '#E5E5E5'}}>{'>'}</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.currentScraps}>
                   <View style={styles.scrapsStat}>
-                    <Text style={styles.scrapsStatHeader}>Today's Scraps</Text>
+                    <Text style={styles.scrapsStatHeader}>Total Received</Text>
                     <Text style={styles.scrapsStatValue}>14</Text>
                   </View>
                   <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text>{'>'}</Text>
+                    <Text style={{color: '#E5E5E5'}}>{'>'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -93,7 +95,7 @@ export default function OwnerHome({ navigation, route }) {
               style={styles.chart}
               theme={VictoryTheme.material}
               padding={{ top: 60, bottom: 60, left: 70, right: 70 }}
-              maxDomain={{ y: 200 }}
+              maxDomain={{ y: 150 }}
               domainPadding={30}>
               <VictoryStack>
                 {scrapList.map(scraps => {
@@ -249,23 +251,27 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     marginBottom: 20,
-    padding: 0,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   stats__graph_legend_inner: {
     alignItems: 'center',
+    width: 70,
+    height: 70
+    // borderWidth: 1,
   },
   stats_daily__divider: {
     alignSelf: 'center',
     marginBottom: 25,
-    width: '100%',
+    width: '100%'
   },
   stats__graphLabelX: {
     position: 'absolute',
     fontFamily: 'Inter-Medium',
     fontSize: 12,
     color: '#5E5E5E',
-    transform: [{rotate: '90deg'}],
+    transform: [{ rotate: '90deg' }],
     top: '45%',
-    left: '75%',
-  },
+    left: '75%'
+  }
 });
