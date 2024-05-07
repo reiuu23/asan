@@ -33,12 +33,12 @@ export default function LoginForm({ navigation, route }) {
   console.log("login form: ", userType);
 
   // Auth Bypasser (For debugging purposes only.)
-  // setSession({
-  //   token: uuid.v4(),
-  //   userType: userType,
-  //   subPlan: 'Free',
-  //   selectedWarehouse: 'abcd01',
-  // });
+  setSession({
+    token: uuid.v4(),
+    userType: 'owner',
+    subPlan: 'Free',
+    selectedWarehouse: 'abcd01',
+  });
 
   const handleLogin = async values => {
     setLoading(true);
