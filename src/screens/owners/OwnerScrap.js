@@ -13,12 +13,15 @@ import {
   TextInput,
   ScrollView,
   Image,
-  Dimensions
+  Dimensions,
+  BackHandler,
+  RefreshControl,
+  ActivityIndicator
 } from 'react-native';
 
 import { useForm, Controller } from 'react-hook-form';
 import { SelectList } from 'react-native-dropdown-select-list';
-import { createScrapData, submitScrapData } from '../../services/scrapdataService';
+import { createScrapData, getScrapData, submitScrapData, updateScrapData, deleteScrapData } from '../../services/scrapdataService';
 import ImagePicker from 'react-native-image-crop-picker';
 import { BackButtonIcon, SearchIcon, UploadIcon, CameraIcon, SearchIconVar } from '../../components/Icons';
 import { AuthContext } from '../../context/AuthContext';
@@ -26,14 +29,64 @@ import { AuthContext } from '../../context/AuthContext';
 const OwnerScrap = () => {
   const { session } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [selectedScrapItem, setSelectedScrapItem] = useState(null);
   const [image, setImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const [data, setData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  // Fetch Scrap Data
+
+  const fetchScrap = async () => {
+    try {
+      setDataLoading(true);
+
+      const response = await getScrapData(session.warehouseId, session.token);
+
+      setData(response);
+
+      console.log('data: ', response);
+
+      return true;
+    } catch (error) {
+      console.log('Error: ', error.message);
+      Alert.alert('Encountered an error while retrieving the scrap data.', error.message);
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    fetchScrap();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    const response = fetchScrap();
+    if(response) {
+      setRefreshing(false);
+    } else {
+      setRefreshing(false);
+      Alert.alert(
+        'Encountered an error while refreshing the scrap data. Please try again later!'
+      );
+    }
+  }
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors }
-  } = useForm();
+  } = useForm({
+    scrap_name: '',
+    scrap_volume: '',
+    scrap_price_per_kg: '',
+    scrap_stock_count: ''
+  });
 
   const handleNumericInput = text => {
     const value = text.replace(/[^0-9]/g, '');
@@ -41,49 +94,89 @@ const OwnerScrap = () => {
   };
 
   const handleCloseModalPress = () => {
-    Alert.alert('Cancel?', 'Do you wish to cancel adding a new scrap entry?', [
+    Alert.alert('Cancel?', `Do you wish to cancel ${modalVisible ? 'adding' : 'editing'} your scrap entry?`, [
       {
         text: 'Cancel',
         onPress: () => console.log('Cancelled adding a new scrap entry.'),
         style: 'cancel'
       },
-      { text: 'Yes', onPress: () => setModalVisible(false) }
+      {
+        text: 'Yes',
+        onPress: () => {
+          setModalVisible(false);
+          setIsEditModalVisible(false);
+          setPreviewImage(null);
+          setImage(null);
+          setPreviewImage(null);
+        }
+      }
     ]);
   };
 
-  const onSubmit = async (data) => {
-    // console.log("submitted data (scraps): ", {"scrap_category": selected, ...data, "scrap_image": image.uri});
+  const onSubmit = async data => {
     const formData = {
       scrap_category: selected,
-      warehouse_id: 'e896bb4b-aeb9-40a5-b48e-3fb6642b54d3',
+      warehouse_id: session.warehouseId,
       ...data,
-      scrap_image: image.uri
+      scrap_image: image
     };
-    const scrapData = createScrapData(formData);
 
-    console.log(formData);
+    console.log('uri: ', formData.scrap_image);
 
-    // console.log(scrapData);
+    const scrapData = await createScrapData(formData);
 
     try {
-      const response = await submitScrapData(
-        scrapData,
-        '3|9C21IKqvcWXW70Toi977Ch5OukXobrfOyQNVppFJ10821375'
+      const response = await submitScrapData(scrapData, session.token);
+
+      Alert.alert(
+        'Scrap Entry Added',
+        `You have successfully added ${selectedScrapItem.scrap_name}. Do you want to create another scrap entry?`,
+        [
+          {
+            text: 'No',
+            onPress: () => {
+              setModalVisible(false);
+              reset();
+            },
+            style: 'cancel'
+          },
+          {
+            text: 'Yes',
+            onPress: () => {
+              reset();
+            }
+          }
+        ]
       );
-      console.log("scrapdata response: ", response);
+
+      fetchScrap();
     } catch (error) {
-      console.log("error upon submitting scrapdata: ", error);
+      if(image === null) {
+        Alert.alert(
+          'Oops',
+          `You haven't added a scrap photo/image yet!`
+        );
+      } else {
+        Alert.alert(
+          'Oops',
+          `An error occured while adding your scrap entry: ${error}`
+        );
+      }
     }
   };
 
   const handleSelectImage = () => {
     ImagePicker.openPicker({
+      width: 200,
+      height: 200,
+      multiple: false,
       cropping: true,
       mediaType: 'photo'
     })
       .then(image => {
-        const source = { uri: image.path };
-        setImage(source);
+        console.log('selected image: ', image);
+        setPreviewImage(image);
+        setImage(image);
       })
       .catch(error => {
         console.log('ImagePicker Error: ', error);
@@ -94,12 +187,14 @@ const OwnerScrap = () => {
     ImagePicker.openCamera({
       width: 200,
       height: 200,
+      multiple: false,
       cropping: true,
       mediaType: 'photo'
     })
       .then(image => {
-        const source = { uri: image.path };
-        setImage(source);
+        console.log('camera image: ', image);
+        setPreviewImage(image);
+        setImage(image);
       })
       .catch(error => {
         console.log('Camera Error: ', error);
@@ -108,39 +203,256 @@ const OwnerScrap = () => {
 
   const categories = require('../../data/categories.json');
 
-  const data = require('../../data/scraps.json');
+  // const [data, setData] = useState(null);
+  const [groupData, setGroupData] = useState(null);
 
-  const groupByCategory = data => {
-    return data.reduce((acc, item) => {
-      const category = item.scrap_category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(item);
-      return acc;
-    }, {});
-  };
+  useEffect(() => {
+    if(data) {
+      const groupByCategory = data => {
+        return data.reduce((acc, item) => {
+          const category = item.scrap_category;
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(item);
+          return acc;
+        }, {});
+      };
 
-  const groupedData = groupByCategory(data);
-  const groupedArray = Object.keys(groupedData).map(category => ({
-    category,
-    items: groupedData[category]
-  }));
+      const groupedData = groupByCategory(data);
+      const groupedArray = Object.keys(groupedData).map(category => ({
+        category,
+        items: groupedData[category]
+      }));
+
+      setGroupData(groupedArray);
+    }
+  }, [data]);
 
   const windowWidth = Dimensions.get('window').width;
 
+  const onDelete = () => {
+    Alert.alert('Delete Scrap Data?', 'Are you sure you want to delete this scrap data?', [
+      {
+        text: 'Delete',
+        onPress: () => handleDelete(selectedScrapItem.scrap_id),
+        style: 'cancel'
+      },
+      {
+        text: 'Cancel',
+        onPress: () => {
+          console.log("Cancelled deletion.");
+        }
+      }
+    ]);
+  }
+
+  const handleDelete = async (scrapId) => {
+    try {
+      const response = await deleteScrapData(scrapId, session.token);
+
+      Alert.alert(
+        'Scrapdata Deleted',
+        `You have successfully deleted ${data.scrap_name}.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setIsEditModalVisible(false);
+              setPreviewImage(null);
+              setImage(null);
+              fetchScrap();
+            }
+          }
+        ]
+      );
+
+      return response;
+    } catch (error) {
+      Alert.alert(
+        'Oops',
+        `An error occurred while attempting to delete the scrap entry: ${error}`
+      );
+    }
+  }
+
+  const handleEdit = item => {
+
+    console.log("Item: ", item);
+
+    setIsEditModalVisible(true);
+    setSelected(item.scrap_category);
+    setSelectedScrapItem(item);
+    setPreviewImage(item.scrap_image);
+
+    console.log("selected items", selectedScrapItem);
+  };
+
+  useEffect(() => {
+    console.log("category1: ", selected);
+  }, [selected]);
+
+  const onEditSubmit = async data => {
+    try {
+      const formData = new FormData();
+
+      console.log(selected);
+      if(selectedScrapItem.scrap_category !== selected) {
+        // console.log('selected: ', selected);
+        formData.append('scrap_category', selected);
+        switch(selected) {
+          case "Plastic":
+            formData.append('scrap_bar_color', '#E9D985');
+            break;
+          case "White Paper":
+            formData.append('scrap_bar_color', '#FF7961');
+            break;
+          case "Select Paper":
+            formData.append('scrap_bar_color', '#FFC7C7');
+            break;
+          case "Karton Paper":
+            formData.append('scrap_bar_color', '#A486E2');
+            break;
+          case "Mixed Paper":
+            formData.append('scrap_bar_color', '#9DE9D7');
+            break;
+          case "Solid Metal":
+            formData.append('scrap_bar_color', '#57B8FF');
+            break;
+          case "Assorted Metal":
+            formData.append('scrap_bar_color', '#3E5A47');
+            break;
+          default: 
+            console.log("Invalid Scrap Category");
+        };
+      }
+
+      if (selectedScrapItem.scrap_name !== data.scrap_name) {
+        formData.append('scrap_name', data.scrap_name);
+      }
+
+      if (selectedScrapItem.scrap_volume !== data.scrap_volume) {
+        formData.append('scrap_volume', data.scrap_volume);
+      }
+
+      if (
+        selectedScrapItem.scrap_price_per_kg !==
+        parseFloat(data.scrap_price_per_kg)
+      ) {
+        formData.append(
+          'scrap_price_per_kg',
+          parseFloat(data.scrap_price_per_kg)
+        );
+      }
+
+      if (
+        selectedScrapItem.scrap_total_weight !==
+        parseInt(data.scrap_total_weight)
+      ) {
+        formData.append('scrap_total_weight', data.scrap_total_weight);
+      }
+
+      if (
+        selectedScrapItem.scrap_stock_count !== parseInt(data.scrap_stock_count)
+      ) {
+        formData.append('scrap_stock_count', parseInt(data.scrap_stock_count));
+      }
+
+      // Check if image is updated
+      if (image !== null) {
+
+        const filename = image.path.split('/').pop(); 
+
+        formData.append('scrap_image', {
+          uri: image.path,
+          type: image.mime,
+          name: filename
+        });
+      }
+
+      // Submit only the updated fields to the backend
+
+      console.log("Updated Fields: ", formData);
+      console.log("session token: ", selectedScrapItem.scrap_id);
+
+      const response = await updateScrapData(
+        selectedScrapItem.scrap_id,
+        formData,
+        session.token
+      );
+
+      // Handle success response
+      Alert.alert(
+        'Scrap Entry Updated',
+        `You have successfully updated ${data.scrap_name}.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setIsEditModalVisible(false);
+              setPreviewImage(null);
+              setImage(null);
+              fetchScrap();
+            }
+          }
+        ]
+      );
+
+      return response;
+    } catch (error) {
+      // Handle error
+      Alert.alert(
+        'Oops',
+        `An error occurred while updating your scrap entry: ${error}`
+      );
+    }
+  };
+
+
+  useEffect(() => {
+    if (isEditModalVisible) {
+      reset({
+        scrap_name: selectedScrapItem.scrap_name,
+        scrap_volume: selectedScrapItem.scrap_volume,
+        scrap_price_per_kg: selectedScrapItem.scrap_price_per_kg.toString(), 
+        scrap_total_weight: selectedScrapItem.scrap_total_weight.toString(),
+        scrap_stock_count: selectedScrapItem.scrap_stock_count.toString() 
+      });
+    } else {
+      reset({
+        scrap_name: '',
+        scrap_volume: '',
+        scrap_price_per_kg: '',
+        scrap_total_weight: '',
+        scrap_stock_count: ''
+      });
+    }
+  }, [isEditModalVisible, modalVisible]);
+
+  
   const renderScrapItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.scrapItemContents}>
-        <Image style={{width: windowWidth * 0.45, height: 130, alignSelf: 'center', marginBottom: 20, borderRadius: 8}} source={require('../../assets/img/plasticImg.png')}/>
-        <Text style={styles.title}>{item.scrap_name}</Text>
+        <Image
+          style={styles.scrapImage}
+          source={
+            item.scrap_image
+              ? { uri: item.scrap_image }
+              : require('../../assets/img/plasticImg.png')
+          }
+        />
+        <Text style={styles.title} numberOfLines={1}>
+          {item.scrap_name}
+        </Text>
         <View style={styles.row}>
           <Text style={styles.label}>Volume</Text>
-          <Text style={styles.value}>{item.scrap_volume}</Text>
+          <Text style={styles.value}>
+            {item.scrap_volume ? item.scrap_volume : 'Unspecified'}
+          </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Price (per kg)</Text>
-          <Text style={styles.value}>&#8369; {item.scrap_price_per_kg}</Text>
+          <Text style={styles.label}>Total Weight (kg)</Text>
+          <Text style={styles.value}>{item.scrap_total_weight}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Stocks</Text>
@@ -150,6 +462,11 @@ const OwnerScrap = () => {
           <Text style={styles.label}>Scrap Price (per kg)</Text>
           <Text style={styles.value}>&#8369; {item.scrap_price_per_kg}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => handleEdit(item)}>
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -172,38 +489,92 @@ const OwnerScrap = () => {
       </View>
       <TouchableOpacity
         style={styles.addBtnWrapper}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setModalVisible(true);
+        }}>
         <Text style={styles.addBtn}>Add a New Scrap</Text>
       </TouchableOpacity>
+
       <Modal
         animationType="slide"
-        visible={modalVisible}
+        visible={modalVisible || isEditModalVisible}
         onRequestClose={() => {
-          setModalVisible(false);
+          Alert.alert(
+            'Cancel?',
+            `Do you wish to abort creating your scrap entry?`,
+            [
+              {
+                text: 'No',
+                onPress: () => {},
+                style: 'cancel'
+              },
+              {
+                text: 'Yes',
+                onPress: () => {
+                  setModalVisible(false);
+                  setPreviewImage(null);
+                  setImage(null);
+                  setPreviewImage(null);
+                  setIsEditModalVisible(false);
+                  reset();
+                }
+              }
+            ]
+          );
         }}>
         <ScrollView contentContainerStyle={styles.modalContainer}>
           <View style={styles.bottomSheetWrapper}>
             <View style={styles.modalForm}>
-              <Text style={styles.formModalHeader}>Add New Entry</Text>
+              {modalVisible ? (
+                <Text style={styles.formModalHeader}>Add New Entry</Text>
+              ) : (
+                <Text style={styles.formModalHeader}>Edit Scrap Entry</Text>
+              )}
               <Text style={styles.formInputHeader}>Scrap Category</Text>
-              <SelectList
-                placeholder="Select Scrap Category"
-                setSelected={val => setSelected(val)}
-                maxHeight={300}
-                data={categories}
-                save="value"
-                fontFamily="Inter-Medium"
-                boxStyles={{
-                  borderStyle: 'solid',
-                  marginBottom: 20,
-                  marginHorizontal: 5,
-                  marginTop: 15
-                }}
-                inputStyles={{ color: '#3E5A47' }}
-                dropdownStyles={{ marginBottom: 20 }}
-                dropdownTextStyles={{ color: '#3E5A47' }}
-              />
+              {modalVisible ? (
+                <SelectList
+                  placeholder="Select Scrap Category"
+                  setSelected={val => setSelected(val)}
+                  maxHeight={300}
+                  data={categories}
+                  save="value"
+                  fontFamily="Inter-Medium"
+                  boxStyles={{
+                    borderStyle: 'solid',
+                    marginBottom: 20,
+                    marginHorizontal: 5,
+                    marginTop: 15
+                  }}
+                  inputStyles={{ color: '#3E5A47' }}
+                  dropdownStyles={{ marginBottom: 20 }}
+                  dropdownTextStyles={{ color: '#3E5A47' }}
+                />
+              ) : (
+                <SelectList
+                  placeholder="Select Scrap Category"
+                  setSelected={val => setSelected(val)}
+                  maxHeight={300}
+                  data={categories}
+                  defaultOption={{ key: selected, value: selected }}
+                  save="value"
+                  fontFamily="Inter-Medium"
+                  boxStyles={{
+                    borderStyle: 'solid',
+                    marginBottom: 20,
+                    marginHorizontal: 5,
+                    marginTop: 15
+                  }}
+                  inputStyles={{ color: '#3E5A47' }}
+                  dropdownStyles={{ marginBottom: 20 }}
+                  dropdownTextStyles={{ color: '#3E5A47' }}
+                />
+              )}
               <Text style={styles.formInputHeader}>Scrap Name</Text>
+              {errors.scrap_name && (
+                <Text style={styles.inputError}>
+                  {errors.scrap_name.message}
+                </Text>
+              )}
               <Controller
                 control={control}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -216,8 +587,8 @@ const OwnerScrap = () => {
                   />
                 )}
                 name="scrap_name"
+                rules={{ required: 'Scrap name is required.' }}
               />
-
               <Text style={styles.formInputHeader}>
                 Scrap Volume (Optional)
               </Text>
@@ -234,8 +605,12 @@ const OwnerScrap = () => {
                 )}
                 name="scrap_volume"
               />
-
               <Text style={styles.formInputHeader}>Price (per kg)</Text>
+              {errors.scrap_price_per_kg && (
+                <Text style={styles.inputError}>
+                  {errors.scrap_price_per_kg.message}
+                </Text>
+              )}
               <Controller
                 control={control}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -249,9 +624,35 @@ const OwnerScrap = () => {
                   />
                 )}
                 name="scrap_price_per_kg"
+                rules={{ required: 'Price is required.' }}
               />
-
+              <Text style={styles.formInputHeader}>Total Weight (in kg)</Text>
+              {errors.scrap_total_weight && (
+                <Text style={styles.inputError}>
+                  {errors.scrap_total_weight.message}
+                </Text>
+              )}
+              <Controller
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Enter the scraps total weight (100kg)"
+                    keyboardType="numeric"
+                    onBlur={onBlur}
+                    onChangeText={input => onChange(handleNumericInput(input))}
+                    value={value}
+                  />
+                )}
+                name="scrap_total_weight"
+                rules={{ required: 'Scrap total weight is required.' }}
+              />
               <Text style={styles.formInputHeader}>Quantity</Text>
+              {errors.scrap_stock_count && (
+                <Text style={styles.inputError}>
+                  {errors.scrap_stock_count.message}
+                </Text>
+              )}
               <Controller
                 control={control}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -265,14 +666,19 @@ const OwnerScrap = () => {
                   />
                 )}
                 name="scrap_stock_count"
+                rules={{ required: 'Scrap quantity amount is required.' }}
               />
 
-              {image ? (
+              {previewImage ? (
                 <>
                   <Text style={styles.formInputHeader}>Image Preview</Text>
                   <View>
                     <Image
-                      source={{ uri: image.uri }}
+                      source={{
+                        uri: previewImage.path
+                          ? previewImage.path
+                          : previewImage
+                      }}
                       style={{
                         alignSelf: 'center',
                         width: 200,
@@ -287,6 +693,27 @@ const OwnerScrap = () => {
               ) : (
                 ''
               )}
+
+              {/* {image ? (
+                <>
+                  <Text style={styles.formInputHeader}>Image Preview</Text>
+                  <View>
+                    <Image
+                      source={{ uri: image.path }}
+                      style={{
+                        alignSelf: 'center',
+                        width: 200,
+                        height: 200,
+                        borderColor: '#3E5A47',
+                        borderWidth: 1,
+                        marginVertical: 20
+                      }}
+                    />
+                  </View>
+                </>
+              ) : (
+                ''
+              )} */}
             </View>
 
             <View style={styles.btnWrapper}>
@@ -306,7 +733,11 @@ const OwnerScrap = () => {
 
               <TouchableOpacity
                 style={styles.submitBtnWrapper}
-                onPress={handleSubmit(onSubmit)}>
+                onPress={
+                  modalVisible
+                    ? handleSubmit(onSubmit)
+                    : handleSubmit(onEditSubmit)
+                }>
                 <Text style={styles.submitBtn}>Submit</Text>
               </TouchableOpacity>
 
@@ -315,12 +746,29 @@ const OwnerScrap = () => {
                 onPress={handleCloseModalPress}>
                 <Text style={styles.cancelBtn}>Cancel</Text>
               </TouchableOpacity>
+
+              {isEditModalVisible && (
+                <TouchableOpacity
+                  style={styles.deleteBtnWrapper}
+                  onPress={() => onDelete()}>
+                  <Text style={styles.submitBtn}>Delete Scrap Item</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </ScrollView>
       </Modal>
-      <ScrollView>
-        {!data ? (
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3E5A47']} // Customize the loading indicator color
+          />
+        }>
+        {!groupData ? (
           <View style={styles.onEmptyList}>
             <Text style={styles.emptyText}>
               Start by tapping the "Add a New Scrap" button
@@ -328,7 +776,7 @@ const OwnerScrap = () => {
           </View>
         ) : (
           <>
-            {groupedArray.map(({ category, items }) => (
+            {groupData.map(({ category, items }) => (
               <View key={category}>
                 <Text style={styles.categoryHeader}>{category}</Text>
                 <FlatList
@@ -336,6 +784,7 @@ const OwnerScrap = () => {
                   data={items}
                   renderItem={renderScrapItem}
                   contentContainerStyle={{ paddingBottom: 40 }}
+                  showsHorizontalScrollIndicator={false}
                   keyExtractor={(item, index) => index.toString()}
                 />
               </View>
@@ -355,8 +804,8 @@ const styles = StyleSheet.create({
   },
   onEmptyList: {
     alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1
+    justifyContent: 'center'
+    // height: 200
   },
   btnWrapper: {
     marginTop: 10
@@ -443,6 +892,11 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     marginBottom: 20
   },
+  inputError: {
+    color: 'red',
+    fontFamily: 'Inter-Medium',
+    marginLeft: 9
+  },
   uploadImageBtnWrapper: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -492,6 +946,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     fontSize: 16
   },
+  deleteBtnWrapper: {
+    alignItems: 'center',
+    backgroundColor: '#8B0000',
+    borderRadius: 10,
+    height: 60,
+    justifyContent: 'center',
+    marginTop: 10
+  },
   cancelBtnWrapper: {
     alignItems: 'center',
     borderRadius: 10,
@@ -519,7 +981,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 20,
     marginLeft: 20,
-    paddingVertical: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -531,12 +994,24 @@ const styles = StyleSheet.create({
   },
 
   // Scrap Item Content Styles
+  scrapImage: {
+    width: 180,
+    height: 140,
+    alignSelf: 'center',
+    marginBottom: 20,
+    borderRadius: 8,
+    borderColor: '#3E5A47'
+  },
   title: {
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 10
+    alignSelf: 'center',
+    marginBottom: 10,
+    width: 150,
+    overflow: 'hidden',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
   },
   row: {
     flexDirection: 'column',
@@ -545,13 +1020,25 @@ const styles = StyleSheet.create({
   label: {
     color: '#3E5A47',
     fontFamily: 'Inter-SemiBold',
-    fontSize: 14,
+    fontSize: 14
   },
   value: {
     color: '#3E5A47',
     fontFamily: 'Inter-Regular',
     fontSize: 14,
     marginBottom: 5
+  },
+  editButton: {
+    backgroundColor: '#3E5A47',
+    borderRadius: 8,
+    marginTop: 20,
+    marginHorizontal: 20,
+    padding: 10
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Inter-Medium',
+    textAlign: 'center'
   }
 });
 

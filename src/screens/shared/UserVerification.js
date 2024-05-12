@@ -1,10 +1,3 @@
-MapboxGL.setAccessToken(
-  'pk.eyJ1IjoicmVpbW5qb28iLCJhIjoiY2x2MmlodWVvMGV3cDJtbGRrenJxYnkwYyJ9.NwwXV0GvL9uLSMcgBbLVpw'
-);
-
-const MAPBOX_TOKEN =
-  'sk.eyJ1IjoicmVpbW5qb28iLCJhIjoiY2x2MmtlNG85MDE5NTJrbnozdm1ieGsxMCJ9.L5sGF41QzV1D8Usd8cjO8A';
-
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -29,15 +22,18 @@ import {
 } from '../../components/Icons';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Calendar } from 'react-native-calendars';
+import { MAPBOX_ACCESS_TOKEN, MAPBOX_STKN } from '../../../env';
 import MapboxGL from '@rnmapbox/maps';
 import PagerView from 'react-native-pager-view';
 import DashedLine from '../../components/DashedLine';
 import ImagePicker from 'react-native-image-crop-picker';
 import ModalCalendar from '../../components/ModalCalendar';
 
+MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
+
+const MAPBOX_TOKEN = MAPBOX_STKN;
+
 const UserVerification = ({ navigation }) => {
-  // const [address, setAddress] = useState('');
-  // const [markerCoordinate, setMarkerCoordinate] = useState([121.0274, 14.5547]);
   const [activeIcon, setActiveIcon] = useState({
     stepOne: false,
     stepTwo: false,
@@ -45,7 +41,6 @@ const UserVerification = ({ navigation }) => {
   });
   const [currentPage, setCurrentPage] = useState(0);
   const [imageSource, setImageSource] = useState(null);
-  const [idSource, setIdSource] = useState(null);
   const mapRef = useRef(null);
   const pagerRef = useRef(null);
 
@@ -88,125 +83,128 @@ const UserVerification = ({ navigation }) => {
   const Page1 = () => {
     return (
       <>
-        <View style={styles.page1}>
-          <View
-            style={{
-              backgroundColor: '#D9D9D9',
-              padding: 15,
-              alignItems: 'center'
-            }}>
-            <Text
+        <ScrollView>
+          <View style={styles.page1}>
+            <View
               style={{
-                fontFamily: 'Inter-Medium',
-                fontSize: 12,
-                textAlign: 'left',
-                color: 'black',
                 backgroundColor: '#D9D9D9',
+                padding: 15,
+                alignItems: 'center'
               }}>
-              NOTE:{' '}
-              <Text style={{ fontWeight: '400' }}>
-                Allowed documents: .jpg and .png with a 100 MB maximum file size
-                only.
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontSize: 12,
+                  textAlign: 'left',
+                  color: 'black',
+                  backgroundColor: '#D9D9D9'
+                }}>
+                NOTE:{' '}
+                <Text style={{ fontWeight: '400' }}>
+                  Allowed documents: .jpg and .png with a 100 MB maximum file
+                  size only.
+                </Text>
               </Text>
-            </Text>
-          </View>
-          <View style={{ alignItems: 'center', marginTop: 20 }}>
-            {imageSource ? (
-              <Image
-                source={{ uri: imageSource.uri }}
-                style={{
-                  width: 200,
-                  height: 200,
-                  borderColor: '#3E5A47',
-                  borderWidth: 1
-                }}
-              />
-            ) : (
-              <Image
-                source={require('../../assets/img/placeholderUser.jpg')}
-                style={{
-                  width: 200,
-                  height: 200,
-                  borderColor: '#3E5A47',
-                  borderWidth: 1
-                }}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              flexDirection: 'column',
-              justifyContent: 'space-around',
-              marginTop: 20,
-              gap: 10
-            }}>
-            <TouchableOpacity
+            </View>
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
+              {imageSource ? (
+                <Image
+                  source={{ uri: imageSource.uri }}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderColor: '#3E5A47',
+                    borderWidth: 1
+                  }}
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/img/placeholderUser.jpg')}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderColor: '#3E5A47',
+                    borderWidth: 1
+                  }}
+                />
+              )}
+            </View>
+            <View
               style={{
-                alignItems: 'center',
-                padding: 20,
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: '#3E5A47',
-                borderRadius: 13,
-                flexDirection: 'row',
-                gap: 20
-              }}
-              onPress={handleOpenCamera}>
-              <CameraIcon color={'#3E5A47'} />
-              <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-                Take Photo
+                flexDirection: 'column',
+                justifyContent: 'space-around',
+                marginTop: 20,
+                gap: 10
+              }}>
+              <TouchableOpacity
+                style={{
+                  alignItems: 'center',
+                  padding: 20,
+                  borderWidth: 1,
+                  borderStyle: 'dashed',
+                  borderColor: '#3E5A47',
+                  borderRadius: 13,
+                  flexDirection: 'row',
+                  gap: 20
+                }}
+                onPress={handleOpenCamera}>
+                <CameraIcon color={'#3E5A47'} />
+                <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
+                  Take Photo
+                </Text>
+              </TouchableOpacity>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontFamily: 'Inter-Medium',
+                  color: '#3E5A47'
+                }}>
+                or
               </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignItems: 'center',
+                  padding: 20,
+                  borderWidth: 1,
+                  borderStyle: 'dashed',
+                  borderColor: '#3E5A47',
+                  borderRadius: 13,
+                  flexDirection: 'row',
+                  gap: 20
+                }}
+                onPress={handleSelectImage}>
+                <PlusIcon color={'#3E5A47'} />
+                <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
+                  Upload Photo
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={{
+              paddingVertical: 25,
+              backgroundColor: '#3E5A47',
+              borderRadius: 13,
+              alignItems: 'center',
+              marginBottom: 40
+            }}
+            onPress={() => {
+              setActiveIcon({
+                ...activeIcon,
+                stepOne: true
+              });
+              validateFirstStep();
+            }}>
             <Text
               style={{
-                textAlign: 'center',
-                fontFamily: 'Inter-Medium',
-                color: '#3E5A47'
+                fontFamily: 'Inter-Regular',
+                fontSize: 20,
+                color: '#FFFFFF',
               }}>
-              or
+              Proceed to Identity Section
             </Text>
-            <TouchableOpacity
-              style={{
-                alignItems: 'center',
-                padding: 20,
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: '#3E5A47',
-                borderRadius: 13,
-                flexDirection: 'row',
-                gap: 20
-              }}
-              onPress={handleSelectImage}>
-              <PlusIcon color={'#3E5A47'} />
-              <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-                Upload Photo
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity
-          style={{
-            paddingVertical: 25,
-            backgroundColor: '#3E5A47',
-            borderRadius: 13,
-            alignItems: 'center'
-          }}
-          onPress={() => {
-            setActiveIcon({
-              ...activeIcon,
-              stepOne: true
-            });
-            validateFirstStep();
-          }}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Regular',
-              fontSize: 20,
-              color: '#FFFFFF'
-            }}>
-            Proceed to Identity Section
-          </Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </ScrollView>
       </>
     );
   };

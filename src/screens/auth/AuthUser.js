@@ -26,6 +26,8 @@ export default function AuthUser({ navigation, route }) {
     selectedWarehouse: null,
   });
 
+  const [dataSession, setDataSession] = useState(null);
+
   // Check if loadScrap turns to true
 
   const { data: scrapData = [], fetchData: loadScrap} = useCustomFetch();
@@ -104,7 +106,7 @@ export default function AuthUser({ navigation, route }) {
   return (
     <>
       <AuthContext.Provider
-        value={{ session, setSession, userType, sessionUpdate }}>
+        value={{ session, setSession, userType, sessionUpdate, dataSession, setDataSession }}>
         {session.userType ? (
           session.userType === 'owner' ? (
             <ScrapContext.Provider value={{ scrapData, loadScrap }}>

@@ -4,12 +4,13 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Image
 } from 'react-native';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { SidebarIcon } from '../../components/Icons';
-
+import { getWarehouseSummary } from '../../services/scrapdataService';
 import { Divider } from '@rneui/themed';
 import {
   VictoryChart,
@@ -25,13 +26,39 @@ import LinearGradient from 'react-native-linear-gradient';
 
 export default function OwnerHome({ navigation, route }) {
 
-  const { session } = useContext(AuthContext);
+  const { session, dataSession, setDataSession } = useContext(AuthContext);
+
+  const [stockOverall, setStockOverall] = useState(null);
 
   // console.log("session (home): ", session);
 
   const scrapList = require('../../data/analytics.json');
   const legendList = require('../../data/graphLegend.json');
   const scrapStats = require('../../data/scrapTotalDate.json');
+
+
+
+  const fetchSummary = async () => {
+    try {
+      const response = await getWarehouseSummary(session.warehouseId, session.token);
+      setDataSession(response);
+    } catch(error) {
+      console.log("Error: ", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
+  useEffect(() => {
+    console.log("DATA SESSION: ", dataSession, 2, null);
+    if(dataSession) {
+      const stockRawPercentage = dataSession.overall_stocks / 5000;
+      const stockFormattedPercentage = (stockRawPercentage * 100).toFixed(2);
+      setStockOverall(stockFormattedPercentage);
+    }
+  }, [dataSession]);
 
   return (
     <SafeAreaView>
@@ -44,7 +71,7 @@ export default function OwnerHome({ navigation, route }) {
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
               <SidebarIcon />
             </TouchableOpacity>
-            <Text style={styles.topbar_header}>Hey, John</Text>
+            <Text style={styles.topbar_header}>Hey, {session.firstName}</Text>
           </View>
 
           <View style={styles.stats_section}>
@@ -53,20 +80,26 @@ export default function OwnerHome({ navigation, route }) {
               <View style={styles.overviewStats}>
                 <View style={styles.currentScraps}>
                   <View style={styles.scrapsStat}>
-                    <Text style={styles.scrapsStatHeader}>Today's Scraps</Text>
-                    <Text style={styles.scrapsStatValue}>14</Text>
+                    <Text style={styles.scrapsStatHeader}>
+                      Today's Scraps (kg)
+                    </Text>
+                    <Text style={styles.scrapsStatValue} numberOfLines={1}>
+                      {dataSession?.todays_scrap}
+                    </Text>
                   </View>
                   <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text style={{color: '#E5E5E5'}}>{'>'}</Text>
+                    <Text style={{ color: '#E5E5E5' }}>{'>'}</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.currentScraps}>
                   <View style={styles.scrapsStat}>
-                    <Text style={styles.scrapsStatHeader}>Total Received</Text>
-                    <Text style={styles.scrapsStatValue}>14</Text>
+                    <Text style={styles.scrapsStatHeader}>Week Total (kg)</Text>
+                    <Text style={styles.scrapsStatValue} numberOfLines={1}>
+                      {dataSession?.week_total}
+                    </Text>
                   </View>
                   <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text style={{color: '#E5E5E5'}}>{'>'}</Text>
+                    <Text style={{ color: '#E5E5E5' }}>{'>'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -75,15 +108,18 @@ export default function OwnerHome({ navigation, route }) {
               <Text style={styles.inventoryStatLabel}>
                 Overall Scrapyard Stock
               </Text>
-              <Text style={styles.inventoryStatValue}>97.60%</Text>
+              <Text style={styles.inventoryStatValue} numberOfLines={2}>
+                {stockOverall}%
+              </Text>
               <Text style={styles.inventoryStatLabel}>
-                976 kg out of 1000 kg available
+                {5000 - dataSession?.overall_stocks} kg out of 5000 kg available
               </Text>
             </View>
           </View>
 
           <Text style={styles.graphStatDate}>
-            May 7 - May 13 Scrap Statistics
+            {dataSession?.week_start_date} - {dataSession?.week_end_date} Scrap
+            Statistics
           </Text>
 
           <View style={styles.stats__graphContainer}>
@@ -95,13 +131,13 @@ export default function OwnerHome({ navigation, route }) {
               style={styles.chart}
               theme={VictoryTheme.material}
               padding={{ top: 60, bottom: 60, left: 70, right: 70 }}
-              maxDomain={{ y: 150 }}
+              maxDomain={{ y: dataSession?.overall_stocks }}
               domainPadding={30}>
               <VictoryStack>
-                {scrapList.map(scraps => {
+                {dataSession?.week_stacked_data.map((scraps, index) => {
                   return (
                     <VictoryBar
-                      key={scraps.scrap_id}
+                      key={index}
                       color={scraps.scrap_bar_color}
                       data={[
                         {
@@ -192,12 +228,14 @@ const styles = StyleSheet.create({
   scrapsStatHeader: {
     color: '#F4F5F4',
     fontFamily: 'Inter-Medium',
-    fontSize: 15
+    fontSize: 12
   },
   scrapsStatValue: {
     color: '#F4F5F4',
     fontFamily: 'Inter-Medium',
-    fontSize: 30
+    fontSize: 30,
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
   },
   inventoryStat: {
     width: 160,
@@ -220,7 +258,10 @@ const styles = StyleSheet.create({
   inventoryStatValue: {
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
-    fontSize: 32
+    fontSize: 32,
+    textAlign: 'center',
+    width: 120,
+    ellipsizeMode: 'tail'
   },
   graphStatDate: {
     color: '#5E5E5E',
@@ -238,7 +279,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#5E5E5E',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   stats__graph_legend: {
     display: 'flex',
@@ -252,7 +293,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 10
   },
   stats__graph_legend_inner: {
     alignItems: 'center',

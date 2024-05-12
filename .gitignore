@@ -13,7 +13,9 @@ build/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
+env.js
 xcuserdata
+reimnjoo.keystore.old
 *.xccheckout
 *.moved-aside
 DerivedData

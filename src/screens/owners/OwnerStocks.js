@@ -26,21 +26,9 @@ import { AuthContext } from '../../context/AuthContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function OwnerStocks({ navigation }) {
-  const { session } = useContext(AuthContext);
-  const { data, loading, error, fetchData } = useCustomFetch();
+  const { session, dataSession } = useContext(AuthContext);
+  const loading = false;
   const [refreshing, setRefreshing] = useState(false);
-
-  const stocksData = () => {
-    const payload = { warehouse_id: session.selectedWarehouse };
-    fetchData('http://192.168.100.5/rest/scrapdata/stocks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(payload)
-    });
-  };
 
   const renderItem = ({ item }) => {
     return (
@@ -51,16 +39,12 @@ export default function OwnerStocks({ navigation }) {
               color={'white'}
               size={'large'}></ActivityIndicator>
           ) : (
-            item.total_volume
+            item.total_weight
           )}
         </Text>
       </View>
     );
   };
-
-  useEffect(() => {
-    stocksData();
-  }, []);
 
   return (
     <SafeAreaView>
@@ -71,13 +55,14 @@ export default function OwnerStocks({ navigation }) {
         <Text style={styles.top_bar__container_header}>Stocks</Text>
       </View>
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={stocksData}
-            colors={['#3E5A47']}
-          />
-        }>
+        // refreshControl={
+        //   <RefreshControl
+        //     refreshing={refreshing}
+        //     onRefresh={stocksData}
+        //     colors={['#3E5A47']}
+        //   />
+        // }
+        >
         <View style={{ padding: 40, marginBottom: 120 }}>
           <View style={styles.scraps__table}>
             <View style={styles.scraps__table_left_column}>
@@ -132,7 +117,7 @@ export default function OwnerStocks({ navigation }) {
                 Total Weight (kg)
               </Text>
               <FlatList
-                data={data} // find a way to filter this data first before rendering. (FINAL HINT)
+                data={dataSession?.weight_stacked_data} // find a way to filter this data first before rendering. (FINAL HINT)
                 renderItem={renderItem}
                 scrollEnabled={false}
                 keyExtractor={item => item.scrap_category}

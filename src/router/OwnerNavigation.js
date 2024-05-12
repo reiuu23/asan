@@ -7,7 +7,7 @@ import {
   Alert,
   StyleSheet
 } from 'react-native';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TransitionPresets } from '@react-navigation/stack';
@@ -57,8 +57,12 @@ import {
   SidebarPlans,
   SidebarStocks
 } from '../components/Icons';
+import { AuthContext } from '../context/AuthContext';
 
 const CustomDrawerContent = (props) => {
+
+  const { session, dataSession } = useContext(AuthContext);
+
   return (
     <>
       <View style={{ marginTop: 50 }}>
@@ -86,14 +90,15 @@ const CustomDrawerContent = (props) => {
         </TouchableOpacity>
         <Text
           style={{
-            width: 112,
+            width: 200,
             fontFamily: 'Inter-Bold',
             fontSize: 20,
+            // textAlign: 'center',
             color: '#3E5A47',
-            marginTop: 10,
+            marginTop: 20,
             marginLeft: 20
           }}>
-          Kim Chaewon
+          {session.firstName}
         </Text>
       </View>
       <DrawerContentScrollView {...props}>

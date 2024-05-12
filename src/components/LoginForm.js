@@ -5,9 +5,6 @@ import { AuthContext } from '../context/AuthContext';
 import { validationSchema } from '../utils/InputValidation';
 import { AsanIcon } from './Icons';
 import { login } from '../services/authService';
-import { useChat, disconnectUserChat } from '../services/streamChatClient';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   StyleSheet,
@@ -18,34 +15,20 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
-  SafeAreaView
 } from 'react-native';
+import { logOutClient } from '../services/streamChatClient';
 
-import useCustomFetch from '../hooks/useCustomFetch';
-import CheckBox from '@react-native-community/checkbox';
-import uuid from 'react-native-uuid';
-import axios from 'axios';
 
 export default function LoginForm({ navigation, route }) {
   const { session, setSession, userType } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
 
-  console.log("login form: ", userType);
-
-  // Auth Bypasser (For debugging purposes only.)
-  setSession({
-    token: uuid.v4(),
-    userType: 'owner',
-    subPlan: 'Free',
-    selectedWarehouse: 'abcd01',
-  });
-
-  // Check if a stream chat connection is still open.
-
   useEffect(() => {
-    disconnectUserChat();
+    logOutClient();
   }, []);
+
+  console.log("login form: ", userType);
 
   const handleLogin = async values => {
     setLoading(true);
@@ -64,13 +47,14 @@ export default function LoginForm({ navigation, route }) {
       setSession({
         token: response.token,
         chatToken: response.stream_token,
-        userId: response.user.access_uuid,
+        userId: response.user.id,
         userImage: response.user.profile_image,
         userType: response.user.user_type,
         fullName: response.user.fullname,
         firstName: response.user.first_name,
+        warehouseId: response?.warehouse_id,
         subPlan: null,
-        selectedWarehouse: null
+        selectedWarehouse: null,
       });
       
     } catch (error) {
