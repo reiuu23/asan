@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { AsanIcon } from '../../components/Icons';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { getWarehouseSummary } from '../../services/scrapdataService';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -30,42 +31,28 @@ export default function BuyerAnalytics() {
   const scrapStats = require('../../data/scrapTotalDate.json');
 
   const { session } = useContext(AuthContext);
-  const { data, error, fetchData } = useCustomFetch();
 
   const [filteredData, setFilteredData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (data) {
-      const uniqueDate = data.filter(
-        (obj, index, self) =>
-          index ===
-          self.findIndex(t => t.scrap_issued_date === obj.scrap_issued_date)
+  const [data, setData] = useState(null);
+
+  const fetchSummary = async () => {
+    try {
+      console.log('ran');
+      const response = await getWarehouseSummary(
+        session.selectedWarehouse,
+        session.token
       );
-      setFilteredData(uniqueDate);
+      setData(response);
+    } catch (error) {
+      console.log('Error: ', error);
     }
-  }, [data]);
-
-  useEffect(() => {
-    console.log(">:", filteredData);
-  }, [filteredData]);
-
-  const fetchAnalytics = () => {
-    const local = 'http://192.168.100.5/rest/scrapdata/analytics';
-    const payload = { warehouse_id: session.selectedWarehouse };
-    fetchData(local, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(payload)
-    });
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    fetchSummary();
   }, []);
 
   return (
@@ -77,7 +64,7 @@ export default function BuyerAnalytics() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={fetchAnalytics}
+            onRefresh={fetchSummary}
             colors={['#3E5A47']}
           />
         }>
@@ -113,9 +100,9 @@ export default function BuyerAnalytics() {
                 paddingBottom: 10,
                 paddingLeft: 20
               }}>
-              {filteredData ? (
-                filteredData.length !== 0 ? (
-                  filteredData?.map((breakdown, index) => {
+              {data ? (
+                data?.week_stacked_data.length !== 0 ? (
+                  data.week_stacked_data?.map((breakdown, index) => {
                     return (
                       <View key={index}>
                         <Text
@@ -124,7 +111,7 @@ export default function BuyerAnalytics() {
                             fontFamily: 'Inter-Regular',
                             fontSize: 17
                           }}>
-                          {breakdown.scrap_issued_date}
+                          {breakdown.day_and_date}
                         </Text>
                         <Text
                           style={{
@@ -132,7 +119,7 @@ export default function BuyerAnalytics() {
                             fontFamily: 'Inter-Bold',
                             fontSize: 20
                           }}>
-                          {breakdown.total_volume_per_day} kg
+                          {breakdown.scrap_total_weight} kg
                           {/* {breakdown.total_volume_all_categories} kg */}
                         </Text>
                       </View>
@@ -197,18 +184,18 @@ export default function BuyerAnalytics() {
                   style={styles.chart}
                   theme={VictoryTheme.material}
                   padding={{ top: 60, bottom: 60, left: 60, right: 60 }}
-                  maxDomain={{ y: data ? data[0]?.max_volume : 100 }}
+                  maxDomain={{ y: data ? data.overall_stocks : 200 }}
                   domainPadding={30}>
                   <VictoryStack>
-                    {data?.map((scraps, index) => {
+                    {data?.week_stacked_data.map((scraps, index) => {
                       return (
                         <VictoryBar
                           key={index}
-                          color={scraps?.scrap_color}
+                          color={scraps?.scrap_bar_color}
                           data={[
                             {
-                              x: scraps?.day_of_week,
-                              y: scraps?.total_volume
+                              x: scraps?.scrap_issued_day,
+                              y: scraps?.scrap_total_weight
                             }
                           ]}></VictoryBar>
                       );
@@ -310,11 +297,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 10
   },
   stats__graph_legend_inner: {
     alignItems: 'center',
-    width: 100,
+    width: 70,
+    height: 70
     // borderWidth: 1,
   },
   stats_daily__divider: {

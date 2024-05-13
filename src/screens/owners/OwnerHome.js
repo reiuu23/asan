@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { SidebarIcon } from '../../components/Icons';
+import { ArrowIcon, SidebarIcon } from '../../components/Icons';
 import { getWarehouseSummary } from '../../services/scrapdataService';
 import { Divider } from '@rneui/themed';
 import {
@@ -83,12 +83,12 @@ export default function OwnerHome({ navigation, route }) {
                     <Text style={styles.scrapsStatHeader}>
                       Today's Scraps (kg)
                     </Text>
-                    <Text style={styles.scrapsStatValue} numberOfLines={1}>
+                    <Text style={styles.scrapsStatValue}>
                       {dataSession?.todays_scrap}
                     </Text>
                   </View>
-                  <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text style={{ color: '#E5E5E5' }}>{'>'}</Text>
+                  <TouchableOpacity styles={styles.scrapsButton} onPress={() => navigation.navigate('Analytics')}>
+                    <ArrowIcon />
                   </TouchableOpacity>
                 </View>
                 <View style={styles.currentScraps}>
@@ -98,8 +98,8 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.week_total}
                     </Text>
                   </View>
-                  <TouchableOpacity styles={styles.scrapsButton}>
-                    <Text style={{ color: '#E5E5E5' }}>{'>'}</Text>
+                  <TouchableOpacity styles={styles.scrapsButton} onPress={() => navigation.navigate('Analytics')}>
+                    <ArrowIcon />
                   </TouchableOpacity>
                 </View>
               </View>

@@ -53,6 +53,7 @@ export default function LoginForm({ navigation, route }) {
         fullName: response.user.fullname,
         firstName: response.user.first_name,
         warehouseId: response?.warehouse_id,
+        verificationStatus: response?.user.verification_status,
         subPlan: null,
         selectedWarehouse: null,
       });

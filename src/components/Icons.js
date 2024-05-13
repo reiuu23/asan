@@ -65,6 +65,27 @@ export const LitterIcon = () => {
   );
 };
 
+export const ArrowIcon = ({ props }) => {
+  return (
+    <Svg
+      width={9}
+      height={17}
+      viewBox="0 0 9 17"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}>
+      <Path
+        d="M1 16L7.43043 9.82577C8.18986 9.0966 8.18986 7.90342 7.43043 7.17425L1 1"
+        stroke="#F4F5F4"
+        strokeWidth={1.2}
+        strokeMiterlimit={10}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export const UploadIcon = ({ props }) => {
   return (
     <Svg

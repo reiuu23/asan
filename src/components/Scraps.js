@@ -1,6 +1,6 @@
 import { useField } from 'formik';
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity } from 'react-native';
 
 export default function Scraps({ scrapCategory, searchQuery, scrapData }) {
   const scrapList = require('../data/scraps.json');
@@ -31,36 +31,36 @@ export default function Scraps({ scrapCategory, searchQuery, scrapData }) {
 
   const renderItem = ({ item }) => {
     return (
-      <View style={styles.scrap_list__scrap_item}>
-        <Image
-          style={styles.scrapImage}
-          source={require('../assets/img/plasticImg.png')}
-        />
-        <Text numberOfLines={1} style={styles.scrap_list__scrap_name}>
-          {item.scrap_name}
-        </Text>
-        <View style={styles.scrap_list__scrap_details}>
-          <View>
-            <View style={styles.scrap_list__scrap_size}>
-              <Text style={styles.scrap_list__scrap_size_label}>Size:</Text>
-              <Text style={styles.scrap_list__scrap_size_output}>
-                {item.scrap_size + ' ' + item.scrap_size_unit}
-              </Text>
-            </View>
-            <View style={styles.scrap_list__scrap_cost}>
-              <Text style={styles.scrap_list__scrap_cost_label}>Cost:</Text>
-              <Text style={styles.scrap_list__scrap_cost_output}>
-                {'PHP' + ' ' + item.scrap_cost + ' / ' + 'kg'}
-              </Text>
-            </View>
-            <View style={styles.scrap_list__scrap_quantity}>
-              <Text style={styles.scrap_list__scrap_quantity_label}>
-                Quantity:
-              </Text>
-              <Text style={styles.scrap_list__scrap_quantity_output}>
-                {item.scrap_quantity + ' pieces'}
-              </Text>
-            </View>
+      <View style={styles.card}>
+        <View style={styles.scrapItemContents}>
+          <Image
+            style={styles.scrapImage}
+            source={
+              item.scrap_image
+                ? { uri: item.scrap_image }
+                : require('../assets/img/plasticImg.png')
+            }
+          />
+          <Text style={styles.title} numberOfLines={1}>
+            {item.scrap_name}
+          </Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Volume</Text>
+            <Text style={styles.value}>
+              {item.scrap_volume ? item.scrap_volume : 'Unspecified'}
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Total Weight (kg)</Text>
+            <Text style={styles.value}>{item.scrap_total_weight}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Stocks</Text>
+            <Text style={styles.value}>{item.scrap_stock_count} pieces</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Scrap Price (per kg)</Text>
+            <Text style={styles.value}>&#8369; {item.scrap_price_per_kg}</Text>
           </View>
         </View>
       </View>
@@ -167,5 +167,71 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: 'bold',
     color: '#3E5A47'
+  },
+  
+  scrapItemContents: {
+    width: 200,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 8,
+    marginRight: 20,
+    marginLeft: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+
+  // Scrap Item Content Styles
+  scrapImage: {
+    width: 180,
+    height: 140,
+    alignSelf: 'center',
+    marginBottom: 20,
+    borderRadius: 8,
+    borderColor: '#3E5A47'
+  },
+  title: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Bold',
+    fontSize: 16,
+    alignSelf: 'center',
+    marginBottom: 10,
+    width: 150,
+    overflow: 'hidden',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
+  },
+  row: {
+    flexDirection: 'column',
+    marginLeft: 20
+  },
+  label: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 14
+  },
+  value: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    marginBottom: 5
+  },
+  editButton: {
+    backgroundColor: '#3E5A47',
+    borderRadius: 8,
+    marginTop: 20,
+    marginHorizontal: 20,
+    padding: 10
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Inter-Medium',
+    textAlign: 'center'
   }
 });

@@ -59,10 +59,9 @@ import {
 } from '../components/Icons';
 import { AuthContext } from '../context/AuthContext';
 
-const CustomDrawerContent = (props) => {
-
-  const { session, dataSession } = useContext(AuthContext);
-
+const CustomDrawerContent = props => {
+  const { session, setSession, dataSession } = useContext(AuthContext);
+  console.log(session);
   return (
     <>
       <View style={{ marginTop: 50 }}>
@@ -74,8 +73,7 @@ const CustomDrawerContent = (props) => {
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          onPress={() => props.navigation.navigate('Profile')}
-          >
+          onPress={() => props.navigation.navigate('Profile')}>
           <Image
             style={{
               borderRadius: 50,
@@ -86,7 +84,11 @@ const CustomDrawerContent = (props) => {
               marginLeft: 35,
               resizeMode: 'contain'
             }}
-            source={require('../assets/img/chaewon.jpg')}></Image>
+            source={{
+              uri: session.userImage
+                ? session.userImage
+                : require('../assets/img/placeholderUser.jpg')
+            }}></Image>
         </TouchableOpacity>
         <Text
           style={{
@@ -100,6 +102,30 @@ const CustomDrawerContent = (props) => {
           }}>
           {session.firstName}
         </Text>
+        <Text
+          style={{
+            fontFamily: 'Inter-Bold',
+            fontSize: 14,
+            // textAlign: 'center',
+            color: '#3E5A47',
+            marginTop: 20,
+            marginLeft: 20
+          }}>
+          Account Status:
+        </Text>
+        {session.verificationStatus === 1 && (
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontSize: 14,
+              // textAlign: 'center',
+              color: '#3E5A47',
+              marginTop: 20,
+              marginLeft: 20
+            }}>
+            Ongoing Verification
+          </Text>
+        )}
       </View>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
@@ -111,7 +137,20 @@ const CustomDrawerContent = (props) => {
             fontSize: 16
           }}
           onPress={() =>
-            Alert.alert('Sign Out', 'Do you wish to sign out of ASAN?')
+            Alert.alert('Sign Out', 'Do you wish to sign out of ASAN?', [
+              {
+                text: 'Yes',
+                onPress: () => {
+                  setSession({ token: null });
+                }
+              },
+              {
+                text: 'Cancel',
+                onPress: () => {
+                  console.log('Cancelled!');
+                }
+              }
+            ])
           }
           icon={() => {
             return <SidebarLogout />;
@@ -137,7 +176,7 @@ const BottomTab = () => {
         tabBarItemStyle: {
           borderBottomWidth: 2,
           borderBottomColor: 'white'
-        },
+        }
       }}>
       <Tab.Screen
         name="About"
@@ -201,6 +240,8 @@ const BottomTab = () => {
 const Sidebar = () => {
   const [verified, setVerified] = useState(false);
 
+  const { session } = useContext(AuthContext);
+
   const Drawer = createDrawerNavigator();
 
   return (
@@ -223,7 +264,7 @@ const Sidebar = () => {
         contentContainerStyle: { paddingVertical: 0 }
       }}
       drawerContent={props => <CustomDrawerContent {...props} />}>
-      {!verified && (
+      {session.verificationStatus === 0 && (
         <Drawer.Screen
           name="Verify"
           component={Verify}
@@ -235,7 +276,7 @@ const Sidebar = () => {
               fontSize: 14,
               marginLeft: 35,
               textAlign: 'center',
-              position: 'relative',
+              position: 'relative'
               // borderWidth: 1
             },
             headerStyle: { backgroundColor: '#3498db' },
@@ -251,6 +292,7 @@ const Sidebar = () => {
           }}
         />
       )}
+
       <Drawer.Screen
         name="Home"
         component={BottomTab}
@@ -307,7 +349,7 @@ export default function OwnerNavigation() {
         name="Root"
         component={Sidebar}
         options={{ headerShown: false }}
-      />       
+      />
     </Stack.Navigator>
   );
 }
