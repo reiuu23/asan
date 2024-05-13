@@ -32,6 +32,7 @@ import BuyerSelection from '../screens/buyers/BuyerSelection';
 
 import {StyleSheet, View} from 'react-native';
 
+
 const TabGroup = () => {
   // Initialized a new bottom tab navigator.
 
@@ -44,62 +45,62 @@ const TabGroup = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {height: 81},
+        tabBarStyle: { height: 81 },
       }}>
       <Tab.Screen
         name="About"
         component={BuyerAbout}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
               <AsanIconBottomB></AsanIconBottomB>
             </View>
-          ),
+          )
         }}></Tab.Screen>
       <Tab.Screen
         name="Chat"
         component={BuyerChat}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
               <ChatIcon></ChatIcon>
             </View>
-          ),
+          )
         }}></Tab.Screen>
       <Tab.Screen
         name="Home"
         component={BuyerHome}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
               <HomeIcon></HomeIcon>
             </View>
-          ),
+          )
         }}></Tab.Screen>
       <Tab.Screen
         name="Stocks"
         component={BuyerStocks}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
               <InventoryIcon></InventoryIcon>
             </View>
-          ),
+          )
         }}></Tab.Screen>
       <Tab.Screen
         name="Analytics"
         component={BuyerAnalytics}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
               style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
               <StatsIcon></StatsIcon>
             </View>
-          ),
+          )
         }}></Tab.Screen>
     </Tab.Navigator>
   );

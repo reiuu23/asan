@@ -1,13 +1,17 @@
-import {useMemo, useState} from 'react';
+import {useContext, useMemo, useState} from 'react';
 import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {analytics, global} from '../../styles/_globalLayout';
 
 import React from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {BoxIcon, UsersIcon} from '../../components/Icons';
+import {BackButtonIcon, BoxIcon, UsersIcon} from '../../components/Icons';
 import {Divider} from '@rneui/base';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function OwnerAnalytics({navigation, route}) {
+
+  const { session, dataSession } = useContext(AuthContext);
+
   const [isToday, setIsToday] = useState(true);
   const [isThisWeek, setIsThisWeek] = useState(false);
 
@@ -19,14 +23,16 @@ export default function OwnerAnalytics({navigation, route}) {
       <View style={analytics.stats_top_container}>
         <View style={analytics.stats_header_tab}>
           <View style={analytics.stats_header_tab_top}>
-            <TouchableOpacity>
-              <Text style={analytics.stats_header_tab_text}>-</Text>
+            <TouchableOpacity
+              style={analytics.backButton}
+              onPress={() => navigation.goBack()}>
+              <BackButtonIcon color={'#3E5A47'}></BackButtonIcon>
             </TouchableOpacity>
             <Text style={analytics.stats_header_tab_text}>Reports</Text>
           </View>
           <React.Fragment>
             <Text
-              style={[analytics.stats_header_tab_text, {textAlign: 'right'}]}>
+              style={[analytics.stats_header_tab_text, { textAlign: 'right' }]}>
               & Analytics
             </Text>
           </React.Fragment>
@@ -38,12 +44,12 @@ export default function OwnerAnalytics({navigation, route}) {
               Total Weight (kg)
             </Text>
             <BoxIcon style={analytics.stats_combo_icon}></BoxIcon>
-            <Text style={analytics.stats_combo_stats_value}>209</Text>
+            <Text style={analytics.stats_combo_stats_value}>{dataSession?.overall_stocks}</Text>
           </View>
           <View style={analytics.stats_combo_stats}>
             <Text style={analytics.stats_combo_stats_label}>Buyers</Text>
             <UsersIcon style={analytics.stats_combo_icon}></UsersIcon>
-            <Text style={analytics.stats_combo_stats_value}>19</Text>
+            <Text style={analytics.stats_combo_stats_value}>{dataSession?.total_buyers}</Text>
           </View>
         </View>
       </View>
@@ -82,11 +88,11 @@ export default function OwnerAnalytics({navigation, route}) {
         <ScrollView>
           <View style={analytics.stats_scrap_data_container}>
             {isToday
-              ? todayData.map(today => {
+              ? dataSession?.today_stacked_data.map((today, index) => {
                   return (
                     <View
                       style={analytics.stats_scrap_data}
-                      key={today.scrap_id}>
+                      key={index}>
                       <Text style={analytics.stats_scrap_data_label}>
                         {today.scrap_category}
                       </Text>
@@ -96,14 +102,14 @@ export default function OwnerAnalytics({navigation, route}) {
                     </View>
                   );
                 })
-              : weekData.map((week, index) => {
+              : dataSession?.week_stacked_data.map((week, index) => {
                   return (
                     <View style={analytics.stats_scrap_data} key={index}>
                       <Text style={analytics.stats_scrap_data_label}>
-                        {week.scrap_issued_date}
+                        {week.day_and_date}
                       </Text>
                       <Text style={analytics.stats_scrap_data_value}>
-                        {week.scrap_total_weight}
+                        {week.scrap_total_weight} kg
                       </Text>
                     </View>
                   );

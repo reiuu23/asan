@@ -1,38 +1,31 @@
 import {
   createStackNavigator,
-  CardStyleInterpolators,
+  CardStyleInterpolators
 } from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import CustomStackNavigator from '../utils/CustomStackNavigator';
-
-// Authentication Route Screens
 
 import Onboarding from '../screens/auth/AuthOnboarding';
 import Auth from '../screens/auth/AuthUser';
 
+const options = {
+  headerShown: false,
+  cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+};
+
+const authScreens = [
+  {
+    name: 'Onboarding',
+    component: Onboarding,
+    options
+  },
+  {
+    name: 'Auth',
+    component: Auth,
+    options
+  }
+];
+
 export default function AuthNavigation() {
-  // Stack Navigation Config (Authentication Flow)
-  const options = {
-    headerShown: false,
-    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-  };
-
-  const authScreens = [
-    {
-      name: 'Onboarding',
-      component: Onboarding,
-      options,
-    },
-    {
-      name: 'Auth',
-      component: Auth,
-      options,
-    },
-  ];
-
-  return (
-    <NavigationContainer>
-      <CustomStackNavigator screens={authScreens}></CustomStackNavigator>
-    </NavigationContainer>
-  );
+  return <CustomStackNavigator screens={authScreens}></CustomStackNavigator>;
 }

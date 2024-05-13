@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { Formik } from 'formik';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { validationSchema } from '../../utils/FormValidation';
+import { registrationSchema } from '../../utils/InputValidation';
 import { AuthContext } from '../../context/AuthContext';
-
-import useCustomFetch from '../../hooks/useCustomFetch';
+import { register } from '../../services/authService';
 
 import {
   StyleSheet,
@@ -19,60 +18,57 @@ import {
 } from 'react-native';
 
 export default function RegistrationForm({ navigation, route }) {
-  // States
-  const { data, loading, error, fetchData } = useCustomFetch(); // Custom useFetch hook
-  const { session, setSession, userType } = useContext(AuthContext); // Session Context
-  const [toggleCheckBox, setToggleCheckBox] = useState(false);
+
+  const { session, setSession, userType } = useContext(AuthContext); 
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     console.log('Reg UT: ', userType);
     console.log('Session Token: ', session);
   }, [session, userType]);
 
-  // Authentication Handler
+  const handleAuth = async values => {
+    try {
+      setLoading(true);
 
-  // Bypass authentication - for easier development on the main application.
+      const data = {
+        user_type: userType,
+        last_name: values?.last_name,
+        first_name: values?.first_name,
+        middle_initial: values?.middle_initial,
+        date_of_birth: null,
+        affiliation: values?.affiliation,
+        location: values?.location,
+        email: values?.email,
+        username: values?.username,
+        password: values?.password,
+        password_confirmation: values?.password_confirmation
+      };
 
-  // setSession({token: uuid.v4()}); // (Temporary Code)
+      console.log(JSON.stringify(data, 2, null));
 
-  // const handleAuth = async values => {
-  //   await fetchData('/auth/', 'post', values); // API request to validate the authentication.
-  //   if (error) console.error('Authentication failed: ', error);
-  // };
+      const response = await register(data);
 
-  // Subscription Plan: 'BaseMode', 'StandardMode', 'ProMode', 'DevMode' (Exclusive unlocked access)
+      setLoading(false);
 
-  const handleAuth = values => {
-    const endpoint = 'buyers/register';
-    const payload = {...values, subPlan: 'BaseMode', subPlanStart: null, subPlanEnd: null };
-    console.log(payload);
-    fetchData(`https://ls2tngnk9ytt.share.zrok.io/${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(payload)
-    });
-  };
+      console.log(JSON.stringify(response, null, 2));
 
-  useEffect(() => {
-    if (data) {
-      if (data.success) {
-        console.log('payload: ', data);
-        Alert.alert(
-          'Welcome aboard!',
-          'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
-        );
-        navigation.goBack();
-      } else {
-        Alert.alert(
-          'Sign-up failed',
-          'Encountered an error while trying to register your account, try again later!.'
-        );
-      }
+      Alert.alert(
+        'Welcome aboard!',
+        'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
+      );
+
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        'Sign-up failed',
+        'Encountered an error while trying to register your account, try again later!.'
+      );
+      setLoading(false);
     }
-  }, [data]);
+    setLoading(false);
+  };
 
   return (
     <SafeAreaView style={{ backgroundColor: '#3E5A47' }}>
@@ -83,36 +79,65 @@ export default function RegistrationForm({ navigation, route }) {
           </View>
           <Formik
             initialValues={{
-              full_name: '',
-              company: '',
+              last_name: '',
+              first_name: '',
+              middle_initial: '',
+              affiliation: '',
               location: '',
               email: '',
-              password: ''
+              username: '',
+              password: '',
+              password_confirmation: ''
             }}
-            onSubmit={handleAuth}
-            validationSchema={validationSchema}>
+            validationSchema={registrationSchema}
+            onSubmit={handleAuth}>
             {formikProps => (
               <>
                 <View>
-                  <Text style={styles.formInputHeader}>Full Name</Text>
+                  <Text style={styles.formInputHeader}>Last Name</Text>
                   <TextInput
                     style={styles.formInput}
-                    onChangeText={formikProps.handleChange('full_name')}
+                    onChangeText={formikProps.handleChange('last_name')}
                     placeholderTextColor={'#8d929f'}
-                    placeholder="Enter your full name"
+                    placeholder="Enter your last name"
                     autoFocus></TextInput>
                   <Text style={styles.formErrorText}>
-                    {formikProps.touched.full_name &&
-                      formikProps.errors.full_name}
+                    {formikProps.touched.last_name &&
+                      formikProps.errors.last_name}
+                  </Text>
+                  <Text style={styles.formInputHeader}>First Name</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    onChangeText={formikProps.handleChange('first_name')}
+                    placeholderTextColor={'#8d929f'}
+                    placeholder="Enter your first name"
+                    autoFocus></TextInput>
+                  <Text style={styles.formErrorText}>
+                    {formikProps.touched.first_name &&
+                      formikProps.errors.first_name}
+                  </Text>
+                  <Text style={styles.formInputHeader}>
+                    Middle Initial (Optional)
+                  </Text>
+                  <TextInput
+                    style={styles.formInput}
+                    onChangeText={formikProps.handleChange('middle_initial')}
+                    placeholderTextColor={'#8d929f'}
+                    placeholder="Enter your middle initial (if applicable)"
+                    autoFocus></TextInput>
+                  <Text style={styles.formErrorText}>
+                    {formikProps.touched.middle_initial &&
+                      formikProps.errors.middle_initial}
                   </Text>
                   <Text style={styles.formInputHeader}>Company</Text>
                   <TextInput
                     style={styles.formInput}
-                    onChangeText={formikProps.handleChange('company')}
+                    onChangeText={formikProps.handleChange('affiliation')}
                     placeholderTextColor={'#8d929f'}
                     placeholder="Enter your company"></TextInput>
                   <Text style={styles.formErrorText}>
-                    {formikProps.touched.company && formikProps.errors.company}
+                    {formikProps.touched.affiliation &&
+                      formikProps.errors.affiliation}
                   </Text>
                   <Text style={styles.formInputHeader}>Location</Text>
                   <TextInput
@@ -133,6 +158,16 @@ export default function RegistrationForm({ navigation, route }) {
                   <Text style={styles.formErrorText}>
                     {formikProps.touched.email && formikProps.errors.email}
                   </Text>
+                  <Text style={styles.formInputHeader}>Username</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    onChangeText={formikProps.handleChange('username')}
+                    placeholderTextColor={'#8d929f'}
+                    placeholder="Enter your username"></TextInput>
+                  <Text style={styles.formErrorText}>
+                    {formikProps.touched.username &&
+                      formikProps.errors.username}
+                  </Text>
                   <Text style={styles.formInputHeader}>Password</Text>
                   <TextInput
                     style={styles.formInput}
@@ -143,6 +178,19 @@ export default function RegistrationForm({ navigation, route }) {
                   <Text style={styles.formErrorText}>
                     {formikProps.touched.password &&
                       formikProps.errors.password}
+                  </Text>
+                  <Text style={styles.formInputHeader}>Confirm Password</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    onChangeText={formikProps.handleChange(
+                      'password_confirmation'
+                    )}
+                    placeholderTextColor={'#8d929f'}
+                    placeholder="Re-enter your password"
+                    secureTextEntry></TextInput>
+                  <Text style={styles.formErrorText}>
+                    {formikProps.touched.password_confirmation &&
+                      formikProps.errors.password_confirmation}
                   </Text>
                 </View>
                 <View style={styles.footerContainer}>
