@@ -34,6 +34,7 @@ import React from 'react';
 import Scraps from '../../components/Scraps';
 import axios from 'axios';
 import _ from 'lodash';
+import { getScrapData } from '../../services/scrapdataService';
 
 
 export default function BuyerHome({ navigation }) {
@@ -41,26 +42,27 @@ export default function BuyerHome({ navigation }) {
   const [isActive, setIsActive] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { session, setSession } = useContext(AuthContext);
+  const { session, setSession, dataSession, setDataSession, } = useContext(AuthContext);
   const { scrapData, loadScrap } = useContext(ScrapContext);
 
-  const fetchScraps = () => {
-    const local = 'http://192.168.100.5/rest/scrapdata/read';
-    const server = 'https://ls2tngnk9ytt.share.zrok.io/scrapdata/read';
-    const payload = { warehouse_id: session.selectedWarehouse };
-    loadScrap(local, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(payload)
-    });
+  // console.log("Session: ", session);
+
+  const fetchScraps = async () => {
+    try {
+      const response = await getScrapData(session.selectedWarehouse, session.token);
+      setDataSession(response);
+    } catch (error) {
+      console.log("Error fetching scraps: ", error);
+    }
   }
 
   useEffect(() => {
     fetchScraps();
   }, []);
+
+  useEffect(() => {
+    console.log("DATA SESSION: ", dataSession);
+  }, [dataSession]);
 
   const [category, setCategory] = useState('Plastic');
   const [searchQuery, setSearchQuery] = useState('');
@@ -241,10 +243,10 @@ export default function BuyerHome({ navigation }) {
           end={{ x: 0, y: 0.35 }}
           style={styles.scrap_list__card}>
           <View style={styles.scrap_list__container}>
-            {scrapData && (
+            {dataSession && (
               <Scraps
                 warehouseId={session.selectedWarehouse}
-                scrapData={scrapData}
+                scrapData={dataSession}
                 scrapCategory={category}
                 searchQuery={searchQuery}
               />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,8 @@ import PagerView from 'react-native-pager-view';
 import DashedLine from '../../components/DashedLine';
 import ImagePicker from 'react-native-image-crop-picker';
 import ModalCalendar from '../../components/ModalCalendar';
+import { requestVerification } from '../../services/authService';
+import { AuthContext } from '../../context/AuthContext';
 
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -45,9 +47,11 @@ const UserVerification = ({ navigation }) => {
   const pagerRef = useRef(null);
 
   const [selected, setSelected] = React.useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
   const [idImage, setIdImage] = useState(null);
+
+  const [verificationRequest, setVerificationRequest] = useState(null);
+
+  const { session } = useContext(AuthContext);
 
   const steps = ['Personal Info', 'Select Location', 'Review'];
 
@@ -68,8 +72,49 @@ const UserVerification = ({ navigation }) => {
     setCurrentPage(e.nativeEvent.position);
   };
 
+  useEffect(() => {
+    console.log("Updated request: ", verificationRequest);
+  }, [verificationRequest]);
+
+  const Page1 = () => {
+
+    const [profileImage, setProfileImage] = useState(null);
+
+    const handleSelectImage = () => {
+      ImagePicker.openPicker({
+        width: 200,
+        height: 200,
+        multiple: false,
+        cropping: true,
+        mediaType: 'photo'
+      })
+        .then(image => {
+          setProfileImage(image);
+        })
+        .catch(error => {
+          console.log('ImagePicker Error: ', error);
+        });
+    };
+
+    const handleOpenCamera = () => {
+      ImagePicker.openCamera({
+        width: 200,
+        height: 200,
+        multiple: false,
+        cropping: true,
+        mediaType: 'photo'
+      })
+        .then(image => {
+          setProfileImage(image);
+        })
+        .catch(error => {
+           console.log('ImagePicker Error: ', error);
+        });
+    };
+
+    
   const validateFirstStep = () => {
-    if (imageSource) handleNext();
+    if (profileImage) handleNext();
     else {
       Alert.alert('Oops!', 'You have not uploaded a photo yet.', [
         {
@@ -79,8 +124,7 @@ const UserVerification = ({ navigation }) => {
       ]);
     }
   };
-
-  const Page1 = () => {
+    
     return (
       <>
         <ScrollView>
@@ -107,9 +151,9 @@ const UserVerification = ({ navigation }) => {
               </Text>
             </View>
             <View style={{ alignItems: 'center', marginTop: 20 }}>
-              {imageSource ? (
+              {profileImage ? (
                 <Image
-                  source={{ uri: imageSource.uri }}
+                  source={{ uri: profileImage.path || verificationRequest.verificationImage.path }}
                   style={{
                     width: 200,
                     height: 200,
@@ -193,6 +237,7 @@ const UserVerification = ({ navigation }) => {
                 ...activeIcon,
                 stepOne: true
               });
+              setVerificationRequest({verification_image: profileImage});
               validateFirstStep();
             }}>
             <Text
@@ -211,17 +256,19 @@ const UserVerification = ({ navigation }) => {
 
   const Page2 = () => {
 
-    const handleDateSelect = date => {
-      setSelectedDate(date);
-    };
+    console.log("Current Verification Data: ", verificationRequest);
 
-    const handleConfirm = () => {
-      onDateSelect(selectedDate);
-      onClose();
+    const [dateOfBirth, setDateOfBirth] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [idType, setIdType] = useState(null);
+    const [idImage,setIdImage] = useState(null);
+
+    const handleDateSelect = date => {
+      setDateOfBirth(date);
     };
 
     const validateSecondStep = () => {
-      if(!selectedDate || !selected || !imageSource) {
+      if(!dateOfBirth || !idType || !idImage) {
         Alert.alert('Oops!', 'You have not completed the required fields.', [
           {
             text: 'Return',
@@ -229,9 +276,31 @@ const UserVerification = ({ navigation }) => {
           }
         ]);
       } else {
+        setVerificationRequest(prevStep => ({
+          ...prevStep,
+          date_of_birth: dateOfBirth,
+          id_type: idType,
+          id_image: idImage,
+        }));
         handleNext();
       }
     }
+
+      const handleOpenCameraForID = () => {
+        ImagePicker.openCamera({
+          width: 500,
+          height: 500,
+          multiple: false,
+          cropping: true,
+          mediaType: 'photo'
+        })
+          .then(image => {
+            setIdImage(image);
+          })
+          .catch(error => {
+            console.log('Camera Error: ', error);
+          });
+      };
 
     const data = require('../../data/validID.json');
 
@@ -263,9 +332,9 @@ const UserVerification = ({ navigation }) => {
               marginVertical: 20
             }}
             onPress={() => setModalVisible(true)}>
-            {selectedDate ? (
+            {dateOfBirth ? (
               <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-                Selected Date of Birth: {selectedDate}
+                Selected Date of Birth: {dateOfBirth}
               </Text>
             ) : (
               <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
@@ -281,7 +350,7 @@ const UserVerification = ({ navigation }) => {
           />
           <SelectList
             placeholder="Kindly Select an ID Type *"
-            setSelected={val => setSelected(val)}
+            setSelected={val => setIdType(val)}
             data={data}
             save="value"
             fontFamily="Inter-Medium"
@@ -312,10 +381,10 @@ const UserVerification = ({ navigation }) => {
               flexDirection: 'row',
               gap: 20
             }}
-            onPress={handleOpenCamera}>
+            onPress={handleOpenCameraForID}>
             <CameraIcon color={'#3E5A47'} />
             <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-              {imageSource ? 'Photo Uploaded' : 'Take Photo'}
+              {idImage ? 'Photo Uploaded' : 'Take Photo'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -331,7 +400,7 @@ const UserVerification = ({ navigation }) => {
             onPress={() => {
               setActiveIcon({
                 ...activeIcon,
-                stepOne: true
+                stepTwo: true
               });
               validateSecondStep();
             }}>
@@ -353,61 +422,93 @@ const UserVerification = ({ navigation }) => {
     const [address, setAddress] = useState('');
 
     const handleSubmit = () => {
-      console.log(
-        `Submitted Data (Verification): image-source: ${imageSource}, user-address: ${address}`
+      Alert.alert(
+        'Are you sure?',
+        "Confrm your changes and once you're done you may select 'submit'.",
+        [
+          {
+            text: 'Submit',
+            onPress: () => {
+              setVerificationRequest(prevStep => ({
+                ...prevStep,
+                id_address: address,
+                verification_status: 1
+              }));
+              onVerifySubmit();
+            },
+          },
+          {
+            text: 'Cancel',
+            onPress: () => {
+              console.log('Cancelled!');
+            }
+          }
+        ]
       );
     };
 
+    const onVerifySubmit = async () => {
+      try {
+        const formData = new FormData();
+
+        formData.append('date_of_birth', verificationRequest.date_of_birth);
+        formData.append('id_address', verificationRequest.id_address);
+        formData.append('id_type', verificationRequest.id_type);
+        formData.append('verification_status', verificationRequest.verification_status);
+
+        const idFilename = verificationRequest.id_image.path.split('/').pop();
+
+        formData.append('id_image', {
+          uri: verificationRequest.id_image.path,
+          type: verificationRequest.id_image.mime,
+          name: idFilename
+        });
+
+        const verifyIdFilename = verificationRequest.verification_image.path.split('/').pop();
+
+        formData.append('verification_image', {
+          uri: verificationRequest.verification_image.path,
+          type: verificationRequest.verification_image.mime,
+          name: verifyIdFilename
+        });
+
+        const response = await requestVerification(formData, session.userId, session.token);
+        Alert.alert(
+          "Let's go!",
+          'You have successfully requested your account verification, please wait for updates regarding your account status!'
+        );
+        navigation.navigate('Home');
+        return response;
+      } catch (error) {
+        Alert.alert(
+          "Verification Unsuccessful",
+          'The client/server encountered an error while sending your verification application, please try again later!'
+        );
+      }
+    }
+
     return (
       <View style={styles.page3}>
-        {/* <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ marginVertical: 30 }}>
-          <MapboxPage address={address} setAddress={setAddress} />
-          <TouchableOpacity
-            style={{
-              paddingVertical: 25,
-              backgroundColor: '#3E5A47',
-              borderRadius: 13,
-              alignItems: 'center',
-              marginTop: 20,
-              marginBottom: 50
-            }}
-            onPress={handleSubmit}>
-            <Text
-              style={{
-                fontFamily: 'Inter-Regular',
-                fontSize: 20,
-                color: '#FFFFFF'
-              }}>
-              Complete Verification
-            </Text>
-          </TouchableOpacity>
-        </ScrollView> */}
-        <View style={{ flex: 3 }}>
+        <View style={{ height: '80%' }}>
           <MapboxPage address={address} setAddress={setAddress} />
         </View>
-        <View style={{ flex: 1 }}>
-          <TouchableOpacity
+        <TouchableOpacity
+          style={{
+            paddingVertical: 25,
+            backgroundColor: '#3E5A47',
+            borderRadius: 13,
+            alignItems: 'center',
+          }}
+          onPress={handleSubmit}>
+          <Text
             style={{
-              paddingVertical: 25,
-              backgroundColor: '#3E5A47',
-              borderRadius: 13,
-              alignItems: 'center',
-              marginTop: 20,
-              marginBottom: 50
-            }}
-            onPress={handleSubmit}>
-            <Text
-              style={{
-                fontFamily: 'Inter-Regular',
-                fontSize: 20,
-                color: '#FFFFFF'
-              }}>
-              Complete Verification
-            </Text>
-          </TouchableOpacity>
-        </View>
+              fontFamily: 'Inter-Regular',
+              fontSize: 20,
+              color: '#FFFFFF'
+            }}>
+            Complete Verification
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -450,88 +551,59 @@ const UserVerification = ({ navigation }) => {
 
     return (
       <View
-        style={{ padding: 20, backgroundColor: '#E8E6E6', borderRadius: 16 }}>
-        <View style={{height: '50%'}}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Regular',
-              color: '#3E5A47',
-              textAlign: 'center',
-              marginBottom: 10
-            }}>
-            DROP A PIN TO LOCATE YOUR ADDRESS
-          </Text>
-          <MapboxGL.MapView
-            style={{ flex: 1 }}
-            onPress={handlePress}
-            ref={mapRef}>
-            <MapboxGL.Camera
-              defaultSettings={{
-                centerCoordinate: [121.0223, 14.5547],
-                zoomLevel: 10
-              }}
-            />
-            {markerCoordinate && (
-              <MapboxGL.PointAnnotation
-                id="marker"
-                coordinate={markerCoordinate}
-                title="Selected Location">
-                <MapboxGL.Callout title="Selected Location" />
-              </MapboxGL.PointAnnotation>
-            )}
-          </MapboxGL.MapView>
-        </View>
-        <View style={{}}>
-          <Text
-            style={{
-              marginVertical: 10,
-              fontFamily: 'Inter-Medium',
-              fontSize: 12,
-              textAlign: 'center'
-            }}>
-            Note: You can also use the address box below to input your address
-            manually.
-          </Text>
-          <TextInput
-            value={address}
-            onChangeText={handleAddressChange}
-            placeholder="Enter address"
-            style={styles.input}
+        style={{
+          padding: 20,
+          backgroundColor: '#E8E6E6',
+          borderRadius: 16,
+          height: '100%'
+        }}>
+        <Text
+          style={{
+            fontFamily: 'Inter-Regular',
+            color: '#3E5A47',
+            textAlign: 'center',
+            marginBottom: 10
+          }}>
+          DROP A PIN TO LOCATE YOUR ADDRESS
+        </Text>
+        <MapboxGL.MapView
+          style={{ flex: 1 }}
+          onPress={handlePress}
+          ref={mapRef}>
+          <MapboxGL.Camera
+            defaultSettings={{
+              centerCoordinate: [121.0223, 14.5547],
+              zoomLevel: 10
+            }}
           />
-        </View>
+          {markerCoordinate && (
+            <MapboxGL.PointAnnotation
+              id="marker"
+              coordinate={markerCoordinate}
+              title="Selected Location">
+              <MapboxGL.Callout title="Selected Location" />
+            </MapboxGL.PointAnnotation>
+          )}
+        </MapboxGL.MapView>
+        <Text
+          style={{
+            marginVertical: 10,
+            fontFamily: 'Inter-Medium',
+            fontSize: 12,
+            textAlign: 'center'
+          }}>
+          Note: You can also use the address box below to input your address
+          manually.
+        </Text>
+        <TextInput
+          value={address}
+          onChangeText={handleAddressChange}
+          placeholder="Enter address"
+          style={styles.input}
+        />
       </View>
     );
   });
-
-  const handleSelectImage = () => {
-    ImagePicker.openPicker({
-      cropping: true,
-      mediaType: 'photo'
-    })
-      .then(image => {
-        const source = { uri: image.path };
-        setImageSource(source);
-      })
-      .catch(error => {
-        console.log('ImagePicker Error: ', error);
-      });
-  };
-
-  const handleOpenCamera = () => {
-    ImagePicker.openCamera({
-      width: 200,
-      height: 200,
-      cropping: true,
-      mediaType: 'photo'
-    })
-      .then(image => {
-        const source = { uri: image.path };
-        setImageSource(source);
-      })
-      .catch(error => {
-        console.log('Camera Error: ', error);
-      });
-  };
 
   const styles = StyleSheet.create({
     container: {
@@ -568,8 +640,9 @@ const UserVerification = ({ navigation }) => {
       paddingVertical: 20
     },
     page3: {
-      flex: 1
-      // backgroundColor: '#E8E6E6'
+      flex: 1,
+      paddingVertical: 10,
+      justifyContent: 'space-evenly'
     },
     input: {
       marginBottom: 10,
@@ -670,7 +743,7 @@ const UserVerification = ({ navigation }) => {
         style={styles.pager}
         initialPage={currentPage}
         onPageSelected={onPageSelected}
-        scrollEnabled={true}>
+        scrollEnabled={false}>
         <Page1 />
         <Page2 />
         <Page3 />

@@ -6,81 +6,88 @@ import {
   Text,
   View,
   RefreshControl,
-  ActivityIndicator
+  ActivityIndicator,
+  Touchable
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   AssortedMetalCat,
-  CardboardIcon,
-  ClothIcon,
-  ElectronicsIcon,
-  GlassIcon,
+  BackButtonIcon,
   KartonCat,
-  MetalIcon,
   MixedPaperCat,
   PlasticCatIcon,
-  PlasticIcon,
   SelectedPaperCat,
   SolidMetalCat,
   WhitePaperCat
 } from '../../components/Icons';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import { AuthContext } from '../../context/AuthContext';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { getWarehouseSummary } from '../../services/scrapdataService';
 
-// Stocks Sample Data
+export default function BuyerStocks({ navigation }) {
 
-const stocks = require('../../data/scraps.json');
-
-export default function BuyerStocks() {
-  const { session } = useContext(AuthContext);
-  const { data, loading, error, fetchData } = useCustomFetch();
+  const { session, dataSession } = useContext(AuthContext);
+  const loading = false;
+  const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const stocksData = () => {
-    const payload = { warehouse_id: session.selectedWarehouse };
-    fetchData('http://192.168.100.5/rest/scrapdata/stocks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify(payload)
-    });
+  // console.log("SESSION: ", data);
+
+  const fetchSummary = async () => {
+    try {
+      console.log('ran');
+      const response = await getWarehouseSummary(
+        session.selectedWarehouse,
+        session.token
+      );
+      setData(response);
+    } catch (error) {
+      console.log('Error: ', error);
+    }
   };
 
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
   const renderItem = ({ item }) => {
+
+    // console.log("item: ", item);
     return (
       <View style={styles.scraps__table_right_value_container}>
         <Text style={styles.scraps__table_right_column_value}>
-          {loading ? <ActivityIndicator color={'white'} size={'large'}></ActivityIndicator> : item.total_volume}
+          {loading ? (
+            <ActivityIndicator
+              color={'white'}
+              size={'large'}></ActivityIndicator>
+          ) : (
+            item.total_weight
+          )}
         </Text>
       </View>
     );
   };
 
-  useEffect(() => {
-    stocksData();
-  }, []);
-
   return (
     <SafeAreaView>
       <View style={styles.top_bar__container}>
-        <Text style={styles.top_bar__container_header}>Available Stocks</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <BackButtonIcon color={'#3E5A47'} />
+        </TouchableOpacity>
+        <Text style={styles.top_bar__container_header}>Stocks</Text>
       </View>
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={stocksData}
-            colors={['#3E5A47']}
-          />
-        }>
-        <LinearGradient
-          colors={['#F2F2F2', '#3E5A47']}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 0, y: 0.9 }}
-          style={{ height: '100%', padding: 35, marginBottom: 115 }}>
+      // refreshControl={
+      //   <RefreshControl
+      //     refreshing={refreshing}
+      //     onRefresh={stocksData}
+      //     colors={['#3E5A47']}
+      //   />
+      // }
+      >
+        <View style={{ padding: 40, marginBottom: 120 }}>
           <View style={styles.scraps__table}>
             <View style={styles.scraps__table_left_column}>
               <Text style={styles.scraps__table_index}>Types</Text>
@@ -134,14 +141,14 @@ export default function BuyerStocks() {
                 Total Weight (kg)
               </Text>
               <FlatList
-                data={data} // find a way to filter this data first before rendering. (FINAL HINT)
+                data={data?.weight_stacked_data} // find a way to filter this data first before rendering. (FINAL HINT)
                 renderItem={renderItem}
                 scrollEnabled={false}
                 keyExtractor={item => item.scrap_category}
               />
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

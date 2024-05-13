@@ -186,12 +186,12 @@ export default function OwnerProfile({ navigation }) {
           </View>
         </View>
 
-        {session.profile ? (
+        {session.user ? (
           <View style={{ paddingLeft: 10, paddingRight: 10, flex: 1 }}>
             <Text style={styles.formInputHeader}>Full Name</Text>
             <Controller
               control={control}
-              defaultValue={session.profile ? session.profile.fullName : ''} // Set defaultValue to profileData.full_name if available
+              defaultValue={session.user ? session.user.fullName : ''} // Set defaultValue to profileData.full_name if available
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={styles.formInput}
