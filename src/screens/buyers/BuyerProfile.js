@@ -11,29 +11,26 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { BackButtonIcon, EditIcon, PencilIcon } from '../../components/Icons';
-import { Formik } from 'formik';
-import { validationSchema } from '../../utils/FormValidation';
+import { BackButtonIcon, EditIcon } from '../../components/Icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { AuthContext } from '../../context/AuthContext';
-import { readImageAsBase64 } from '../../utils/imageReaderBase64';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import ImagePicker from 'react-native-image-crop-picker';
+import { updateProfile } from '../../services/authService';
 
 export default function BuyerProfile({ navigation }) {
-
-  const { session, setSession, sessionUpdate } = useContext(AuthContext);
+  const { session, setSession } = useContext(AuthContext);
   const { data, loading, error, fetchData } = useCustomFetch();
 
-  const [image, setImage] = useState(session.userImage);
+  const [image, setImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
   const [isUpdated, setIsUpdated] = useState(false);
   const [profileData, setProfileData] = useState(null);
 
   const fetchProfile = () => {
-    fetchData(`https://ls2tngnk9ytt.share.zrok.io/buyers`, {
+    fetchData(`https://ls2tngnk9ytt.share.zrok.io/owners`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,105 +47,166 @@ export default function BuyerProfile({ navigation }) {
     fetchProfile();
   }, []);
 
-  useEffect(() => {
-    if (data) {
-      const { full_name, company, location, email, image } = data[0];
-      setProfileData({
-        full_name: full_name,
-        company: company,
-        location: location,
-        email: email
-      });
-      setImage(image);
-      setSession(currentVal => ({ ...currentVal, userImage: image }));
-    }
-  }, [data]);
-
   const {
     control,
     handleSubmit,
     formState: { errors }
   } = useForm();
 
-  const onSubmit = async payload => {
-    console.log("payload on submit: ", payload);
+  useEffect(() => {
+    setImage(session.profile.profile_image);
+  }, [session]);
+
+  const onSubmit = async data => {
     try {
-      const url = 'https://ls2tngnk9ytt.share.zrok.io/buyers/update';
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          UPID: session.token,
-          Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-        },
-        body: JSON.stringify(payload)
-      });
+      console.log('submitted data: ', data);
+      const formData = new FormData();
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      console.log('last name: ', data.last_name);
+      if (session.profile.last_name !== data.last_name) {
+        formData.append('last_name', data.last_name);
       }
 
-      const data = await response.json();
-      sessionUpdate();
-      
-      if(data === true) {
-        Alert.alert(
-          'Update Status',
-          'Your profile has been updated successfully!',
-          [
-            {
-              text: 'Okay',
-            }
-          ]
-        );
-      } else {
-        Alert.alert(
-          'Update Status',
-          'No changes have been made on your profile because your profile details exists already.',
-          [
-            {
-              text: 'Understood',
-            }
-          ]
-        );
+      if (session.profile.first_name !== data.first_name) {
+        formData.append('first_name', data.first_name);
       }
-    } catch {
-      console.error('Error:', error);
+
+      if (session.profile.middle_initial !== data.middle_initial) {
+        formData.append('middle_initial', data.middle_initial);
+      }
+
+      console.log('session affiliation: ', session.profile.affiliation);
+      console.log('data affiliation: ', data.affiliation);
+
+      if (session.profile.affiliation !== data.affiliation) {
+        formData.append('affiliation', data.affiliation);
+      }
+
+      if (session.profile.username !== data.username) {
+        formData.append('username', data.username);
+      }
+
+      if (session.profile.email !== data.email) {
+        formData.append('email', data.email);
+      }
+
+      if (data.password) {
+        formData.append('password', data.password);
+      }
+
+      if (newImage) {
+        const filename = image.path.split('/').pop();
+
+        formData.append('profile_image', {
+          uri: image.path,
+          type: image.mime,
+          name: filename
+        });
+      }
+
+      const response = await updateProfile(
+        formData,
+        session.profile.id,
+        session.token
+      );
+
+      // Set New Session
+
+      setSession(prevSession => ({
+        ...prevSession,
+        userId: response.user.id,
+        userImage: response.user.profile_image,
+        userType: response.user.user_type,
+        fullName: response.user.fullname,
+        firstName: response.user.first_name,
+        verificationStatus: response.user.verification_status,
+        profile: response.user
+      }));
+
+      // Handle success response
+      Alert.alert(
+        'Profile Update Status',
+        `You have successfully updated your profile!`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate('Home');
+            }
+          }
+        ]
+      );
+
+      return response;
+    } catch (error) {
+      Alert.alert(
+        'Oops',
+        `An error occurred while updating your profile. Please try again later.`
+      );
     }
   };
 
-  const validateUpdate = async data => {
-
-    // Filter blank values on the form update.
-    const filteredData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== '')
-    );
-
-    if(newImage) {
-      const base64img = await readImageAsBase64(image);
-      const payload = { ...filteredData, image: base64img };
-      console.log(data);
-      onSubmit(payload);
-    } else {
-      const payload = filteredData;
-      console.log(payload);
-      onSubmit(payload);
-    }
-  }
-
-  const pickImage = async () => {
-    try {
-      const croppedImage = await ImagePicker.openPicker({
-        width: 200,
-        height: 200,
-        cropping: true
+  const handleSelectImage = () => {
+    ImagePicker.openPicker({
+      width: 200,
+      height: 200,
+      multiple: false,
+      cropping: true,
+      mediaType: 'photo'
+    })
+      .then(image => {
+        console.log('selected image: ', image);
+        setImage(image);
+        setNewImage(image);
+      })
+      .catch(error => {
+        console.log('ImagePicker Error: ', error);
       });
-      setNewImage(true);
-      setImage(croppedImage.path);
-      console.log(croppedImage);
-    } catch (error) {
-      console.log('Error selecting image:', error);
-    }
+  };
+
+  const handleOpenCamera = () => {
+    ImagePicker.openCamera({
+      width: 200,
+      height: 200,
+      multiple: false,
+      cropping: true,
+      mediaType: 'photo'
+    })
+      .then(image => {
+        console.log('camera image: ', image);
+        setImage(image);
+        setNewImage(image);
+      })
+      .catch(error => {
+        console.log('Camera Error: ', error);
+      });
+  };
+
+  const handleNewUserPic = () => {
+    Alert.alert(
+      'Upload a new photo?',
+      'Please select which option you would like for your new profile photo.',
+      [
+        {
+          text: 'Upload Photo',
+          onPress: () => handleSelectImage(),
+          style: 'cancel'
+        },
+        {
+          text: 'Use Camera',
+          onPress: () => handleOpenCamera()
+        },
+        {
+          text: 'Cancel',
+          onPress: () => {
+            Alert.alert(
+              'Cancelled',
+              'You have successfully cancelled uploading a new profile photo.'
+            );
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -164,14 +222,14 @@ export default function BuyerProfile({ navigation }) {
           </View>
 
           <View style={styles.header_select_pic}>
-            <TouchableOpacity onPress={pickImage}>
+            <TouchableOpacity onPress={handleNewUserPic}>
               {!loading ? (
                 image ? (
                   <Image
                     key={new Date().getTime()}
                     style={styles.header_image}
                     source={{
-                      uri: image
+                      uri: !image.path ? image : image.path
                     }}></Image>
                 ) : (
                   <Image
@@ -189,26 +247,62 @@ export default function BuyerProfile({ navigation }) {
 
         {session.profile ? (
           <View style={{ paddingLeft: 10, paddingRight: 10, flex: 1 }}>
-            <Text style={styles.formInputHeader}>Full Name</Text>
+            <Text style={styles.formInputHeader}>Last Name</Text>
             <Controller
               control={control}
-              defaultValue={session.profile ? session.profile.fullName : ''} // Set defaultValue to profileData.full_name if available
+              defaultValue={session.profile ? session.profile.last_name : ''}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={styles.formInput}
-                  placeholder="Full Name"
+                  placeholder="Last Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value} // Use value from the field object
+                  value={value}
                 />
               )}
-              name="full_name"
+              name="last_name"
             />
 
-            <Text style={styles.formInputHeader}>Company</Text>
+            <Text style={styles.formInputHeader}>First Name</Text>
             <Controller
               control={control}
-              defaultValue={session.profile ? session.profile.company : ''}
+              defaultValue={session.profile ? session.profile.first_name : ''}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="First Name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="first_name"
+            />
+
+            <Text style={styles.formInputHeader}>
+              Middle Initial (optional)
+            </Text>
+            <Controller
+              control={control}
+              defaultValue={
+                session.profile ? session.profile.middle_initial : ''
+              }
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="Middle Initial"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="middle_initial"
+            />
+
+            <Text style={styles.formInputHeader}>Scrapyard Name</Text>
+            <Controller
+              control={control}
+              defaultValue={session.profile ? session.profile.affiliation : ''}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={styles.formInput}
@@ -218,7 +312,7 @@ export default function BuyerProfile({ navigation }) {
                   value={value}
                 />
               )}
-              name="company"
+              name="affiliation"
             />
 
             <Text style={styles.formInputHeader}>Location</Text>
@@ -235,6 +329,22 @@ export default function BuyerProfile({ navigation }) {
                 />
               )}
               name="location"
+            />
+
+            <Text style={styles.formInputHeader}>Username</Text>
+            <Controller
+              control={control}
+              defaultValue={session.profile ? session.profile.username : ''}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="Full Name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="username"
             />
 
             <Text style={styles.formInputHeader}>Email</Text>
@@ -279,7 +389,7 @@ export default function BuyerProfile({ navigation }) {
         {/* Form Footer */}
         <View style={styles.footerContainer}>
           <TouchableOpacity
-            onPress={handleSubmit(validateUpdate)}
+            onPress={handleSubmit(onSubmit)}
             style={styles.formSubmitBtn}>
             <Text style={styles.formSubmitBtnText}>Update Profile</Text>
           </TouchableOpacity>

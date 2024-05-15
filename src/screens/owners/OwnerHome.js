@@ -5,50 +5,30 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
+  RefreshControl
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { ArrowIcon, SidebarIcon } from '../../components/Icons';
-import { getWarehouseSummary } from '../../services/scrapdataService';
-import { Divider } from '@rneui/themed';
 import {
   VictoryChart,
-  VictoryGroup,
   VictoryBar,
   VictoryStack,
-  VictoryAxis,
   VictoryTheme,
-  VictoryLegend
 } from 'victory-native';
 
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function OwnerHome({ navigation, route }) {
 
-  const { session, dataSession, setDataSession } = useContext(AuthContext);
+  const { session, dataSession, fetchSummary } = useContext(AuthContext);
 
   const [stockOverall, setStockOverall] = useState(null);
 
-  // console.log("session (home): ", session);
-
-  const scrapList = require('../../data/analytics.json');
   const legendList = require('../../data/graphLegend.json');
-  const scrapStats = require('../../data/scrapTotalDate.json');
-
-
-
-  const fetchSummary = async () => {
-    try {
-      const response = await getWarehouseSummary(session.warehouseId, session.token);
-      setDataSession(response);
-    } catch(error) {
-      console.log("Error: ", error);
-    }
-  }
 
   useEffect(() => {
-    fetchSummary();
+    fetchSummary(session.warehouseId, session.token);
   }, []);
 
   useEffect(() => {
@@ -60,9 +40,22 @@ export default function OwnerHome({ navigation, route }) {
     }
   }, [dataSession]);
 
+  const [refreshing, setRefreshing] = useState(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchSummary(session.warehouseId, session.token);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
+
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
           start={{ x: 0, y: 0.5 }}
@@ -87,7 +80,9 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.todays_scrap}
                     </Text>
                   </View>
-                  <TouchableOpacity styles={styles.scrapsButton} onPress={() => navigation.navigate('Analytics')}>
+                  <TouchableOpacity
+                    styles={styles.scrapsButton}
+                    onPress={() => navigation.navigate('Analytics')}>
                     <ArrowIcon />
                   </TouchableOpacity>
                 </View>
@@ -98,7 +93,9 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.week_total}
                     </Text>
                   </View>
-                  <TouchableOpacity styles={styles.scrapsButton} onPress={() => navigation.navigate('Analytics')}>
+                  <TouchableOpacity
+                    styles={styles.scrapsButton}
+                    onPress={() => navigation.navigate('Analytics')}>
                     <ArrowIcon />
                   </TouchableOpacity>
                 </View>

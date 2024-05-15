@@ -35,3 +35,21 @@ export const requestVerification = async (data, userId, token) => {
     throw error;
   }
 };
+
+export const updateProfile = async (data, userId, token) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/v1/users/update/${userId}`,
+      data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}

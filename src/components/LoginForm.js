@@ -54,6 +54,7 @@ export default function LoginForm({ navigation, route }) {
         firstName: response.user.first_name,
         warehouseId: response?.warehouse_id,
         verificationStatus: response?.user.verification_status,
+        profile: response?.user,
         subPlan: null,
         selectedWarehouse: null,
       });
@@ -101,7 +102,7 @@ export default function LoginForm({ navigation, route }) {
                   placeholderTextColor={'#8d929f'}
                   placeholder="Enter your password"
                   secureTextEntry
-                  autoFocus></TextInput>
+                ></TextInput>
                 <Text style={styles.formErrorText}>
                   {formikProps.touched.password && formikProps.errors.password}
                 </Text>

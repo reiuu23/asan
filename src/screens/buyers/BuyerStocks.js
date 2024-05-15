@@ -5,12 +5,10 @@ import {
   StyleSheet,
   Text,
   View,
-  RefreshControl,
   ActivityIndicator,
-  Touchable
+  RefreshControl
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
-import LinearGradient from 'react-native-linear-gradient';
 import {
   AssortedMetalCat,
   BackButtonIcon,
@@ -21,7 +19,6 @@ import {
   SolidMetalCat,
   WhitePaperCat
 } from '../../components/Icons';
-import useCustomFetch from '../../hooks/useCustomFetch';
 import { AuthContext } from '../../context/AuthContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { getWarehouseSummary } from '../../services/scrapdataService';
@@ -29,15 +26,13 @@ import { getWarehouseSummary } from '../../services/scrapdataService';
 export default function BuyerStocks({ navigation }) {
 
   const { session, dataSession } = useContext(AuthContext);
-  const loading = false;
   const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // console.log("SESSION: ", data);
+  const emptyData = require('../../data/analytics.json');
 
   const fetchSummary = async () => {
     try {
-      console.log('ran');
       const response = await getWarehouseSummary(
         session.selectedWarehouse,
         session.token
@@ -49,25 +44,29 @@ export default function BuyerStocks({ navigation }) {
   };
 
   useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  useEffect(() => {
     fetchSummary();
   }, []);
 
   const renderItem = ({ item }) => {
-
-    // console.log("item: ", item);
     return (
       <View style={styles.scraps__table_right_value_container}>
         <Text style={styles.scraps__table_right_column_value}>
-          {loading ? (
-            <ActivityIndicator
-              color={'white'}
-              size={'large'}></ActivityIndicator>
-          ) : (
-            item.total_weight
-          )}
+          {item.total_weight}
         </Text>
       </View>
     );
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchSummary(session.selectedWarehouse, session.token);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
   };
 
   return (
@@ -79,14 +78,13 @@ export default function BuyerStocks({ navigation }) {
         <Text style={styles.top_bar__container_header}>Stocks</Text>
       </View>
       <ScrollView
-      // refreshControl={
-      //   <RefreshControl
-      //     refreshing={refreshing}
-      //     onRefresh={stocksData}
-      //     colors={['#3E5A47']}
-      //   />
-      // }
-      >
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3E5A47']}
+          />
+        }>
         <View style={{ padding: 40, marginBottom: 120 }}>
           <View style={styles.scraps__table}>
             <View style={styles.scraps__table_left_column}>
@@ -140,12 +138,18 @@ export default function BuyerStocks({ navigation }) {
                 ]}>
                 Total Weight (kg)
               </Text>
-              <FlatList
-                data={data?.weight_stacked_data} // find a way to filter this data first before rendering. (FINAL HINT)
-                renderItem={renderItem}
-                scrollEnabled={false}
-                keyExtractor={item => item.scrap_category}
-              />
+              {data && (
+                <FlatList
+                  data={
+                    data.weight_stacked_data.length === 0
+                      ? emptyData
+                      : data.weight_stacked_data
+                  } // find a way to filter this data first before rendering. (FINAL HINT)
+                  renderItem={renderItem}
+                  scrollEnabled={false}
+                  keyExtractor={item => item.scrap_category}
+                />
+              )}
             </View>
           </View>
         </View>

@@ -1,22 +1,18 @@
-import {useContext, useMemo, useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {analytics, global} from '../../styles/_globalLayout';
+import { useContext, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { analytics, global } from '../../styles/_globalLayout';
 
 import React from 'react';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {BackButtonIcon, BoxIcon, UsersIcon} from '../../components/Icons';
-import {Divider} from '@rneui/base';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { BackButtonIcon, BoxIcon, UsersIcon } from '../../components/Icons';
+import { Divider } from '@rneui/base';
 import { AuthContext } from '../../context/AuthContext';
 
-export default function OwnerAnalytics({navigation, route}) {
-
-  const { session, dataSession } = useContext(AuthContext);
+export default function OwnerAnalytics({ navigation, route }) {
+  const { dataSession } = useContext(AuthContext);
 
   const [isToday, setIsToday] = useState(true);
   const [isThisWeek, setIsThisWeek] = useState(false);
-
-  const todayData = require('../../data/analytics.json');
-  const weekData = require('../../data/scrapTotalDate.json');
 
   return (
     <View style={global.container}>
@@ -44,12 +40,16 @@ export default function OwnerAnalytics({navigation, route}) {
               Total Weight (kg)
             </Text>
             <BoxIcon style={analytics.stats_combo_icon}></BoxIcon>
-            <Text style={analytics.stats_combo_stats_value}>{dataSession?.overall_stocks}</Text>
+            <Text style={analytics.stats_combo_stats_value}>
+              {dataSession?.overall_stocks}
+            </Text>
           </View>
           <View style={analytics.stats_combo_stats}>
             <Text style={analytics.stats_combo_stats_label}>Buyers</Text>
             <UsersIcon style={analytics.stats_combo_icon}></UsersIcon>
-            <Text style={analytics.stats_combo_stats_value}>{dataSession?.total_buyers}</Text>
+            <Text style={analytics.stats_combo_stats_value}>
+              {dataSession?.total_buyers}
+            </Text>
           </View>
         </View>
       </View>
@@ -87,12 +87,11 @@ export default function OwnerAnalytics({navigation, route}) {
         <Divider></Divider>
         <ScrollView>
           <View style={analytics.stats_scrap_data_container}>
-            {isToday
-              ? dataSession?.today_stacked_data.map((today, index) => {
+            {isToday ? (
+              dataSession.today_stacked_data ? (
+                dataSession?.today_stacked_data.map((today, index) => {
                   return (
-                    <View
-                      style={analytics.stats_scrap_data}
-                      key={index}>
+                    <View style={analytics.stats_scrap_data} key={index}>
                       <Text style={analytics.stats_scrap_data_label}>
                         {today.scrap_category}
                       </Text>
@@ -102,18 +101,55 @@ export default function OwnerAnalytics({navigation, route}) {
                     </View>
                   );
                 })
-              : dataSession?.week_stacked_data.map((week, index) => {
-                  return (
-                    <View style={analytics.stats_scrap_data} key={index}>
-                      <Text style={analytics.stats_scrap_data_label}>
-                        {week.day_and_date}
-                      </Text>
-                      <Text style={analytics.stats_scrap_data_value}>
-                        {week.scrap_total_weight} kg
-                      </Text>
-                    </View>
-                  );
-                })}
+              ) : (
+                <View
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 250
+                  }}>
+                  <Text
+                    style={{
+                      width: 250,
+                      color: '#3E5A47',
+                      fontFamily: 'Inter-Medium',
+                      textAlign: 'center'
+                    }}>
+                    There are no current data for this day, as of now.
+                  </Text>
+                </View>
+              )
+            ) : dataSession.week_stacked_data ? (
+              dataSession?.week_stacked_data.map((week, index) => {
+                return (
+                  <View style={analytics.stats_scrap_data} key={index}>
+                    <Text style={analytics.stats_scrap_data_label}>
+                      {week.day_and_date}
+                    </Text>
+                    <Text style={analytics.stats_scrap_data_value}>
+                      {week.scrap_total_weight} kg
+                    </Text>
+                  </View>
+                );
+              })
+            ) : (
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 250
+                }}>
+                <Text
+                  style={{
+                    width: 250,
+                    color: '#3E5A47',
+                    fontFamily: 'Inter-Medium',
+                    textAlign: 'center'
+                  }}>
+                  There are no current data for this week, as of now.
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>

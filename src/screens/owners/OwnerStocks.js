@@ -25,10 +25,19 @@ import useCustomFetch from '../../hooks/useCustomFetch';
 import { AuthContext } from '../../context/AuthContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
+
 export default function OwnerStocks({ navigation }) {
-  const { session, dataSession } = useContext(AuthContext);
+  const { session, dataSession, fetchSummary } = useContext(AuthContext);
   const loading = false;
   const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchSummary(session.warehouseId, session.token);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   const renderItem = ({ item }) => {
     return (
@@ -55,13 +64,13 @@ export default function OwnerStocks({ navigation }) {
         <Text style={styles.top_bar__container_header}>Stocks</Text>
       </View>
       <ScrollView
-        // refreshControl={
-        //   <RefreshControl
-        //     refreshing={refreshing}
-        //     onRefresh={stocksData}
-        //     colors={['#3E5A47']}
-        //   />
-        // }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3E5A47']}
+          />
+        }
         >
         <View style={{ padding: 40, marginBottom: 120 }}>
           <View style={styles.scraps__table}>

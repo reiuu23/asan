@@ -48,6 +48,7 @@ import {
   AnalyticsBottomIcon,
   AsanIconBottomB,
   ChatIcon,
+  CheckIcon,
   HomeIcon,
   NotifBellIcon,
   SidebarAnalytics,
@@ -125,6 +126,21 @@ const CustomDrawerContent = props => {
             }}>
             Ongoing Verification
           </Text>
+        )}
+        {session.verificationStatus === 2 && (
+          <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 15,marginTop: 20}}>
+            <CheckIcon color={'#3E5A47'} />
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontSize: 14,
+                // textAlign: 'center',
+                color: '#3E5A47',
+                marginLeft: 5
+              }}>
+              Account Verified
+            </Text>
+          </View>
         )}
       </View>
       <DrawerContentScrollView {...props}>

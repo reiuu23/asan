@@ -49,6 +49,7 @@ export default function BuyerHome({ navigation }) {
 
   const fetchScraps = async () => {
     try {
+      console.log(session.selectedWarehouse);
       const response = await getScrapData(session.selectedWarehouse, session.token);
       setDataSession(response);
     } catch (error) {

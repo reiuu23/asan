@@ -1,7 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect, useContext } from 'react';
 import {
-  Button,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -14,20 +13,18 @@ import {
   ScrollView,
   Image,
   Dimensions,
-  BackHandler,
   RefreshControl,
-  ActivityIndicator
 } from 'react-native';
 
 import { useForm, Controller } from 'react-hook-form';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { createScrapData, getScrapData, submitScrapData, updateScrapData, deleteScrapData } from '../../services/scrapdataService';
 import ImagePicker from 'react-native-image-crop-picker';
-import { BackButtonIcon, SearchIcon, UploadIcon, CameraIcon, SearchIconVar } from '../../components/Icons';
+import { BackButtonIcon, UploadIcon, CameraIcon, SearchIconVar } from '../../components/Icons';
 import { AuthContext } from '../../context/AuthContext';
 
 const OwnerScrap = () => {
-  const { session } = useContext(AuthContext);
+  const { session, fetchSummary } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -44,13 +41,8 @@ const OwnerScrap = () => {
   const fetchScrap = async () => {
     try {
       setDataLoading(true);
-
       const response = await getScrapData(session.warehouseId, session.token);
-
       setData(response);
-
-      console.log('data: ', response);
-
       return true;
     } catch (error) {
       console.log('Error: ', error.message);
@@ -126,42 +118,47 @@ const OwnerScrap = () => {
     const scrapData = await createScrapData(formData);
 
     try {
-      const response = await submitScrapData(scrapData, session.token);
+      if(selected && image) {
+        const response = await submitScrapData(scrapData, session.token);
 
-      Alert.alert(
-        'Scrap Entry Added',
-        `You have successfully added ${selectedScrapItem.scrap_name}. Do you want to create another scrap entry?`,
-        [
-          {
-            text: 'No',
-            onPress: () => {
-              setModalVisible(false);
-              reset();
+        Alert.alert(
+          'Scrap Entry Added',
+          `You have successfully added ${scrapData.scrap_name}. Do you want to create another scrap entry?`,
+          [
+            {
+              text: 'No',
+              onPress: () => {
+                setModalVisible(false);
+                setPreviewImage(null);
+                setSelected(null);
+                setImage(null);
+                reset();
+              },
+              style: 'cancel'
             },
-            style: 'cancel'
-          },
-          {
-            text: 'Yes',
-            onPress: () => {
-              reset();
+            {
+              text: 'Yes',
+              onPress: () => {
+                reset();
+                setPreviewImage(null);
+                setSelected(null);
+                setImage(null);
+              }
             }
-          }
-        ]
-      );
+          ]
+        );
 
-      fetchScrap();
-    } catch (error) {
-      if(image === null) {
-        Alert.alert(
-          'Oops',
-          `You haven't added a scrap photo/image yet!`
-        );
+        fetchScrap();
+        fetchSummary(session.warehouseId, session.token);
       } else {
-        Alert.alert(
-          'Oops',
-          `An error occured while adding your scrap entry: ${error}`
-        );
+        Alert.alert('Oops', `You haven't added a scrap photo/image yet!`);
       }
+    } catch (error) {
+      console.log(error);
+      Alert.alert(
+        'Oops',
+        `An error occured while adding your scrap entry`
+      );
     }
   };
 
@@ -253,7 +250,7 @@ const OwnerScrap = () => {
 
       Alert.alert(
         'Scrapdata Deleted',
-        `You have successfully deleted ${data.scrap_name}.`,
+        `You have successfully deleted ${selectedScrapItem.scrap_name}.`,
         [
           {
             text: 'OK',

@@ -16,7 +16,7 @@ export const createScrapData = async data => {
     case 'White Paper':
       formData.append('scrap_bar_color', '#FF7961');
       break;
-    case 'Select Paper':
+    case 'Selected Paper':
       formData.append('scrap_bar_color', '#FFC7C7');
       break;
     case 'Karton Paper':

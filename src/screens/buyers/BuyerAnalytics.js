@@ -26,13 +26,10 @@ import useCustomFetch from '../../hooks/useCustomFetch';
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function BuyerAnalytics() {
-  const scrapList = require('../../data/analytics.json');
-  const legendList = require('../../data/graphLegend.json');
-  const scrapStats = require('../../data/scrapTotalDate.json');
 
+  const legendList = require('../../data/graphLegend.json');
   const { session } = useContext(AuthContext);
 
-  const [filteredData, setFilteredData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -184,7 +181,7 @@ export default function BuyerAnalytics() {
                   style={styles.chart}
                   theme={VictoryTheme.material}
                   padding={{ top: 60, bottom: 60, left: 60, right: 60 }}
-                  maxDomain={{ y: data ? data.overall_stocks : 200 }}
+                  maxDomain={{ y: data.overall_stocks === 0 ? 50 : data.overall_stocks }}
                   domainPadding={30}>
                   <VictoryStack>
                     {data?.week_stacked_data.map((scraps, index) => {
@@ -195,7 +192,7 @@ export default function BuyerAnalytics() {
                           data={[
                             {
                               x: scraps?.scrap_issued_day,
-                              y: scraps?.scrap_total_weight
+                              y: scraps?.scrap_total_weight 
                             }
                           ]}></VictoryBar>
                       );

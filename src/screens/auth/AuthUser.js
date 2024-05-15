@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { ScrapContext } from '../../context/ScrapContext';
+import { getWarehouseSummary } from '../../services/scrapdataService';
 import {
   createStackNavigator,
   CardStyleInterpolators
@@ -40,17 +41,17 @@ export default function AuthUser({ navigation, route }) {
     );
   }, [scrapData])
 
-  // if (session.token) {
-  //   loadScrap(`https://ls2tngnk9ytt.share.zrok.io/scrapdata`, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-  //     },
-  //   });
-  // } else {
-  //   console.log('scrap remained unchanged. (auth user) or not initialized.');
-  // }
+  const fetchSummary = async (warehouseId, token) => {
+    try {
+      const response = await getWarehouseSummary(
+        warehouseId,
+        token
+      );
+      setDataSession(response);
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+  };
 
   const sessionUpdate = async values => {
     const endpoint = userType === 'owner' ? 'owners' : 'buyers';
@@ -106,7 +107,7 @@ export default function AuthUser({ navigation, route }) {
   return (
     <>
       <AuthContext.Provider
-        value={{ session, setSession, userType, sessionUpdate, dataSession, setDataSession }}>
+        value={{ session, setSession, userType, sessionUpdate, dataSession, setDataSession, fetchSummary }}>
         {session.userType ? (
           session.userType === 'owner' ? (
             <ScrapContext.Provider value={{ scrapData, loadScrap }}>
