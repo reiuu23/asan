@@ -23,30 +23,12 @@ import { updateProfile } from '../../services/authService';
 export default function OwnerProfile({ navigation }) {
 
   const { session, setSession } = useContext(AuthContext);
-  const { data, loading, error, fetchData } = useCustomFetch();
 
+  const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
   const [isUpdated, setIsUpdated] = useState(false);
   const [profileData, setProfileData] = useState(null);
-
-  const fetchProfile = () => {
-    fetchData(`https://ls2tngnk9ytt.share.zrok.io/owners`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        UPID: session.token,
-        Authorization: 'Bearer f7b5b129-7dd1-4366-bd1e-031e03315c32'
-      },
-      body: JSON.stringify({ buyer_id: session.token })
-    });
-  };
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const {
     control,
@@ -58,11 +40,12 @@ export default function OwnerProfile({ navigation }) {
     setImage(session.profile.profile_image);
   }, [session]);
 
+  const formData = new FormData();
+
   const onSubmit = async data => {
     try {
-
+      setLoading(true);
       console.log("submitted data: ", data);
-      const formData = new FormData();
 
       console.log("last name: ", data.last_name);
       if (session.profile.last_name !== data.last_name) {
@@ -77,11 +60,12 @@ export default function OwnerProfile({ navigation }) {
         formData.append('middle_initial', data.middle_initial);
       }
 
-      console.log("session affiliation: ", session.profile.affiliation);
-      console.log("data affiliation: ", data.affiliation);
-      
       if (session.profile.affiliation !== data.affiliation) {
         formData.append('affiliation', data.affiliation);
+      }
+
+      if (session.profile.location !== data.location) {
+        formData.append('location', data.location);
       }
 
       if (session.profile.username !== data.username) {
@@ -94,6 +78,7 @@ export default function OwnerProfile({ navigation }) {
 
       if (data.password) {
         formData.append('password', data.password);
+        formData.append('password_confirmation', data.confirm_password);
       }
 
       if (newImage) {
@@ -106,45 +91,61 @@ export default function OwnerProfile({ navigation }) {
         });
       }
 
-      const response = await updateProfile(
-        formData,
-        session.profile.id,
-        session.token
-      );
+      if(formData._parts.length !== 0) {
+        const response = await updateProfile(
+          formData,
+          session.profile.id,
+          session.token
+        );
 
-      // Set New Session
+        setSession(prevSession => ({
+          ...prevSession,
+          userId: response.user.id,
+          userImage: response.user.profile_image,
+          userType: response.user.user_type,
+          fullName: response.user.fullname,
+          firstName: response.user.first_name,
+          verificationStatus: response.user.verification_status,
+          profile: response.user
+        }));
 
-      setSession(prevSession => ({
-        ...prevSession,
-        userId: response.user.id,
-        userImage: response.user.profile_image,
-        userType: response.user.user_type,
-        fullName: response.user.fullname,
-        firstName: response.user.first_name,
-        verificationStatus: response.user.verification_status,
-        profile: response.user
-      }));
-
-      // Handle success response
-      Alert.alert(
-        'Profile Update Status',
-        `You have successfully updated your profile!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate('Home');
+        Alert.alert(
+          'Profile Update Status',
+          `You have successfully updated your profile!`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.navigate('Home');
+              }
             }
-          }
-        ]
-      );
-
-      return response;
-    } catch (error) {
-      Alert.alert(
-        'Oops',
-        `An error occurred while updating your profile. Please try again later.`
-      );
+          ]
+        );
+        setLoading(false);
+        return response;
+      } else {
+        Alert.alert(
+          'Oops',
+          `No changes have been made on your profile. No updated fields found.`
+        );
+        navigation.navigate('Home');
+      }
+      setLoading(false);
+    } catch (message) {
+      console.log('formdata: ', formData);
+      setLoading(false);
+      if(formData._parts.length !== 0) {
+        Alert.alert(
+          'Oops',
+          `An error occurred while updating your profile. Please try again later.\n\nError: ${message}`
+        );
+      } else {
+        navigation.navigate('Home');
+        Alert.alert(
+          'Oops',
+          `No changes have been made on your profile. No updated fields found.`
+        );
+      }
     }
   };
 
@@ -222,23 +223,17 @@ export default function OwnerProfile({ navigation }) {
 
           <View style={styles.header_select_pic}>
             <TouchableOpacity onPress={handleNewUserPic}>
-              {!loading ? (
-                image ? (
-                  <Image
-                    key={new Date().getTime()}
-                    style={styles.header_image}
-                    source={{
-                      uri: !image.path ? image : image.path
-                    }}></Image>
-                ) : (
-                  <Image
-                    style={styles.header_image}
-                    source={require('../../assets/img/placeholderUser.jpg')}></Image>
-                )
+              {image ? (
+                <Image
+                  key={new Date().getTime()}
+                  style={styles.header_image}
+                  source={{
+                    uri: !image.path ? image : image.path
+                  }}></Image>
               ) : (
-                <View style={styles.header_load_icon}>
-                  <ActivityIndicator size="large" color="white" />
-                </View>
+                <Image
+                  style={styles.header_image}
+                  source={require('../../assets/img/placeholderUser.jpg')}></Image>
               )}
             </TouchableOpacity>
           </View>
@@ -333,9 +328,7 @@ export default function OwnerProfile({ navigation }) {
             <Text style={styles.formInputHeader}>Username</Text>
             <Controller
               control={control}
-              defaultValue={
-                session.profile ? session.profile.username : ''
-              }
+              defaultValue={session.profile ? session.profile.username : ''}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={styles.formInput}
@@ -380,6 +373,23 @@ export default function OwnerProfile({ navigation }) {
               )}
               name="password"
             />
+
+            <Text style={styles.formInputHeader}>Re-enter Password</Text>
+            <Controller
+              control={control}
+              defaultValue={''}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  secureTextEntry
+                  style={styles.formInput}
+                  placeholder="Re-enter your password"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="confirm_password"
+            />
           </View>
         ) : (
           <ActivityIndicator
@@ -392,7 +402,13 @@ export default function OwnerProfile({ navigation }) {
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             style={styles.formSubmitBtn}>
-            <Text style={styles.formSubmitBtnText}>Update Profile</Text>
+            {!loading ? (
+              <Text style={styles.formSubmitBtnText}>Update Profile</Text>
+            ) : (
+              <ActivityIndicator
+                size={'large'}
+                color={'#FFFFFF'}></ActivityIndicator>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
