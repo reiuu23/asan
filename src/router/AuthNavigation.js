@@ -7,6 +7,7 @@ import CustomStackNavigator from '../utils/CustomStackNavigator';
 
 import Onboarding from '../screens/auth/AuthOnboarding';
 import Auth from '../screens/auth/AuthUser';
+import PasswordReset from '../screens/shared/PasswordReset';
 
 const options = {
   headerShown: false,
@@ -22,6 +23,11 @@ const authScreens = [
   {
     name: 'Auth',
     component: Auth,
+    options
+  },
+  {
+    name: 'Password Reset',
+    component: PasswordReset,
     options
   }
 ];

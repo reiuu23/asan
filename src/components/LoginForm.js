@@ -5,12 +5,14 @@ import { AuthContext } from '../context/AuthContext';
 import { validationSchema } from '../utils/InputValidation';
 import { AsanIcon } from './Icons';
 import { login } from '../services/authService';
+import Toast from 'react-native-toast-message';
 
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
+
   TextInput,
   Alert,
   ScrollView,
@@ -52,18 +54,33 @@ export default function LoginForm({ navigation, route }) {
         userType: response.user.user_type,
         fullName: response.user.fullname,
         firstName: response.user.first_name,
-        warehouseId: response?.warehouse_id,
-        verificationStatus: response?.user.verification_status,
-        profile: response?.user,
+        warehouseId: response.warehouse_id,
+        warehouseOwner: response.warehouse_owner_id,
+        verificationStatus: response.user.verification_status,
+        profile: response.user,
         subPlan: null,
         selectedWarehouse: null,
+        subscription_status: response.subscription.subscription_status
       });
       
     } catch (error) {
-      console.log("Error: ", error.message);
-      Alert.alert('Login unsuccessful', error.message);
+      errorToast("Login error, invalid credentials");
       setLoading(false);
     }
+  };
+
+  const welcomeToast = () => {
+    Toast.show({
+      type: 'welcomeToast',
+      props: { first_name: session.profile.first_name }
+    });
+  };
+
+  const errorToast = (errorMsg = 'Undefined error') => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg }
+    });
   };
 
   return (
@@ -108,7 +125,7 @@ export default function LoginForm({ navigation, route }) {
                 </Text>
               </View>
               <View style={styles.formOptionContainer}>
-                <TouchableOpacity onPress={() => console.log('pressed')}>
+                <TouchableOpacity onPress={() => navigation.navigate('Password Reset')}>
                   <Text style={styles.forgotPwText}>Forgot Password?</Text>
                 </TouchableOpacity>
               </View>

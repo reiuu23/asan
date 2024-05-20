@@ -28,12 +28,29 @@ import PagerView from 'react-native-pager-view';
 import DashedLine from '../../components/DashedLine';
 import ImagePicker from 'react-native-image-crop-picker';
 import ModalCalendar from '../../components/ModalCalendar';
+import Toast from 'react-native-toast-message';
+import { sessionUpdate } from '../../services/authService';
 import { requestVerification } from '../../services/authService';
 import { AuthContext } from '../../context/AuthContext';
+import DatePicker from 'react-native-date-picker';
 
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 const MAPBOX_TOKEN = MAPBOX_STKN;
+
+const errorToast = errorMsg => {
+  Toast.show({
+    type: 'errorToast',
+    props: { error_message: errorMsg }
+  });
+};
+
+const successToast = successMsg => {
+  Toast.show({
+    type: 'successToast',
+    props: { success_message: successMsg }
+  });
+};
 
 const UserVerification = ({ navigation }) => {
   const [activeIcon, setActiveIcon] = useState({
@@ -50,8 +67,6 @@ const UserVerification = ({ navigation }) => {
   const [idImage, setIdImage] = useState(null);
 
   const [verificationRequest, setVerificationRequest] = useState(null);
-
-  const { session } = useContext(AuthContext);
 
   const steps = ['Personal Info', 'Select Location', 'Review'];
 
@@ -73,11 +88,10 @@ const UserVerification = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log("Updated request: ", verificationRequest);
+    console.log('Updated request: ', verificationRequest);
   }, [verificationRequest]);
 
   const Page1 = () => {
-
     const [profileImage, setProfileImage] = useState(null);
 
     const handleSelectImage = () => {
@@ -108,23 +122,23 @@ const UserVerification = ({ navigation }) => {
           setProfileImage(image);
         })
         .catch(error => {
-           console.log('ImagePicker Error: ', error);
+          console.log('ImagePicker Error: ', error);
         });
     };
 
-    
-  const validateFirstStep = () => {
-    if (profileImage) handleNext();
-    else {
-      Alert.alert('Oops!', 'You have not uploaded a photo yet.', [
-        {
-          text: 'Return',
-          onPress: () => {}
-        }
-      ]);
-    }
-  };
-    
+    const validateFirstStep = () => {
+      if (profileImage) {
+        setActiveIcon({
+          ...activeIcon,
+          stepOne: true
+        });
+
+        handleNext();
+      } else {
+        errorToast('Oops!, You have not uploaded a photo yet.');
+      }
+    };
+
     return (
       <>
         <ScrollView>
@@ -153,7 +167,11 @@ const UserVerification = ({ navigation }) => {
             <View style={{ alignItems: 'center', marginTop: 20 }}>
               {profileImage ? (
                 <Image
-                  source={{ uri: profileImage.path || verificationRequest.verificationImage.path }}
+                  source={{
+                    uri:
+                      profileImage.path ||
+                      verificationRequest.verificationImage.path
+                  }}
                   style={{
                     width: 200,
                     height: 200,
@@ -233,18 +251,14 @@ const UserVerification = ({ navigation }) => {
               marginBottom: 40
             }}
             onPress={() => {
-              setActiveIcon({
-                ...activeIcon,
-                stepOne: true
-              });
-              setVerificationRequest({verification_image: profileImage});
+              setVerificationRequest({ verification_image: profileImage });
               validateFirstStep();
             }}>
             <Text
               style={{
                 fontFamily: 'Inter-Regular',
                 fontSize: 20,
-                color: '#FFFFFF',
+                color: '#FFFFFF'
               }}>
               Proceed to Identity Section
             </Text>
@@ -255,52 +269,52 @@ const UserVerification = ({ navigation }) => {
   };
 
   const Page2 = () => {
+    console.log('Current Verification Data: ', verificationRequest);
 
-    console.log("Current Verification Data: ", verificationRequest);
-
-    const [dateOfBirth, setDateOfBirth] = useState(null);
+    const [dateOfBirth, setDateOfBirth] = useState(new Date());
+    const [datePreview, setDatePreview] = useState(null);
+    const [open, setOpen] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [idType, setIdType] = useState(null);
-    const [idImage,setIdImage] = useState(null);
+    const [idImage, setIdImage] = useState(null);
 
     const handleDateSelect = date => {
       setDateOfBirth(date);
     };
 
     const validateSecondStep = () => {
-      if(!dateOfBirth || !idType || !idImage) {
-        Alert.alert('Oops!', 'You have not completed the required fields.', [
-          {
-            text: 'Return',
-            onPress: () => {}
-          }
-        ]);
+      if (!dateOfBirth || !idType || !idImage) {
+        errorToast('Oops!, You have not completed the required fields.');
       } else {
+        setActiveIcon({
+          ...activeIcon,
+          stepTwo: true
+        });
         setVerificationRequest(prevStep => ({
           ...prevStep,
-          date_of_birth: dateOfBirth,
+          date_of_birth: datePreview,
           id_type: idType,
-          id_image: idImage,
+          id_image: idImage
         }));
         handleNext();
       }
-    }
+    };
 
-      const handleOpenCameraForID = () => {
-        ImagePicker.openCamera({
-          width: 500,
-          height: 500,
-          multiple: false,
-          cropping: true,
-          mediaType: 'photo'
+    const handleOpenCameraForID = () => {
+      ImagePicker.openCamera({
+        width: 500,
+        height: 500,
+        multiple: false,
+        cropping: true,
+        mediaType: 'photo'
+      })
+        .then(image => {
+          setIdImage(image);
         })
-          .then(image => {
-            setIdImage(image);
-          })
-          .catch(error => {
-            console.log('Camera Error: ', error);
-          });
-      };
+        .catch(error => {
+          console.log('Camera Error: ', error);
+        });
+    };
 
     const data = require('../../data/validID.json');
 
@@ -331,22 +345,33 @@ const UserVerification = ({ navigation }) => {
               paddingHorizontal: 20,
               marginVertical: 20
             }}
-            onPress={() => setModalVisible(true)}>
-            {dateOfBirth ? (
+            onPress={() => setOpen(true)}>
+            {datePreview ? (
               <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-                Selected Date of Birth: {dateOfBirth}
+                Selected Date of Birth: {datePreview}
               </Text>
             ) : (
               <Text style={{ fontFamily: 'Inter-Medium', color: '#3E5A47' }}>
-                Date of Birth *
+                Select your Date of Birth *
               </Text>
             )}
           </TouchableOpacity>
-          {/* <Text>Selected Date: {selectedDate}</Text> */}
-          <ModalCalendar
-            isVisible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onDateSelect={handleDateSelect}
+          <DatePicker
+            modal
+            mode="date"
+            locale='en'
+            open={open}
+            date={dateOfBirth}
+            onConfirm={date => {
+              setOpen(false);
+              const formattedDate = date.toLocaleDateString('en-CA');
+              console.log('selected date: ', formattedDate);
+              setDateOfBirth(date);
+              setDatePreview(formattedDate);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
           />
           <SelectList
             placeholder="Kindly Select an ID Type *"
@@ -398,10 +423,6 @@ const UserVerification = ({ navigation }) => {
               marginTop: 5
             }}
             onPress={() => {
-              setActiveIcon({
-                ...activeIcon,
-                stepTwo: true
-              });
               validateSecondStep();
             }}>
             <Text
@@ -420,6 +441,25 @@ const UserVerification = ({ navigation }) => {
 
   const Page3 = () => {
     const [address, setAddress] = useState('');
+    const { session, setSession } = useContext(AuthContext);
+
+    const sessionRefetch = async () => {
+      try {
+        const response = await sessionUpdate(session.profile.id, session.token);
+        setSession(prev => ({
+          ...prev,
+          profile: response?.user,
+          verificationStatus: response?.user.verification_status,
+          subscription_status: response?.subscription.subscription_status,
+          token: response?.token
+        }));
+        return response;
+      } catch (error) {
+        errorToast(
+          'Encountered an error while trying to update the session. Please try again later'
+        );
+      }
+    };
 
     const handleSubmit = () => {
       Alert.alert(
@@ -429,13 +469,9 @@ const UserVerification = ({ navigation }) => {
           {
             text: 'Submit',
             onPress: () => {
-              setVerificationRequest(prevStep => ({
-                ...prevStep,
-                id_address: address,
-                verification_status: 1
-              }));
-              onVerifySubmit();
-            },
+              console.log("submitted address: ", address);
+              onVerifySubmit(address);
+            }
           },
           {
             text: 'Cancel',
@@ -447,14 +483,14 @@ const UserVerification = ({ navigation }) => {
       );
     };
 
-    const onVerifySubmit = async () => {
+    const onVerifySubmit = async (address) => {
       try {
         const formData = new FormData();
 
         formData.append('date_of_birth', verificationRequest.date_of_birth);
-        formData.append('id_address', verificationRequest.id_address);
+        formData.append('id_address', address);
         formData.append('id_type', verificationRequest.id_type);
-        formData.append('verification_status', verificationRequest.verification_status);
+        formData.append('verification_status', 1);
 
         const idFilename = verificationRequest.id_image.path.split('/').pop();
 
@@ -464,7 +500,9 @@ const UserVerification = ({ navigation }) => {
           name: idFilename
         });
 
-        const verifyIdFilename = verificationRequest.verification_image.path.split('/').pop();
+        const verifyIdFilename = verificationRequest.verification_image.path
+          .split('/')
+          .pop();
 
         formData.append('verification_image', {
           uri: verificationRequest.verification_image.path,
@@ -472,20 +510,27 @@ const UserVerification = ({ navigation }) => {
           name: verifyIdFilename
         });
 
-        const response = await requestVerification(formData, session.userId, session.token);
-        Alert.alert(
-          "Let's go!",
+        const response = await requestVerification(
+          formData,
+          session.userId,
+          session.token
+        );
+        successToast(
           'You have successfully requested your account verification, please wait for updates regarding your account status!'
         );
+        setActiveIcon({
+          ...activeIcon,
+          stepThree: true
+        });
+        sessionRefetch();
         navigation.navigate('Home');
         return response;
       } catch (error) {
-        Alert.alert(
-          "Verification Unsuccessful",
-          'The client/server encountered an error while sending your verification application, please try again later!'
+        errorToast(
+          'Verifiication unsuccessful, the client/server encountered an error while sending your verification application, please try again later!'
         );
       }
-    }
+    };
 
     return (
       <View style={styles.page3}>
@@ -497,7 +542,7 @@ const UserVerification = ({ navigation }) => {
             paddingVertical: 25,
             backgroundColor: '#3E5A47',
             borderRadius: 13,
-            alignItems: 'center',
+            alignItems: 'center'
           }}
           onPress={handleSubmit}>
           <Text
@@ -531,6 +576,7 @@ const UserVerification = ({ navigation }) => {
         );
         const data = await response.json();
         if (data && data.features && data.features.length > 0) {
+          console.log("selected location:", data.features[0].place_name);
           setAddress(data.features[0].place_name);
         }
       } catch (error) {
@@ -699,7 +745,7 @@ const UserVerification = ({ navigation }) => {
         </View>
         <DashedLine width={'30%'} color="#3E5A47" />
         <View>
-          {activeIcon === 2 ? (
+          {activeIcon.stepTwo ? (
             <CheckIcon color={'#3E5A47'} />
           ) : (
             <IdentityIcon color={activeIcon === 2 ? '#3E5A47' : '#667B6D'} />
@@ -719,7 +765,7 @@ const UserVerification = ({ navigation }) => {
         </View>
         <DashedLine width={'30%'} color="#3E5A47" />
         <View>
-          {activeIcon === 3 ? (
+          {activeIcon.stepThree ? (
             <CheckIcon color={'#3E5A47'} />
           ) : (
             <LocationIcon color={activeIcon === 3 ? '#3E5A47' : '#667B6D'} />

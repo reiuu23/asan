@@ -8,7 +8,8 @@ import {
   Image,
   TextInput,
   Alert,
-  RefreshControl
+  RefreshControl,
+  BackHandler
 } from 'react-native';
 import {
   LogoutIcon,
@@ -23,33 +24,32 @@ import {
   AsanIconBottom
 } from '../../components/Icons';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { ScrapContext } from '../../context/ScrapContext';
 import { Shadow } from 'react-native-shadow-2';
 import { Divider } from '@rneui/themed';
+import { sessionUpdate } from '../../services/authService';
+import { useFocusEffect } from '@react-navigation/native';
 
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import Scraps from '../../components/Scraps';
-import axios from 'axios';
+import Toast from 'react-native-toast-message';
 import _ from 'lodash';
 import { getScrapData } from '../../services/scrapdataService';
 
 
-export default function BuyerHome({ navigation }) {
+export default function BuyerHome({ navigation, alert }) {
 
   const [isActive, setIsActive] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { session, setSession, dataSession, setDataSession, } = useContext(AuthContext);
+  const { session, setSession, dataSession, setDataSession } = useContext(AuthContext);
   const { scrapData, loadScrap } = useContext(ScrapContext);
-
-  // console.log("Session: ", session);
 
   const fetchScraps = async () => {
     try {
-      console.log(session.selectedWarehouse);
       const response = await getScrapData(session.selectedWarehouse, session.token);
       setDataSession(response);
     } catch (error) {
@@ -57,12 +57,34 @@ export default function BuyerHome({ navigation }) {
     }
   }
 
+  const sessionRefetch = async () => {
+    try {
+      const response = await sessionUpdate(session.profile.id, session.token);
+      if(response) {
+        setSession(prev => ({
+          ...prev,
+          profile: response?.user,
+          verificationStatus: response?.user.verification_status,
+          subscription_status: response?.subscription.subscription_status,
+          token: response?.token
+        }));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+     console.log('warehouse owner: ', session.warehouseOwner);
+  }, [session]);
+
   useEffect(() => {
     fetchScraps();
   }, []);
 
   useEffect(() => {
     console.log("DATA SESSION: ", dataSession);
+    console.log("Session: ", session)
   }, [dataSession]);
 
   const [category, setCategory] = useState('Plastic');
@@ -144,6 +166,24 @@ export default function BuyerHome({ navigation }) {
     }
   ];
 
+  const welcomeToast = () => {
+    Toast.show({
+      type: 'welcomeToast',
+      props: { first_name: session.profile.first_name }
+    });
+  };
+
+  const errorToast = (errorMsg = "Undefined error") => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg}
+    })
+  }
+
+  useEffect(() => {
+    welcomeToast();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.top_bar__container}>
@@ -153,6 +193,7 @@ export default function BuyerHome({ navigation }) {
               style={styles.top_bar__profile_image}
               source={require('../../assets/img/chaewon.jpg')}
             /> */}
+            {/* <Button title="Show toast" onPress={showToast} /> */}
             {session.userImage ? (
               <Image
                 style={styles.top_bar__profile_image}
@@ -165,7 +206,9 @@ export default function BuyerHome({ navigation }) {
                 source={require('../../assets/img/placeholderUser.jpg')}></Image>
             )}
           </TouchableOpacity>
-          <Text style={styles.top_bar__profile_name}>Hey, {session.firstName}</Text>
+          <Text style={styles.top_bar__profile_name}>
+            Hey, {session.firstName}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.top_bar__signout}
@@ -181,7 +224,10 @@ export default function BuyerHome({ navigation }) {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={fetchScraps}
+            onRefresh={() => {
+              fetchScraps();
+              sessionRefetch();
+            }}
             colors={['#3E5A47']}
           />
         }>

@@ -1,82 +1,89 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import { getToken } from '../../services/transactions/authToken';
-import React from 'react';
+import * as React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-var fetch = require('node-fetch');
+import MonthlySubscription from './subscription/MonthlySubscription';
+import AnnualSubscription from './subscription/AnnualSubscription';
+import PayPalPaymentScreen from './subscription/PaypalPaymentScreen';
+import { BackButtonIcon } from '../../components/Icons';
 
-getToken().then((token) => {
-  fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'PayPal-Request-Id': '7b92603e-77ed-4896-8e78-5dea2050476a',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          reference_id: 'd9f80740-38f0-11e8-b467-0ed5f89f718b',
-          amount: { currency_code: 'USD', value: '100.00' }
-        }
-      ],
-      payment_source: {
-        paypal: {
-          experience_context: {
-            payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-            brand_name: 'EXAMPLE INC',
-            locale: 'en-US',
-            landing_page: 'LOGIN',
-            shipping_preference: 'SET_PROVIDED_ADDRESS',
-            user_action: 'PAY_NOW',
-            return_url: 'https://example.com/returnUrl',
-            cancel_url: 'https://example.com/cancelUrl'
-          }
-        }
-      }
-    })
-  })
-    .then(result => {
-      return result.json();
-    })
-    .then(data => {
-      console.log(data);
-    });
-});
+const Tab = createMaterialTopTabNavigator();
+const Stack = createStackNavigator();
 
-
-
-
-
-export default function Subscription() {
+function MyTabs() {
   return (
-    <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.text}>Plans</Text>
-        <TouchableOpacity>
-          <Text style={styles.text}>CHECKOUT</Text>
+    <Tab.Navigator
+      initialRouteName="Monthly"
+      screenOptions={{
+        tabBarIndicatorStyle: {
+          backgroundColor: '#3E5A47'
+        },
+        tabBarLabelStyle: {
+          color: '#3E5A47',
+          fontFamily: 'Inter-Medium'
+        }
+      }}>
+      <Tab.Screen
+        name="MonthlySubscription"
+        component={MonthlySubscription}
+        options={{ tabBarLabel: 'Monthly' }}
+      />
+      <Tab.Screen
+        name="AnnualSubscription"
+        component={AnnualSubscription}
+        options={{ tabBarLabel: 'Annual' }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+function MainStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Subscriptions"
+        component={MyTabs}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name="PayPalPayment"
+        component={PayPalPaymentScreen}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export default function Subscription({ navigation }) {
+  return (
+    <SafeAreaProvider>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <BackButtonIcon color={'#3E5A47'} />
         </TouchableOpacity>
+        <Text style={styles.topHeader}>Upgrade to Premium</Text>
       </View>
-    </View>
+      <MainStack />
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 40,
+  topBar: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20
   },
-  main: {
-    // padding: 20,
-    borderWidth: 1,
-    borderColor: 'green',
-    flex: 1
-  },
-  text: {
-    textAlign: 'center', 
-    marginVertical: 20, 
-    fontFamily: 'Inter-Medium', 
-    fontSize: 20
+  topHeader: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Bold',
+    fontSize: 22
   }
 });

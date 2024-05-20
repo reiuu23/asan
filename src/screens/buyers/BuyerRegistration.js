@@ -5,6 +5,8 @@ import { registrationSchema } from '../../utils/InputValidation';
 import { AuthContext } from '../../context/AuthContext';
 import { register } from '../../services/authService';
 
+import Toast from 'react-native-toast-message';
+
 import {
   StyleSheet,
   Text,
@@ -26,6 +28,20 @@ export default function RegistrationForm({ navigation, route }) {
     console.log('Reg UT: ', userType);
     console.log('Session Token: ', session);
   }, [session, userType]);
+
+  const errorToast = errorMsg => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg }
+    });
+  };
+
+  const successToast = successMsg => {
+    Toast.show({
+      type: 'successToast',
+      props: { success_message: successMsg }
+    });
+  };
 
   const handleAuth = async values => {
     try {
@@ -51,20 +67,22 @@ export default function RegistrationForm({ navigation, route }) {
 
       setLoading(false);
 
-      console.log(JSON.stringify(response, null, 2));
+      // Alert.alert(
+      //   'Welcome aboard!',
+      //   'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
+      // );
 
-      Alert.alert(
-        'Welcome aboard!',
-        'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
-      );
+      successToast("Welcome aboard! You have successfully signed up.");
 
       navigation.navigate('Login');
     } catch (error) {
-      console.error(error);
-      Alert.alert(
-        'Sign-up failed',
-        'Encountered an error while trying to register your account, try again later!.'
-      );
+      // Alert.alert(
+      //   'Sign-up failed',
+      //   'Encountered an error while trying to register your account, try again later!.'
+      // );
+      
+      errorToast("Encountered an error while trying to register your account, try again later!");
+
       setLoading(false);
     }
     setLoading(false);

@@ -58,7 +58,7 @@ export default function OwnerStocks({ navigation }) {
   return (
     <SafeAreaView>
       <View style={styles.top_bar__container}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
           <BackButtonIcon color={'#3E5A47'} />
         </TouchableOpacity>
         <Text style={styles.top_bar__container_header}>Stocks</Text>

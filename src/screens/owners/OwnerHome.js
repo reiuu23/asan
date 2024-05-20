@@ -5,35 +5,77 @@ import {
   Text,
   TouchableOpacity,
   View,
-  RefreshControl
+  RefreshControl,
+  ActivityIndicator,
+  BackHandler,
+  Alert
 } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { ArrowIcon, SidebarIcon } from '../../components/Icons';
 import {
   VictoryChart,
   VictoryBar,
   VictoryStack,
-  VictoryTheme,
+  VictoryTheme
 } from 'victory-native';
 
 import LinearGradient from 'react-native-linear-gradient';
 
-export default function OwnerHome({ navigation, route }) {
+import { sessionUpdate } from '../../services/authService';
 
-  const { session, dataSession, fetchSummary } = useContext(AuthContext);
+export default function OwnerHome({ navigation, route }) {
+  const { session, dataSession, fetchSummary, setSession } = useContext(AuthContext);
 
   const [stockOverall, setStockOverall] = useState(null);
 
   const legendList = require('../../data/graphLegend.json');
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'Logout',
+          'Are you sure you want to log out?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Logout', onPress: () => setSession({ token: null }) }
+          ],
+          { cancelable: false }
+        );
+        return true; // Prevent default behavior (navigating back)
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
+
+  const sessionRefetch = async () => {
+    try {
+      const response = await sessionUpdate(session.profile.id, session.token);
+      setSession(prev => ({
+        ...prev,
+        profile: response?.user,
+        subscription_status: response?.subscription.subscription_status,
+        token: response?.token,
+        verificationStatus: response?.user.verification_status
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     fetchSummary(session.warehouseId, session.token);
   }, []);
 
   useEffect(() => {
-    console.log("DATA SESSION: ", dataSession, 2, null);
-    if(dataSession) {
+    console.log('DATA SESSION: ', dataSession);
+    if (dataSession) {
       const stockRawPercentage = dataSession.overall_stocks / 5000;
       const stockFormattedPercentage = (stockRawPercentage * 100).toFixed(2);
       setStockOverall(stockFormattedPercentage);
@@ -44,6 +86,7 @@ export default function OwnerHome({ navigation, route }) {
 
   const onRefresh = () => {
     setRefreshing(true);
+    sessionRefetch();
     fetchSummary(session.warehouseId, session.token);
     setTimeout(() => {
       setRefreshing(false);
@@ -80,11 +123,13 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.todays_scrap}
                     </Text>
                   </View>
-                  <TouchableOpacity
-                    styles={styles.scrapsButton}
-                    onPress={() => navigation.navigate('Analytics')}>
-                    <ArrowIcon />
-                  </TouchableOpacity>
+                  {session.subscription_status === 1 && (
+                    <TouchableOpacity
+                      styles={styles.scrapsButton}
+                      onPress={() => navigation.navigate('Analytics')}>
+                      <ArrowIcon />
+                    </TouchableOpacity>
+                  )}
                 </View>
                 <View style={styles.currentScraps}>
                   <View style={styles.scrapsStat}>
@@ -93,11 +138,13 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.week_total}
                     </Text>
                   </View>
-                  <TouchableOpacity
-                    styles={styles.scrapsButton}
-                    onPress={() => navigation.navigate('Analytics')}>
-                    <ArrowIcon />
-                  </TouchableOpacity>
+                  {session.subscription_status === 1 && (
+                    <TouchableOpacity
+                      styles={styles.scrapsButton}
+                      onPress={() => navigation.navigate('Analytics')}>
+                      <ArrowIcon />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             </View>
@@ -124,28 +171,39 @@ export default function OwnerHome({ navigation, route }) {
             <Text style={styles.stats__graphLabelX}>
               weight of scrap per type
             </Text>
-            <VictoryChart
-              style={styles.chart}
-              theme={VictoryTheme.material}
-              padding={{ top: 60, bottom: 60, left: 70, right: 70 }}
-              maxDomain={{ y: dataSession?.overall_stocks }}
-              domainPadding={30}>
-              <VictoryStack>
-                {dataSession?.week_stacked_data.map((scraps, index) => {
-                  return (
-                    <VictoryBar
-                      key={index}
-                      color={scraps.scrap_bar_color}
-                      data={[
-                        {
-                          x: scraps.scrap_issued_day,
-                          y: scraps.scrap_total_weight
-                        }
-                      ]}></VictoryBar>
-                  );
-                })}
-              </VictoryStack>
-            </VictoryChart>
+            {dataSession ? (
+              <VictoryChart
+                style={styles.chart}
+                theme={VictoryTheme.material}
+                padding={{ top: 60, bottom: 60, left: 70, right: 70 }}
+                maxDomain={{
+                  y:
+                    dataSession.overall_stocks !== 0
+                      ? dataSession.overall_stocks + 50
+                      : 50
+                }}
+                domainPadding={30}>
+                <VictoryStack>
+                  {dataSession?.week_stacked_data.map((scraps, index) => {
+                    return (
+                      <VictoryBar
+                        key={index}
+                        color={scraps.scrap_bar_color}
+                        data={[
+                          {
+                            x: scraps.scrap_issued_day,
+                            y: scraps.scrap_total_weight
+                          }
+                        ]}></VictoryBar>
+                    );
+                  })}
+                </VictoryStack>
+              </VictoryChart>
+            ) : (
+              <View style={{height: 500}}>
+                <ActivityIndicator size={'large'} color={'#3E5A47'} />
+              </View>
+            )}
             {/* Graph Legend */}
             <View style={styles.stats__graph_legend}>
               {legendList.map(category => {
@@ -160,7 +218,7 @@ export default function OwnerHome({ navigation, route }) {
                         backgroundColor: category.scrap_bar_color,
                         margin: 10
                       }}></View>
-                    <Text style={{ textAlign: 'center' }}>
+                    <Text style={{ textAlign: 'center', color: '#3E5A47' }}>
                       {category.scrap_category}
                     </Text>
                   </View>

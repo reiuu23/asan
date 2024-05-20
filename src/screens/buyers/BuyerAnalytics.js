@@ -173,15 +173,16 @@ export default function BuyerAnalytics() {
           {!loading ? (
             data ? (
               <View style={styles.stats__graphContainer}>
-                {/* Graph */}
                 <Text style={styles.stats__graphLabelX}>
-                  weight of scrap per type
+                  weight of scrap per types
                 </Text>
                 <VictoryChart
                   style={styles.chart}
                   theme={VictoryTheme.material}
                   padding={{ top: 60, bottom: 60, left: 60, right: 60 }}
-                  maxDomain={{ y: data.overall_stocks === 0 ? 50 : data.overall_stocks }}
+                  maxDomain={{
+                    y: data.overall_stocks === 0 ? 50 : data.overall_stocks + 50
+                  }}
                   domainPadding={30}>
                   <VictoryStack>
                     {data?.week_stacked_data.map((scraps, index) => {
@@ -192,7 +193,7 @@ export default function BuyerAnalytics() {
                           data={[
                             {
                               x: scraps?.scrap_issued_day,
-                              y: scraps?.scrap_total_weight 
+                              y: scraps?.scrap_total_weight
                             }
                           ]}></VictoryBar>
                       );
@@ -213,7 +214,7 @@ export default function BuyerAnalytics() {
                             backgroundColor: category.scrap_bar_color,
                             margin: 10
                           }}></View>
-                        <Text style={{ textAlign: 'center' }}>
+                        <Text style={{ textAlign: 'center', color: '#3E5A47' }}>
                           {category.scrap_category}
                         </Text>
                       </View>
@@ -222,7 +223,9 @@ export default function BuyerAnalytics() {
                 </View>
                 {/* --- */}
               </View>
-            ) : <View style={{height: 50}}></View>
+            ) : (
+              <View style={{ height: 50 }}></View>
+            )
           ) : (
             <View
               style={{

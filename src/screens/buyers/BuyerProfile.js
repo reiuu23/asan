@@ -16,18 +16,17 @@ import { useForm, Controller } from 'react-hook-form';
 import { BackButtonIcon, EditIcon } from '../../components/Icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { AuthContext } from '../../context/AuthContext';
+import { updateProfile } from '../../services/authService';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import ImagePicker from 'react-native-image-crop-picker';
-import { updateProfile } from '../../services/authService';
+import Toast from 'react-native-toast-message';
 
 export default function BuyerProfile({ navigation }) {
-  const { session, setSession } = useContext(AuthContext);
 
+  const { session, setSession } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
-  const [isUpdated, setIsUpdated] = useState(false);
-  const [profileData, setProfileData] = useState(null);
 
   const {
     control,
@@ -108,24 +107,13 @@ export default function BuyerProfile({ navigation }) {
           profile: response.user
         }));
 
-        Alert.alert(
-          'Profile Update Status',
-          `You have successfully updated your profile!`,
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('Home');
-              }
-            }
-          ]
-        );
+        successToast('You have successfully updated your profile!');
+        navigation.navigate('Home');
         setLoading(false);
         return response;
       } else {
-        Alert.alert(
-          'Oops',
-          `No changes have been made on your profile. No updated fields found.`
+        errorToast(
+          'Oops, no changes have been made on your profile. No updated fields found.'
         );
         navigation.navigate('Home');
       }
@@ -134,15 +122,13 @@ export default function BuyerProfile({ navigation }) {
       console.log('formdata: ', formData);
       setLoading(false);
       if (formData._parts.length !== 0) {
-        Alert.alert(
-          'Oops',
-          `An error occurred while updating your profile. Please try again later.\n\nError: ${message}`
+        errorToast(
+          `An error occurred while updating your profile : ${message}`
         );
       } else {
         navigation.navigate('Home');
-        Alert.alert(
-          'Oops',
-          `No changes have been made on your profile. No updated fields found.`
+        errorToast(
+          'Oops, no changes have been made on your profile. No updated fields found.'
         );
       }
     }
@@ -157,12 +143,12 @@ export default function BuyerProfile({ navigation }) {
       mediaType: 'photo'
     })
       .then(image => {
-        console.log('selected image: ', image);
         setImage(image);
+        successToast("You have selected an image.")
         setNewImage(image);
       })
       .catch(error => {
-        console.log('ImagePicker Error: ', error);
+        console.log(error);
       });
   };
 
@@ -175,12 +161,12 @@ export default function BuyerProfile({ navigation }) {
       mediaType: 'photo'
     })
       .then(image => {
-        console.log('camera image: ', image);
         setImage(image);
+        successToast('You have selected an image.');
         setNewImage(image);
       })
       .catch(error => {
-        console.log('Camera Error: ', error);
+        console.log(error);
       });
   };
 
@@ -201,15 +187,28 @@ export default function BuyerProfile({ navigation }) {
         {
           text: 'Cancel',
           onPress: () => {
-            Alert.alert(
-              'Cancelled',
-              'You have successfully cancelled uploading a new profile photo.'
-            );
+            successToast("You have successfully cancelled adding a photo.");
           }
         }
       ]
     );
   };
+
+  // Error Toast
+
+  const errorToast = (errorMsg) => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg }
+    });
+  };
+
+  const successToast = (successMsg) => {
+    Toast.show({
+      type: 'successToast',
+      props: { success_message: successMsg }
+    });
+  }
 
   return (
     <ScrollView>
@@ -295,7 +294,7 @@ export default function BuyerProfile({ navigation }) {
               name="middle_initial"
             />
 
-            <Text style={styles.formInputHeader}>Scrapyard Name</Text>
+            <Text style={styles.formInputHeader}>Company Name</Text>
             <Controller
               control={control}
               defaultValue={session.profile ? session.profile.affiliation : ''}
@@ -401,6 +400,46 @@ export default function BuyerProfile({ navigation }) {
 
         {/* Form Footer */}
         <View style={styles.footerContainer}>
+          <View style={{ flexDirection: 'row', gap: 0 }}>
+            {session.verificationStatus !== 0
+              ? session.subscription_status === 1 && (
+                  <>
+                    <Text style={styles.verificationText}>
+                      {' '}
+                      Account Status:{' '}
+                    </Text>
+                    {session.verificationStatus === 0 && (
+                      <Text style={styles.verificationText}>Ongoing</Text>
+                    )}
+                    {session.verificationStatus === 1 && (
+                      <Text style={styles.verificationText}>Ongoing</Text>
+                    )}
+                    {session.verificationStatus === 2 && (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginLeft: 15,
+                          marginTop: 20
+                        }}>
+                        <CheckIcon color={'#3E5A47'} />
+                        <Text style={styles.verificationText}>Ongoing</Text>
+                      </View>
+                    )}
+                  </>
+                )
+              : ''}
+          </View>
+          {session.verificationStatus === 0 &&
+            session.subscription_status === 1 && (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Verification')}
+                style={styles.formSubmitBtn}>
+                <Text style={styles.formSubmitBtnText}>
+                  Verify your Account
+                </Text>
+              </TouchableOpacity>
+            )}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             style={styles.formSubmitBtn}>
@@ -425,6 +464,7 @@ export default function BuyerProfile({ navigation }) {
                   { text: 'Yes', onPress: () => navigation.goBack() }
                 ]
               );
+              successToast('Cancelled profile update');
             }}
             style={styles.formCancelBtn}>
             <Text style={styles.formCancelBtnText}>Cancel</Text>
@@ -601,5 +641,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: RFValue(14),
     textDecorationLine: 'underline'
+  },
+  verificationText: {
+    marginVertical: 5,
+    fontFamily: 'Inter-Medium',
+    color: '#3E5A47'
   }
 });

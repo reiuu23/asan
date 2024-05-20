@@ -1,22 +1,48 @@
 import {
-  Image,
+  BackHandler,
+  Alert,
   StyleSheet,
   Text,
   View,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 import { index } from '../../services/warehouseService';
-import React, { useContext, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import useCustomFetch from '../../hooks/useCustomFetch';
 
 export default function BuyerSelection({ navigation }) {
   const { session, setSession } = useContext(AuthContext);
   const [data, setData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'Logout',
+          'Are you sure you want to log out?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Logout', onPress: () => setSession({ token: null }) }
+          ],
+          { cancelable: false }
+        );
+        return true; // Prevent default behavior (navigating back)
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
 
   const retrieveWarehouseList = async () => {
     try {
@@ -25,7 +51,13 @@ export default function BuyerSelection({ navigation }) {
     } catch (error) {
       console.log('Error retrieving warehouse data: ', error);
     }
-  }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await retrieveWarehouseList();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     retrieveWarehouseList();
@@ -36,8 +68,11 @@ export default function BuyerSelection({ navigation }) {
       <View style={styles.top_bar__container}>
         <Text style={styles.top_bar__container_header}>Welcome!</Text>
       </View>
-      <ScrollView>
-        <View style={{ height: data?.length < 5 ? 800 : 'auto' }}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={{ height: 800 }}>
           <LinearGradient
             colors={['#F2F2F2', '#3E5A47']}
             start={{ x: 0, y: 0.5 }}
@@ -49,30 +84,37 @@ export default function BuyerSelection({ navigation }) {
             }}>
             <Text style={styles.main_header}>KINDLY SELECT A WAREHOUSE!</Text>
             {data ? (
-              data.map((warehouse, index) => (
-                <TouchableOpacity
-                  key={warehouse.warehouse_id}
-                  style={styles.button_container}
-                  onPress={() => {
-                    setSession(prev => ({
-                      ...prev,
-                      selectedWarehouse: warehouse.warehouse_id
-                    })),
+              data.length > 0 ? (
+                data.map((warehouse, index) => (
+                  <TouchableOpacity
+                    key={warehouse.warehouse_id}
+                    style={styles.button_container}
+                    onPress={() => {
+                      setSession(prev => ({
+                        ...prev,
+                        selectedWarehouse: warehouse.warehouse_id,
+                        warehouseOwner: warehouse.warehouse_owner_id
+                      }));
                       navigation.navigate('Root');
-                  }}>
-                  <Text style={styles.button_header}>
-                    Warehouse {index + 1}
-                  </Text>
-                  <Text style={styles.button_value}>
-                    Warehouse Owner: {warehouse.warehouse_name}
-                  </Text>
-                  <Text style={styles.button_value}>
-                    Location: {warehouse.warehouse_location}
-                  </Text>
-                </TouchableOpacity>
-              ))
+                    }}>
+                    <Text style={styles.button_header}>
+                      Warehouse {index + 1}
+                    </Text>
+                    <Text style={styles.button_value}>
+                      Warehouse Owner: {warehouse.warehouse_name}
+                    </Text>
+                    <Text style={styles.button_value}>
+                      Location: {warehouse.warehouse_location}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.no_warehouses_text}>
+                  There are no current warehouses available yet.
+                </Text>
+              )
             ) : (
-              <View style={{marginTop: 100}}>
+              <View style={{ marginTop: 100 }}>
                 <ActivityIndicator
                   size={'large'}
                   color={'#3E5A47'}></ActivityIndicator>
@@ -128,5 +170,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 12,
     textAlign: 'center'
+  },
+  no_warehouses_text: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    textAlign: 'center',
+    marginTop: 50
   }
 });

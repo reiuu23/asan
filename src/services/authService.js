@@ -53,3 +53,17 @@ export const updateProfile = async (data, userId, token) => {
     throw error;
   }
 }
+
+
+export const sessionUpdate = async (userId, token) => {
+  try {
+    const response = await axiosInstance.get(`/api/v1/users/currentUser/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}

@@ -29,14 +29,20 @@ import BuyerStocks from '../screens/buyers/BuyerStocks';
 import BuyerAnalytics from '../screens/buyers/BuyerAnalytics';
 import BuyerProfile from '../screens/buyers/BuyerProfile';
 import BuyerSelection from '../screens/buyers/BuyerSelection';
+import Subscription from '../screens/shared/Subscription';
+import Verification from '../screens/shared/UserVerification';
 
 import {StyleSheet, View} from 'react-native';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 
 const TabGroup = () => {
   // Initialized a new bottom tab navigator.
 
   const Tab = createBottomTabNavigator();
+  
+  const { session } = useContext(AuthContext);
 
   return (
     <Tab.Navigator
@@ -45,7 +51,7 @@ const TabGroup = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: { height: 81 },
+        tabBarStyle: { height: 81 }
       }}>
       <Tab.Screen
         name="About"
@@ -58,17 +64,19 @@ const TabGroup = () => {
             </View>
           )
         }}></Tab.Screen>
-      <Tab.Screen
-        name="Chat"
-        component={BuyerChat}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-              <ChatIcon></ChatIcon>
-            </View>
-          )
-        }}></Tab.Screen>
+      {session.subscription_status === 1 && (
+        <Tab.Screen
+          name="Chat"
+          component={BuyerChat}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View
+                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+                <ChatIcon></ChatIcon>
+              </View>
+            )
+          }}></Tab.Screen>
+      )}
       <Tab.Screen
         name="Home"
         component={BuyerHome}
@@ -91,17 +99,19 @@ const TabGroup = () => {
             </View>
           )
         }}></Tab.Screen>
-      <Tab.Screen
-        name="Analytics"
-        component={BuyerAnalytics}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-              <StatsIcon></StatsIcon>
-            </View>
-          )
-        }}></Tab.Screen>
+      {session.subscription_status === 1 && (
+        <Tab.Screen
+          name="Analytics"
+          component={BuyerAnalytics}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View
+                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+                <StatsIcon></StatsIcon>
+              </View>
+            )
+          }}></Tab.Screen>
+      )}
     </Tab.Navigator>
   );
 };
@@ -111,22 +121,32 @@ export default function BuyerNavigation() {
 
   return (
     <Stack.Navigator
-      // initialRouteName="Selection"
+      initialRouteName="Selection"
       screenOptions={TransitionPresets.ModalSlideFromBottomIOS}>
       <Stack.Screen
         name="Selection"
         component={BuyerSelection}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Profile"
         component={BuyerProfile}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Root"
         component={TabGroup}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Subscription"
+        component={Subscription}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Verification"
+        component={Verification}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

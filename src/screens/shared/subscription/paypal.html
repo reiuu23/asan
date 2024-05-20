@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal Payment</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=AeJrkCd4NimWl72g9zzrB2WpYeOUGwWna6BGF3gGVjZRcYo00Kh7WQF8ETyuDisTJJ-x_gHZFAyzFruQ&currency=PHP"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .plan-details {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .plan-details h3 {
+            margin-top: 0;
+            color: #3E5A47;
+        }
+        .features {
+            list-style-type: none;
+            padding: 0;
+        }
+        .features li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="plan-details">
+        <h3 id="plan-name">Subscription Plan</h3>
+        <p id="plan-price"></p>
+        <ul class="features" id="plan-features">
+            <!-- Features will be injected here -->
+        </ul>
+    </div>
+    <div id="paypal-button-container"></div>
+    <script>
+        function sendMessageToReactNativeApp(message) {
+            window.ReactNativeWebView.postMessage(message);
+        }
+
+        // Plan details
+        const plans = {
+            monthly: {
+                name: 'Monthly Plan for Trading Plan',
+                price: '499.00',
+                currency: 'PHP',
+                features: [
+                    'Overview Storage',
+                    'Stocks',
+                    'Scrap Category',
+                    'Messages & Notification',
+                    'Account Verification',
+                    'Reports & Analytics'
+                ]
+            },
+            annual: {
+                name: 'Annual Plan for Trading Plan',
+                price: '5799.00',
+                currency: 'PHP',
+                features: [
+                    'Overview Storage',
+                    'Stocks',
+                    'Scrap Category',
+                    'Messages & Notification',
+                    'Account Verification',
+                    'Reports & Analytics'
+                ]
+            }
+        };
+
+         const urlParams = new URLSearchParams(window.location.search);
+        const planType = urlParams.get('plan');
+        
+        // Ensure valid plan type
+        if (!plans[planType]) {
+            sendMessageToReactNativeApp(JSON.stringify({ status: 'error', error: 'Invalid plan type' }));
+            throw new Error('Invalid plan type');
+        }
+
+        // Set plan details in the DOM
+        const selectedPlan = plans[planType];
+        document.getElementById('plan-name').textContent = selectedPlan.name;
+        document.getElementById('plan-price').textContent = `Price: ${selectedPlan.currency} ${selectedPlan.price}`;
+        const featuresList = document.getElementById('plan-features');
+        selectedPlan.features.forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = feature;
+            featuresList.appendChild(li);
+        });
+
+        // PayPal Buttons
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: selectedPlan.price,
+                            currency_code: selectedPlan.currency
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    const transactionDetails = {
+                        status: 'success',
+                        planId: selectedPlan.id,
+                        transactionId: details.id,
+                        transactionDate: details.create_time,
+                        amount: details.purchase_units[0].amount.value,
+                        currency: details.purchase_units[0].amount.currency_code,
+                        payer: details.payer,
+                    };
+                    sendMessageToReactNativeApp(JSON.stringify(transactionDetails));
+                });
+            },
+            onError: function(err) {
+                const errorDetails = {
+                    status: 'error',
+                    error: err
+                };
+                sendMessageToReactNativeApp(JSON.stringify(errorDetails));
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>

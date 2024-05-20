@@ -127,7 +127,7 @@ const ChannelScreen = (props) => {
                 padding: 20,
                 alignItems: 'center'
               }}>
-               {'<'}  Back
+               Back
             </Text>
           </TouchableOpacity>
           <Text
@@ -169,8 +169,15 @@ export default OwnerChat = () => {
   const { session } = useContext(AuthContext);
   const { clientIsReady } = useChatClient(session);
 
+  // const clientIsReady = false;
+
   if (!clientIsReady) {
-    return <ActivityIndicator size={'large'} color={'#3E5A47'}/>;
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 20}}>
+        <Text style={{fontFamily: 'Inter-Medium', color: '#3E5A47', fontSize: 16}}>Loading Chat</Text>
+        <ActivityIndicator size={'small'} color={'#3E5A47'} />
+      </View>
+    );
   }
 
   return (

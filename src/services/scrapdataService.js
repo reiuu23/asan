@@ -1,5 +1,4 @@
 import axiosInstance from './axiosInstance';
-import RNFetchBlob from 'rn-fetch-blob'; // Import RNFetchBlob for file handling
 
 export const createScrapData = async data => {
   const formData = new FormData();

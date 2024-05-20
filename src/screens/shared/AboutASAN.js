@@ -5,25 +5,41 @@ import {
   View,
   ScrollView,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import { AuthContext } from '../../context/AuthContext';
 
-export default function AboutASAN() {
+export default function AboutASAN({ navigation }) {
+
+  const { session } = useContext(AuthContext);
   return (
     <SafeAreaView>
       <View style={styles.top_bar__container}>
         <Text style={styles.top_bar__container_header}>About ASAN</Text>
       </View>
       <ScrollView>
+        {session.subscription_status === 0 && (
+          <View style={styles.subscriptionBox}>
+            <Text style={styles.subscriptionBoxHeader}>
+              Unlock All Features Now!
+            </Text>
+            <TouchableOpacity
+              style={styles.availButton}
+              onPress={() => navigation.navigate('Subscription')}>
+              <Text style={styles.availButtonText}>Avail Premium</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <LinearGradient
           colors={['#F2F2F2', '#3E5A47']}
-          start={{x: 0, y: 0.5}}
-          end={{x: 0, y: 0.9}}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 0, y: 0.9 }}
           style={{
             height: '100%',
             padding: 30,
-            marginBottom: 115,
+            marginBottom: 115
           }}>
           <View style={styles.about_section__header}>
             <Text style={styles.about_section__header_title}>The ASAN App</Text>
@@ -61,19 +77,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 25,
     paddingLeft: 20,
-    paddingRight: 20,
+    paddingRight: 20
   },
   top_bar__container_header: {
     alignSelf: 'center',
     color: '#FFFFFF',
     fontFamily: 'Inter-Bold',
-    fontSize: 26,
+    fontSize: 26
   },
   about_section__header_title: {
     color: '#365540',
     fontFamily: 'Inter-Bold',
     fontSize: 25,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   about_section__header: {
     borderColor: '#3E5A47',
@@ -81,7 +97,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 14,
     borderWidth: 1,
     padding: 20,
-    marginBottom: 30,
+    marginBottom: 30
   },
   about_section__header_content: {
     color: '#365540',
@@ -89,20 +105,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 5,
     marginBottom: 20,
-    textAlign: 'justify',
+    textAlign: 'justify'
   },
   about_section__body: {
     borderColor: '#3E5A47',
     borderWidth: 1,
     borderBottomLeftRadius: 14,
     borderBottomRightRadius: 14,
-    padding: 20,
+    padding: 20
   },
   about_section__body_title: {
     color: '#365540',
     fontFamily: 'Inter-Bold',
     fontSize: 25,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   about_section__body_content: {
     color: '#365540',
@@ -110,12 +126,42 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 5,
     marginBottom: 20,
-    textAlign: 'justify',
+    textAlign: 'justify'
   },
   about_section__image: {
     alignSelf: 'center',
     marginBottom: 20,
     resizeMode: 'contain',
-    width: '100%',
+    width: '100%'
   },
+  subscriptionBox: {
+    alignItems: 'center',
+    backgroundColor: '#5A7C65',
+    borderRadius: 20,
+    gap: 10,
+    height: 118,
+    justifyContent: 'center',
+    marginTop: 30,
+    marginHorizontal: 30,
+    elevation: 10
+  },
+  subscriptionBoxHeader: {
+    color: '#FFFFFF',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 20
+  },
+  availButton: {
+    alignItems: 'center',
+    backgroundColor: '#D9D9D9',
+    borderRadius: 20,
+    justifyContent: 'center',
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    elevation: 10
+  },
+  availButtonText: {
+    color: '#3A493F',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16
+  }
 });

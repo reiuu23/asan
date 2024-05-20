@@ -88,7 +88,7 @@ export default function OwnerAnalytics({ navigation, route }) {
         <ScrollView>
           <View style={analytics.stats_scrap_data_container}>
             {isToday ? (
-              dataSession.today_stacked_data ? (
+              dataSession.today_stacked_data.length !== 0 ? (
                 dataSession?.today_stacked_data.map((today, index) => {
                   return (
                     <View style={analytics.stats_scrap_data} key={index}>
@@ -119,7 +119,7 @@ export default function OwnerAnalytics({ navigation, route }) {
                   </Text>
                 </View>
               )
-            ) : dataSession.week_stacked_data ? (
+            ) : dataSession.week_stacked_data.length !== 0 ? (
               dataSession?.week_stacked_data.map((week, index) => {
                 return (
                   <View style={analytics.stats_scrap_data} key={index}>

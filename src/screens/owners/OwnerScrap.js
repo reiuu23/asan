@@ -14,16 +14,21 @@ import {
   Image,
   Dimensions,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 
 import { useForm, Controller } from 'react-hook-form';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { createScrapData, getScrapData, submitScrapData, updateScrapData, deleteScrapData } from '../../services/scrapdataService';
-import ImagePicker from 'react-native-image-crop-picker';
-import { BackButtonIcon, UploadIcon, CameraIcon, SearchIconVar } from '../../components/Icons';
+import { BackButtonIcon, UploadIcon, CameraIcon, SearchIconVar, MagnifyIcon } from '../../components/Icons';
 import { AuthContext } from '../../context/AuthContext';
 
-const OwnerScrap = () => {
+import Toast from 'react-native-toast-message';
+
+import ImagePicker from 'react-native-image-crop-picker';
+import _ from 'lodash';
+
+const OwnerScrap = ({ navigation }) => {
   const { session, fetchSummary } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -36,6 +41,11 @@ const OwnerScrap = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
+  // Search Functionality
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const debouncedSetSearchQuery = _.debounce(text => setSearchQuery(text), 300);
+
   // Fetch Scrap Data
 
   const fetchScrap = async () => {
@@ -45,8 +55,7 @@ const OwnerScrap = () => {
       setData(response);
       return true;
     } catch (error) {
-      console.log('Error: ', error.message);
-      Alert.alert('Encountered an error while retrieving the scrap data.', error.message);
+      errorToast('Encountered an error while retrieving the scrap data.');
       return false;
     }
   }
@@ -62,11 +71,26 @@ const OwnerScrap = () => {
       setRefreshing(false);
     } else {
       setRefreshing(false);
-      Alert.alert(
+      errorToast(
         'Encountered an error while refreshing the scrap data. Please try again later!'
       );
     }
   }
+
+  const errorToast = errorMsg => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg }
+    });
+  };
+
+  const successToast = successMsg => {
+    Toast.show({
+      type: 'successToast',
+      props: { success_message: successMsg }
+    });
+  };
+
 
   const {
     control,
@@ -95,6 +119,7 @@ const OwnerScrap = () => {
       {
         text: 'Yes',
         onPress: () => {
+          successToast('You have cancelled adding a scrap entry');
           setModalVisible(false);
           setIsEditModalVisible(false);
           setPreviewImage(null);
@@ -128,6 +153,7 @@ const OwnerScrap = () => {
             {
               text: 'No',
               onPress: () => {
+                successToast('You have successfully added a new scrap entry.');
                 setModalVisible(false);
                 setPreviewImage(null);
                 setSelected(null);
@@ -151,14 +177,11 @@ const OwnerScrap = () => {
         fetchScrap();
         fetchSummary(session.warehouseId, session.token);
       } else {
-        Alert.alert('Oops', `You haven't added a scrap photo/image yet!`);
+        errorToast("Oops', `You haven't added a scrap photo/category yet!");
       }
     } catch (error) {
       console.log(error);
-      Alert.alert(
-        'Oops',
-        `An error occured while adding your scrap entry`
-      );
+      errorToast('Oops, An error occured while adding your scrap entry');
     }
   };
 
@@ -238,7 +261,7 @@ const OwnerScrap = () => {
       {
         text: 'Cancel',
         onPress: () => {
-          console.log("Cancelled deletion.");
+          successToast("Cancelled deletion.");
         }
       }
     ]);
@@ -248,21 +271,14 @@ const OwnerScrap = () => {
     try {
       const response = await deleteScrapData(scrapId, session.token);
 
-      Alert.alert(
-        'Scrapdata Deleted',
-        `You have successfully deleted ${selectedScrapItem.scrap_name}.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              setIsEditModalVisible(false);
-              setPreviewImage(null);
-              setImage(null);
-              fetchScrap();
-            }
-          }
-        ]
+      successToast(
+        `You have successfully deleted: ${selectedScrapItem.scrap_name}.`
       );
+
+      setIsEditModalVisible(false);
+      setPreviewImage(null);
+      setImage(null);
+      fetchScrap();
 
       return response;
     } catch (error) {
@@ -378,26 +394,14 @@ const OwnerScrap = () => {
         session.token
       );
 
-      // Handle success response
-      Alert.alert(
-        'Scrap Entry Updated',
-        `You have successfully updated ${data.scrap_name}.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              setIsEditModalVisible(false);
-              setPreviewImage(null);
-              setImage(null);
-              fetchScrap();
-            }
-          }
-        ]
-      );
+      successToast(`You have successfully updated ${data.scrap_name}.`);
+      setIsEditModalVisible(false);
+      setPreviewImage(null);
+      setImage(null);
+      fetchScrap();
 
       return response;
     } catch (error) {
-      // Handle error
       Alert.alert(
         'Oops',
         `An error occurred while updating your scrap entry: ${error}`
@@ -473,15 +477,23 @@ const OwnerScrap = () => {
       <View style={styles.top_bar__container}>
         <View style={styles.top_bar_section}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
-            <BackButtonIcon />
+            <BackButtonIcon color={'#3E5A47'}/>
           </TouchableOpacity>
           <Text style={styles.top_bar__header}>Scrap</Text>
         </View>
         <View style={styles.top_bar_section}>
-          <TouchableOpacity style={styles.top_bar__searchbtn}>
-            <SearchIconVar />
-          </TouchableOpacity>
+          <View></View>
           <Text style={styles.top_bar__header}>Categories</Text>
+        </View>
+        <View style={styles.top_nav__searchbar_container}>
+          <View style={styles.top_nav__searchbar_icon}>
+            <MagnifyIcon/>
+          </View>
+          <TextInput
+            style={styles.top_nav__searchbar}
+            placeholder="Search"
+            placeholderTextColor={'#3E5A47'}
+            onChangeText={debouncedSetSearchQuery}></TextInput>
         </View>
       </View>
       <TouchableOpacity
@@ -508,6 +520,7 @@ const OwnerScrap = () => {
               {
                 text: 'Yes',
                 onPress: () => {
+                  successToast("You have cancelled adding a scrap entry");
                   setModalVisible(false);
                   setPreviewImage(null);
                   setImage(null);
@@ -767,9 +780,9 @@ const OwnerScrap = () => {
         }>
         {!groupData ? (
           <View style={styles.onEmptyList}>
-            <Text style={styles.emptyText}>
-              Start by tapping the "Add a New Scrap" button
-            </Text>
+            <ActivityIndicator
+              size={'large'}
+              color={'#3E5A47'}></ActivityIndicator>
           </View>
         ) : (
           <>
@@ -778,7 +791,11 @@ const OwnerScrap = () => {
                 <Text style={styles.categoryHeader}>{category}</Text>
                 <FlatList
                   horizontal
-                  data={items}
+                  data={items.filter(item =>
+                    item.scrap_name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase())
+                  )}
                   renderItem={renderScrapItem}
                   contentContainerStyle={{ paddingBottom: 40 }}
                   showsHorizontalScrollIndicator={false}
@@ -1007,8 +1024,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: 150,
     overflow: 'hidden',
-    numberOfLines: 1,
-    ellipsizeMode: 'tail'
   },
   row: {
     flexDirection: 'column',
@@ -1036,6 +1051,32 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter-Medium',
     textAlign: 'center'
+  },
+  top_nav__searchbar_container: {
+    backgroundColor: '#D9D9D9',
+    borderRadius: 5,
+    height: 40,
+    marginTop: 10
+  },
+  top_nav__searchbar: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    paddingLeft: 45,
+    paddingRight: 20
+  },
+  top_nav__searchbar_icon: {
+    position: 'absolute',
+    top: 12,
+    left: 15
+  },
+  top_nav__search_button: {
+    alignItems: 'center',
+    backgroundColor: '#3E5A47',
+    borderRadius: 8,
+    height: 35,
+    justifyContent: 'center',
+    width: 47
   }
 });
 

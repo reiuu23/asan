@@ -1,30 +1,29 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import {
   createStackNavigator,
   CardStyleInterpolators
 } from '@react-navigation/stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useChatClient } from '../../services/streamChatClient';
-import { ActivityIndicator, Text } from 'react-native';
-import { CustomChatProvider, useChatContext } from '../../context/ChatContext';
 import {
-  Chat,
-  OverlayProvider,
   ChannelList,
   Channel,
   MessageList,
   MessageInput,
   Thread,
-  ChannelAvatar
+  ChannelAvatar,
+  OverlayProvider,
+  Chat
 } from 'stream-chat-react-native';
 import { StreamChat } from 'stream-chat';
 import { AuthContext } from '../../context/AuthContext';
-import ChatHeader from '../../components/ChatHeader';
+import { CustomChatProvider, useChatContext } from '../../context/ChatContext';
+import { useNavigation } from '@react-navigation/native';
+import { STREAM_PB } from '../../../env';
+import { useChatClient } from '../../services/streamChatClient';
 
 const Stack = createStackNavigator();
 
-const chatClient = StreamChat.getInstance(process.env.STREAM_PB);
+const chatClient = StreamChat.getInstance(STREAM_PB);
 
 if (chatClient) {
   chatClient.disconnectUser();
@@ -33,6 +32,7 @@ if (chatClient) {
 const ChannelListScreen = props => {
   const { session } = useContext(AuthContext);
   const { setChannel } = useChatContext();
+  const navigation = useNavigation();
 
   const filters = {
     members: {
@@ -44,11 +44,26 @@ const ChannelListScreen = props => {
     last_message_at: -1
   };
 
+  const startDirectMessage = async targetUserId => {
+    try {
+      const channel = chatClient.channel('messaging', {
+        members: [session.userId, targetUserId]
+      });
+
+      await channel.watch();
+
+      setChannel(channel);
+      navigation.navigate('ChannelScreen');
+    } catch (error) {
+      console.error('Error starting direct message:', error);
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <View
         style={{
-          flex: 1,
+          flex: 1.5,
           padding: 15,
           backgroundColor: '#3E5A47',
           justifyContent: 'center'
@@ -59,8 +74,7 @@ const ChannelListScreen = props => {
             fontSize: 16,
             color: '#FFFFFF'
           }}>
-          Note: You'll only be able to interact with buyers who directly
-          messaged you.
+          Note: You'll only be able to interact with the direct owner of the scrapyard warehouse you selected!
         </Text>
       </View>
       <View style={{ flex: 8 }}>
@@ -84,6 +98,12 @@ const ChannelListScreen = props => {
           )}
         />
       </View>
+
+      {/* Button to initiate direct message */}
+      <TouchableOpacity style={{backgroundColor: '#3E5A47', padding: 20}}
+        onPress={() => startDirectMessage(session.warehouseOwner)}>
+        <Text style={{fontFamily: 'Inter-Medium', color: '#FFFFFF', textAlign: 'center'}}>Tap here to start messaging the Owner</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -137,7 +157,7 @@ const ChannelScreen = props => {
                 padding: 20,
                 alignItems: 'center'
               }}>
-              {'<'} Back
+               Back
             </Text>
           </TouchableOpacity>
           <Text
@@ -177,9 +197,29 @@ const ThreadScreen = props => {
 export default BuyerChat = () => {
   const { session } = useContext(AuthContext);
   const { clientIsReady } = useChatClient(session);
+  const navigation = useNavigation();
 
   if (!clientIsReady) {
-    return <ActivityIndicator size={'large'} color={'#3E5A47'} />;
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+          gap: 20
+        }}>
+        <Text
+          style={{
+            fontFamily: 'Inter-Medium',
+            color: '#3E5A47',
+            fontSize: 16
+          }}>
+          Loading Chat
+        </Text>
+        <ActivityIndicator size={'small'} color={'#3E5A47'} />
+      </View>
+    );
   }
 
   return (
@@ -188,9 +228,9 @@ export default BuyerChat = () => {
         <Chat client={chatClient}>
           <Stack.Navigator
             screenOptions={{
-              cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+              cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
             }}>
-            <Stack.Screen name="Messages" component={ChannelListScreen} />
+            <Stack.Screen options={{ headerLeft: () => null }} name="Messages" component={ChannelListScreen} />
             <Stack.Screen
               name="ChannelScreen"
               component={ChannelScreen}

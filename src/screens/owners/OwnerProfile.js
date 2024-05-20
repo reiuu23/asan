@@ -16,19 +16,16 @@ import { useForm, Controller } from 'react-hook-form';
 import { BackButtonIcon, EditIcon } from '../../components/Icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { AuthContext } from '../../context/AuthContext';
+import { updateProfile } from '../../services/authService';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import ImagePicker from 'react-native-image-crop-picker';
-import { updateProfile } from '../../services/authService';
+import Toast from 'react-native-toast-message';
 
 export default function OwnerProfile({ navigation }) {
-
   const { session, setSession } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
-  const [isUpdated, setIsUpdated] = useState(false);
-  const [profileData, setProfileData] = useState(null);
 
   const {
     control,
@@ -45,9 +42,9 @@ export default function OwnerProfile({ navigation }) {
   const onSubmit = async data => {
     try {
       setLoading(true);
-      console.log("submitted data: ", data);
+      console.log('submitted data: ', data);
 
-      console.log("last name: ", data.last_name);
+      console.log('last name: ', data.last_name);
       if (session.profile.last_name !== data.last_name) {
         formData.append('last_name', data.last_name);
       }
@@ -91,7 +88,7 @@ export default function OwnerProfile({ navigation }) {
         });
       }
 
-      if(formData._parts.length !== 0) {
+      if (formData._parts.length !== 0) {
         const response = await updateProfile(
           formData,
           session.profile.id,
@@ -109,24 +106,26 @@ export default function OwnerProfile({ navigation }) {
           profile: response.user
         }));
 
-        Alert.alert(
-          'Profile Update Status',
-          `You have successfully updated your profile!`,
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('Home');
-              }
-            }
-          ]
-        );
+        // Alert.alert(
+        //   'Profile Update Status',
+        //   `You have successfully updated your profile!`,
+        //   [
+        //     {
+        //       text: 'OK',
+        //       onPress: () => {
+        //         navigation.navigate('Home');
+        //       }
+        //     }
+        //   ]
+        // );
+
+        successToast('You have successfully updated your profile!');
+        navigation.navigate('Home');
         setLoading(false);
         return response;
       } else {
-        Alert.alert(
-          'Oops',
-          `No changes have been made on your profile. No updated fields found.`
+        errorToast(
+          'Oops, no changes have been made on your profile. No updated fields found.'
         );
         navigation.navigate('Home');
       }
@@ -134,16 +133,14 @@ export default function OwnerProfile({ navigation }) {
     } catch (message) {
       console.log('formdata: ', formData);
       setLoading(false);
-      if(formData._parts.length !== 0) {
-        Alert.alert(
-          'Oops',
-          `An error occurred while updating your profile. Please try again later.\n\nError: ${message}`
+      if (formData._parts.length !== 0) {
+        errorToast(
+          `An error occurred while updating your profile : ${message}`
         );
       } else {
         navigation.navigate('Home');
-        Alert.alert(
-          'Oops',
-          `No changes have been made on your profile. No updated fields found.`
+        errorToast(
+          'Oops, no changes have been made on your profile. No updated fields found.'
         );
       }
     }
@@ -158,12 +155,12 @@ export default function OwnerProfile({ navigation }) {
       mediaType: 'photo'
     })
       .then(image => {
-        console.log('selected image: ', image);
         setImage(image);
+        successToast('You have selected an image.');
         setNewImage(image);
       })
       .catch(error => {
-        console.log('ImagePicker Error: ', error);
+        console.log(error);
       });
   };
 
@@ -176,12 +173,12 @@ export default function OwnerProfile({ navigation }) {
       mediaType: 'photo'
     })
       .then(image => {
-        console.log('camera image: ', image);
         setImage(image);
+        successToast('You have selected an image.');
         setNewImage(image);
       })
       .catch(error => {
-        console.log('Camera Error: ', error);
+        console.log(error);
       });
   };
 
@@ -197,17 +194,33 @@ export default function OwnerProfile({ navigation }) {
         },
         {
           text: 'Use Camera',
-          onPress: () => handleOpenCamera(),
+          onPress: () => handleOpenCamera()
         },
         {
           text: 'Cancel',
           onPress: () => {
-            Alert.alert('Cancelled', 'You have successfully cancelled uploading a new profile photo.')
+            successToast('You have successfully cancelled adding a photo.');
           }
         }
       ]
     );
-  }
+  };
+
+  // Error Toast
+
+  const errorToast = errorMsg => {
+    Toast.show({
+      type: 'errorToast',
+      props: { error_message: errorMsg }
+    });
+  };
+
+  const successToast = successMsg => {
+    Toast.show({
+      type: 'successToast',
+      props: { success_message: successMsg }
+    });
+  };
 
   return (
     <ScrollView>
@@ -423,6 +436,7 @@ export default function OwnerProfile({ navigation }) {
                   { text: 'Yes', onPress: () => navigation.goBack() }
                 ]
               );
+              successToast('Cancelled profile update');
             }}
             style={styles.formCancelBtn}>
             <Text style={styles.formCancelBtnText}>Cancel</Text>

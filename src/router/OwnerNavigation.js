@@ -33,7 +33,7 @@ import Categories from '../screens/owners/OwnerScrap';
 import Stocks from '../screens/owners/OwnerStocks';
 import Analytics from '../screens/owners/OwnerAnalytics';
 import Plans from '../screens/shared/Subscription';
-
+import Subscription from '../screens/shared/Subscription';
 import About from '../screens/shared/AboutASAN';
 import Chat from '../screens/owners/OwnerChat';
 import Home from '../screens/owners/OwnerHome';
@@ -50,8 +50,6 @@ import {
   ChatIcon,
   CheckIcon,
   HomeIcon,
-  NotifBellIcon,
-  SidebarAnalytics,
   SidebarCategories,
   SidebarHome,
   SidebarLogout,
@@ -61,8 +59,10 @@ import {
 import { AuthContext } from '../context/AuthContext';
 
 const CustomDrawerContent = props => {
+
   const { session, setSession, dataSession } = useContext(AuthContext);
-  console.log(session);
+
+  console.log('session data: ', session);
   return (
     <>
       <View style={{ marginTop: 50 }}>
@@ -75,21 +75,35 @@ const CustomDrawerContent = props => {
             justifyContent: 'center'
           }}
           onPress={() => props.navigation.navigate('Profile')}>
-          <Image
-            style={{
-              borderRadius: 50,
-              borderWidth: 5,
-              borderColor: '#3E5A47',
-              width: '100%',
-              height: '100%',
-              marginLeft: 35,
-              resizeMode: 'contain'
-            }}
-            source={{
-              uri: session.userImage
-                ? session.userImage
-                : require('../assets/img/placeholderUser.jpg')
-            }}></Image>
+          {session ? (
+            session.userImage ? (
+              <Image
+                style={{
+                  borderRadius: 50,
+                  borderWidth: 5,
+                  borderColor: '#3E5A47',
+                  width: '100%',
+                  height: '100%',
+                  marginLeft: 35,
+                  resizeMode: 'contain'
+                }}
+                source={{ uri: session.userImage }}></Image>
+            ) : (
+              <Image
+                style={{
+                  borderRadius: 50,
+                  borderWidth: 5,
+                  borderColor: '#3E5A47',
+                  width: '100%',
+                  height: '100%',
+                  marginLeft: 35,
+                  resizeMode: 'contain'
+                }}
+                source={require('../assets/img/placeholderUser.jpg')}></Image>
+            )
+          ) : (
+            <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+          )}
         </TouchableOpacity>
         <Text
           style={{
@@ -103,45 +117,70 @@ const CustomDrawerContent = props => {
           }}>
           {session.firstName}
         </Text>
-        <Text
-          style={{
-            fontFamily: 'Inter-Bold',
-            fontSize: 14,
-            // textAlign: 'center',
-            color: '#3E5A47',
-            marginTop: 20,
-            marginLeft: 20
-          }}>
-          Account Status:
-        </Text>
-        {session.verificationStatus === 1 && (
-          <Text
-            style={{
-              fontFamily: 'Inter-Medium',
-              fontSize: 14,
-              // textAlign: 'center',
-              color: '#3E5A47',
-              marginTop: 20,
-              marginLeft: 20
-            }}>
-            Ongoing Verification
-          </Text>
-        )}
-        {session.verificationStatus === 2 && (
-          <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 15,marginTop: 20}}>
-            <CheckIcon color={'#3E5A47'} />
-            <Text
-              style={{
-                fontFamily: 'Inter-Medium',
-                fontSize: 14,
-                // textAlign: 'center',
-                color: '#3E5A47',
-                marginLeft: 5
-              }}>
-              Account Verified
-            </Text>
-          </View>
-        )}
+        {session.verificationStatus !== 0 ? (
+          session.subscription_status === 1 && (
+            <>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Bold',
+                  fontSize: 14,
+                  // textAlign: 'center',
+                  color: '#3E5A47',
+                  marginTop: 20,
+                  marginLeft: 20
+                }}>
+                Account Status:
+              </Text>
+              {session.verificationStatus === 0 && (
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontSize: 14,
+                    // textAlign: 'center',
+                    color: '#3E5A47',
+                    marginTop: 20,
+                    marginLeft: 20
+                  }}>
+                  Not Yet Verified
+                </Text>
+              )}
+              {session.verificationStatus === 1 && (
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontSize: 14,
+                    // textAlign: 'center',
+                    color: '#3E5A47',
+                    marginTop: 20,
+                    marginLeft: 20
+                  }}>
+                  Ongoing Verification
+                </Text>
+              )}
+              {session.verificationStatus === 2 && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 15,
+                    marginTop: 20
+                  }}>
+                  <CheckIcon color={'#3E5A47'} />
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Medium',
+                      fontSize: 14,
+                      // textAlign: 'center',
+                      color: '#3E5A47',
+                      marginLeft: 5
+                    }}>
+                    Account Verified
+                  </Text>
+                </View>
+              )}
+            </>
+          )
+        ) : ('')}
       </View>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
@@ -180,6 +219,8 @@ const CustomDrawerContent = props => {
 const BottomTab = () => {
   const Tab = createBottomTabNavigator();
 
+  const { session } = useContext(AuthContext);
+
   return (
     <Tab.Navigator
       initialRouteName="Home1"
@@ -205,19 +246,24 @@ const BottomTab = () => {
             </View>
           )
         }}></Tab.Screen>
-      <Tab.Screen
-        name="Chat"
-        component={Chat}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-              <ChatIcon></ChatIcon>
-            </View>
-          )
-        }}></Tab.Screen>
+      {session.subscription_status === 1 && (
+        <Tab.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View
+                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+                <ChatIcon></ChatIcon>
+              </View>
+            )
+          }}></Tab.Screen>
+      )}
       <Tab.Screen
         name="Home1"
+        backBehavior={() => {
+          Alert.alert();
+        }}
         component={Home}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -227,7 +273,7 @@ const BottomTab = () => {
             </View>
           )
         }}></Tab.Screen>
-      <Tab.Screen
+      {session.subscription_status === 1 && <Tab.Screen
         name="Analytics"
         component={Analytics}
         options={{
@@ -237,18 +283,7 @@ const BottomTab = () => {
               <AnalyticsBottomIcon></AnalyticsBottomIcon>
             </View>
           )
-        }}></Tab.Screen>
-      <Tab.Screen
-        name="Notifications"
-        component={Notifications}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-              <NotifBellIcon></NotifBellIcon>
-            </View>
-          )
-        }}></Tab.Screen>
+        }}></Tab.Screen>}
     </Tab.Navigator>
   );
 };
@@ -280,7 +315,7 @@ const Sidebar = () => {
         contentContainerStyle: { paddingVertical: 0 }
       }}
       drawerContent={props => <CustomDrawerContent {...props} />}>
-      {session.verificationStatus === 0 && (
+      {session.verificationStatus === 0 && session.subscription_status === 1 && (
         <Drawer.Screen
           name="Verify"
           component={Verify}
@@ -302,7 +337,7 @@ const Sidebar = () => {
               borderRadius: 10,
               width: '90%',
               height: 45,
-              marginBottom: 50,
+              marginBottom: 20,
               gap: 0
             }
           }}
@@ -364,6 +399,11 @@ export default function OwnerNavigation() {
       <Stack.Screen
         name="Root"
         component={Sidebar}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Subscription"
+        component={Subscription}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

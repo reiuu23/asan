@@ -24,10 +24,10 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { getWarehouseSummary } from '../../services/scrapdataService';
 
 export default function BuyerStocks({ navigation }) {
-
-  const { session, dataSession } = useContext(AuthContext);
+  const { session } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const emptyData = require('../../data/analytics.json');
 
@@ -40,30 +40,31 @@ export default function BuyerStocks({ navigation }) {
       setData(response);
     } catch (error) {
       console.log('Error: ', error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   useEffect(() => {
     fetchSummary();
   }, []);
 
-  const renderItem = ({ item }) => {
-    return (
-      <View style={styles.scraps__table_right_value_container}>
+  const renderItem = ({ item }) => (
+    <View style={styles.scraps__table_right_value_container}>
+      {loading ? (
+        <ActivityIndicator size="small" color="#F4F5F4" />
+      ) : (
         <Text style={styles.scraps__table_right_column_value}>
           {item.total_weight}
         </Text>
-      </View>
-    );
-  };
+      )}
+    </View>
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchSummary(session.selectedWarehouse, session.token);
+    setLoading(true);
+    fetchSummary();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
@@ -138,13 +139,19 @@ export default function BuyerStocks({ navigation }) {
                 ]}>
                 Total Weight (kg)
               </Text>
-              {data && (
+              {loading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#F4F5F4"
+                  style={{ marginTop: 20 }}
+                />
+              ) : (
                 <FlatList
                   data={
-                    data.weight_stacked_data.length === 0
+                    data?.weight_stacked_data.length === 0
                       ? emptyData
-                      : data.weight_stacked_data
-                  } // find a way to filter this data first before rendering. (FINAL HINT)
+                      : data?.weight_stacked_data
+                  }
                   renderItem={renderItem}
                   scrollEnabled={false}
                   keyExtractor={item => item.scrap_category}

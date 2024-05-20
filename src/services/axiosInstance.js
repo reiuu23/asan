@@ -17,18 +17,16 @@ axiosInstance.interceptors.response.use(
     if (error.response) {
       const { status, data } = error.response;
       console.log('Error response:', data); // Log the error response
-      let errorMessage = '';
-      if (status >= 400 && status < 500) {
-        errorMessage = `Client error ${status}: ${
-          data.message || 'Unknown error'
-        }`;
-      } else if (status >= 500 && status < 600) {
-        errorMessage = `Server error ${status}: ${
-          data.message || 'Unknown error'
-        }`;
+      let errorMessages = [];
+
+      if (data.errors) {
+        Object.keys(data.errors).forEach(key => {
+          const errorArray = data.errors[key];
+          errorMessages = errorMessages.concat(errorArray);
+        });
       }
 
-      throw new Error(errorMessage);
+      throw new Error(errorMessages);
     } else if (error.request) {
       throw new Error('No response from server');
     } else {
