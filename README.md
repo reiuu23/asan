@@ -1,4 +1,4 @@
-Welcome to the WMS (Warehouse Management System) User Manual. This guide will
+Welcome to the ASAN WMS (Warehouse Management System) User Manual. This guide will
 help you navigate and utilize the key features of the WMS efficiently. There are three types
 of accounts within the WMS: Owner, Buyer, and Administrator. Each account type has
 specific functionalities designed to cater to different roles within the system.
