@@ -264,33 +264,28 @@ export default function BuyerProfile({ navigation }) {
                 marginLeft: 10,
                 marginBottom: 20
               }}>
-              {session.verificationStatus !== 0
-                ? session.subscription_status === 1 && (
-                    <>
-                      <Text style={styles.verificationText}>
-                        {' '}
-                        Account Status:{' '}
-                      </Text>
-                      {session.verificationStatus === 0 && (
-                        <Text style={styles.verificationText}>Unverified</Text>
-                      )}
-                      {session.verificationStatus === 1 && (
-                        <Text style={styles.verificationText}>Ongoing</Text>
-                      )}
-                      {session.verificationStatus === 2 && (
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginLeft: 15
-                          }}>
-                          <CheckIcon color={'#3E5A47'} />
-                          <Text style={styles.verificationText}>Verified</Text>
-                        </View>
-                      )}
-                    </>
-                  )
-                : ''}
+              {session.verificationStatus !== 0 && (
+                <>
+                  <Text style={styles.verificationText}> Account Status: </Text>
+                  {session.verificationStatus === 0 && (
+                    <Text style={styles.verificationText}>Unverified</Text>
+                  )}
+                  {session.verificationStatus === 1 && (
+                    <Text style={styles.verificationText}>Ongoing</Text>
+                  )}
+                  {session.verificationStatus === 2 && (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginLeft: 15
+                      }}>
+                      <CheckIcon color={'#3E5A47'} />
+                      <Text style={styles.verificationText}>Verified</Text>
+                    </View>
+                  )}
+                </>
+              )}
             </View>
             <Text style={styles.formInputHeader}>Last Name</Text>
             <Controller
