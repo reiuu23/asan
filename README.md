@@ -1,79 +1,73 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+Welcome to the WMS (Warehouse Management System) User Manual. This guide will
+help you navigate and utilize the key features of the WMS efficiently. There are three types
+of accounts within the WMS: Owner, Buyer, and Administrator. Each account type has
+specific functionalities designed to cater to different roles within the system.
 
-# Getting Started
+1. Owner Account - As an Owner, you have access to the following features:
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+   Input Daily Scrap
 
-## Step 1: Start the Metro Server
+      a. Login to your Owner account.
+      b. Navigate to the Daily Scrap Input section from the main dashboard.
+      c. Enter the Date, Type of Scrap, Quantity, and any additional notes.
+      d. Click Submit to save the entry.
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+   View Weekly Scrap
 
-To start Metro, run the following command from the _root_ of your React Native project:
+      a. Steps to View Weekly Scrap:
+      b. Login to your Owner account.
+      c. Navigate to the Weekly Scrap section from the main dashboard.
+      d. Select the desired Week from the dropdown menu.
+      e. Review the summarized data for the selected week.
 
-```bash
-# using npm
-npm start
+   View Overall Scrapyard Stock
 
-# OR using Yarn
-yarn start
-```
+      a. Steps to View Overall Scrapyard Stock:
+      b. Login to your Owner account.
+      c. Navigate to the Overall Scrapyard Stock section from the main
+      dashboard.
+      d. View the total stock levels across all categories and scrapyards.
 
-## Step 2: Start your Application
+   View Weekly Scrap Statistics
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+      a. Login to your Owner account.
+      b. Navigate to the Weekly Scrap Statistics section from the main
+      dashboard.
+      c. Review charts and graphs to understand trends and patterns.
 
-### For Android
+2. Buyer account - As a Buyer, you have access to the following features:
 
-```bash
-# using npm
-npm run android
+   Perform Warehouse Selection
 
-# OR using Yarn
-yarn android
-```
+      a. Login to your Buyer account.
+      b. Navigate to the Warehouse Selection section from the main dashboard.
+      c. Browse the list of available warehouses.
+      d. Select a warehouse to view its details and make your choice.
 
-### For iOS
+   View Overall Stock
 
-```bash
-# using npm
-npm run ios
+      a. Login to your Buyer account.
+      b. Navigate to the Overall Stock section from the main dashboard.
+      c. View the total available stock across all warehouses.
 
-# OR using Yarn
-yarn ios
-```
+   View Categories of Each Scrapyard
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+      a. Login to your Buyer account.
+      b. Navigate to the Scrapyard Categories section from the main
+      dashboard.
+      157
+      c. Select a scrapyard to view its categories and available stock within
+      each category.
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+3. Administrator Account - As an Administrator, you have access to the following
+features:
 
-## Step 3: Modifying your App
+   User/Account Management
 
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+      a. Login to your Administrator account.
+      b. Navigate to the User Management section from the main dashboard.
+      c. View the list of current users.
+      d. Add new users by clicking Add User and filling in the necessary
+      details.
+      e. Edit existing user information by selecting a user and clicking Edit.
+      f. Deactivate or delete users as needed.
