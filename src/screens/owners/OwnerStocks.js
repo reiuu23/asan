@@ -63,78 +63,90 @@ export default function OwnerStocks({ navigation }) {
         </TouchableOpacity>
         <Text style={styles.top_bar__container_header}>Stocks</Text>
       </View>
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={['#3E5A47']}
-          />
-        }
-        >
-        <View style={{ padding: 40, marginBottom: 120 }}>
-          <View style={styles.scraps__table}>
-            <View style={styles.scraps__table_left_column}>
-              <Text style={styles.scraps__table_index}>Types</Text>
-              <View style={styles.scrapStock__icons}>
-                <PlasticCatIcon color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>Plastic</Text>
+      {session.subscription_status === 1 ? (
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#3E5A47']}
+            />
+          }>
+          <View style={{ padding: 40, marginBottom: 120 }}>
+            <View style={styles.scraps__table}>
+              <View style={styles.scraps__table_left_column}>
+                <Text style={styles.scraps__table_index}>Types</Text>
+                <View style={styles.scrapStock__icons}>
+                  <PlasticCatIcon color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>Plastic</Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <WhitePaperCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    White Paper
+                  </Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <SelectedPaperCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    Selected Paper
+                  </Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <KartonCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    Karton Paper
+                  </Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <MixedPaperCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    Mixed Paper
+                  </Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <SolidMetalCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    Solid Metal
+                  </Text>
+                </View>
+                <View style={styles.scrapStock__icons}>
+                  <AssortedMetalCat color={'#3E5A47'} />
+                  <Text style={styles.scraps__table_scrap_header}>
+                    Assorted Metal
+                  </Text>
+                </View>
               </View>
-              <View style={styles.scrapStock__icons}>
-                <WhitePaperCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  White Paper
+              <View style={styles.scraps__table_right_column}>
+                <Text
+                  style={[
+                    styles.scraps__table_index,
+                    styles.scraps__table_index_right
+                  ]}>
+                  Total Weight (kg)
                 </Text>
+                <FlatList
+                  data={dataSession?.weight_stacked_data} // find a way to filter this data first before rendering. (FINAL HINT)
+                  renderItem={renderItem}
+                  scrollEnabled={false}
+                  keyExtractor={item => item.scrap_category}
+                />
               </View>
-              <View style={styles.scrapStock__icons}>
-                <SelectedPaperCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  Selected Paper
-                </Text>
-              </View>
-              <View style={styles.scrapStock__icons}>
-                <KartonCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  Karton Paper
-                </Text>
-              </View>
-              <View style={styles.scrapStock__icons}>
-                <MixedPaperCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  Mixed Paper
-                </Text>
-              </View>
-              <View style={styles.scrapStock__icons}>
-                <SolidMetalCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  Solid Metal
-                </Text>
-              </View>
-              <View style={styles.scrapStock__icons}>
-                <AssortedMetalCat color={'#3E5A47'} />
-                <Text style={styles.scraps__table_scrap_header}>
-                  Assorted Metal
-                </Text>
-              </View>
-            </View>
-            <View style={styles.scraps__table_right_column}>
-              <Text
-                style={[
-                  styles.scraps__table_index,
-                  styles.scraps__table_index_right
-                ]}>
-                Total Weight (kg)
-              </Text>
-              <FlatList
-                data={dataSession?.weight_stacked_data} // find a way to filter this data first before rendering. (FINAL HINT)
-                renderItem={renderItem}
-                scrollEnabled={false}
-                keyExtractor={item => item.scrap_category}
-              />
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      ) : (
+        <Text
+          style={{
+            fontSize: 18,
+            fontFamily: 'Inter-Medium',
+            color: '#3E5A47',
+            padding: 40,
+            textAlign: 'center'
+          }}>
+          Unlock this feature by purchasing the Trading (Premium) Plan
+        </Text>
+      )}
     </SafeAreaView>
   );
 }

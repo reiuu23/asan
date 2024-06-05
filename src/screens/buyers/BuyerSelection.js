@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  TextInput
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 import { index } from '../../services/warehouseService';
@@ -20,6 +21,8 @@ import useCustomFetch from '../../hooks/useCustomFetch';
 export default function BuyerSelection({ navigation }) {
   const { session, setSession } = useContext(AuthContext);
   const [data, setData] = useState(null);
+  const [filteredData, setFilteredData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
@@ -48,6 +51,7 @@ export default function BuyerSelection({ navigation }) {
     try {
       const response = await index(session.token);
       setData(response);
+      setFilteredData(response);
     } catch (error) {
       console.log('Error retrieving warehouse data: ', error);
     }
@@ -59,6 +63,22 @@ export default function BuyerSelection({ navigation }) {
     setRefreshing(false);
   };
 
+  const handleSearch = query => {
+    setSearchQuery(query);
+    if (data) {
+      const filtered = data.filter(
+        warehouse =>
+          warehouse.warehouse_name
+            .toLowerCase()
+            .includes(query.toLowerCase()) ||
+          warehouse.warehouse_location
+            .toLowerCase()
+            .includes(query.toLowerCase())
+      );
+      setFilteredData(filtered);
+    }
+  };
+
   useEffect(() => {
     retrieveWarehouseList();
   }, []);
@@ -68,11 +88,17 @@ export default function BuyerSelection({ navigation }) {
       <View style={styles.top_bar__container}>
         <Text style={styles.top_bar__container_header}>Welcome!</Text>
       </View>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search by warehouse name or location"
+        value={searchQuery}
+        onChangeText={handleSearch}
+      />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <View style={{ height: 800 }}>
+        <View style={{ marginBottom: 30 }}>
           <LinearGradient
             colors={['#F2F2F2', '#3E5A47']}
             start={{ x: 0, y: 0.5 }}
@@ -80,12 +106,13 @@ export default function BuyerSelection({ navigation }) {
             style={{
               height: '100%',
               padding: 30,
-              marginBottom: 115
+              // borderWidth: 1,
+              marginBottom: 800
             }}>
             <Text style={styles.main_header}>KINDLY SELECT A WAREHOUSE!</Text>
-            {data ? (
-              data.length > 0 ? (
-                data.map((warehouse, index) => (
+            {filteredData ? (
+              filteredData.length > 0 ? (
+                filteredData.map((warehouse, index) => (
                   <TouchableOpacity
                     key={warehouse.warehouse_id}
                     style={styles.button_container}
@@ -98,10 +125,7 @@ export default function BuyerSelection({ navigation }) {
                       navigation.navigate('Root');
                     }}>
                     <Text style={styles.button_header}>
-                      Warehouse {index + 1}
-                    </Text>
-                    <Text style={styles.button_value}>
-                      Warehouse Owner: {warehouse.warehouse_name}
+                      {warehouse.warehouse_name}
                     </Text>
                     <Text style={styles.button_value}>
                       Location: {warehouse.warehouse_location}
@@ -110,7 +134,7 @@ export default function BuyerSelection({ navigation }) {
                 ))
               ) : (
                 <Text style={styles.no_warehouses_text}>
-                  There are no current warehouses available yet.
+                  No warehouses found.
                 </Text>
               )
             ) : (
@@ -142,12 +166,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: 26
   },
+  searchBar: {
+    borderColor: '#3E5A47',
+    borderWidth: 1,
+    borderRadius: 5,
+    fontFamily: 'Inter-Medium',
+    margin: 20,
+    paddingVertical: 10,
+    paddingLeft: 20
+  },
   main_header: {
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
     fontSize: 20,
     textAlign: 'center',
-    marginTop: 30,
     marginBottom: 20
   },
   button_container: {

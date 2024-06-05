@@ -66,27 +66,17 @@ export default function RegistrationForm({ navigation, route }) {
 
       setLoading(false);
 
-      console.log(JSON.stringify(response, null, 2));
-
-      // Alert.alert(
-      //   'Welcome aboard!',
-      //   'You have successfully signed up. Get ready to explore and experience all that our platform has to offer!'
-      // );
+      console.log(response);
 
       successToast('Welcome aboard! You have successfully signed up.');
 
       navigation.navigate('Login');
     } catch (error) {
-      console.error(error);
-      // Alert.alert(
-      //   'Sign-up failed',
-      //   'Encountered an error while trying to register your account, try again later!.'
-      // );
-
+      console.log(error);
       errorToast(
-        'Encountered an error while trying to register your account, try again later!'
+        'The email/username you used has been already registered in our application!'
       );
-      
+
       setLoading(false);
     }
     setLoading(false);

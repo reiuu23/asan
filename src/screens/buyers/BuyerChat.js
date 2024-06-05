@@ -21,6 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import { STREAM_PB } from '../../../env';
 import { useChatClient } from '../../services/streamChatClient';
 
+import LockScreen from '../shared/LockScreen';
 const Stack = createStackNavigator();
 
 const chatClient = StreamChat.getInstance(STREAM_PB);
@@ -33,6 +34,14 @@ const ChannelListScreen = props => {
   const { session } = useContext(AuthContext);
   const { setChannel } = useChatContext();
   const navigation = useNavigation();
+
+  const [isLocked, setisLocked] = useState(true);
+
+  useEffect(() => {
+    if(session?.verificationStatus === 2 && session?.subscription_status === 1) {
+      setisLocked(false);
+    }
+  }, []);
 
   const filters = {
     members: {
@@ -64,45 +73,62 @@ const ChannelListScreen = props => {
       <View
         style={{
           flex: 1.5,
-          padding: 15,
+          padding: 20,
           backgroundColor: '#3E5A47',
           justifyContent: 'center'
         }}>
-        <Text
-          style={{
-            fontFamily: 'Inter-Medium',
-            fontSize: 16,
-            color: '#FFFFFF'
-          }}>
-          Note: You'll only be able to interact with the direct owner of the scrapyard warehouse you selected!
-        </Text>
+        {!isLocked ? (
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontSize: 16,
+              color: '#FFFFFF'
+            }}>
+            Note: You'll only be able to interact with the direct owner of the
+            scrapyard warehouse, excluding started histories with other
+            scrapyard owners.
+          </Text>
+        ) : (
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontSize: 16,
+              color: '#FFFFFF'
+            }}>
+            Note: This feature is only available with the Trading Plan and Verified Accounts (Premium).
+          </Text>
+        )}
       </View>
       <View style={{ flex: 8 }}>
         <ChannelList
           filters={filters}
           sort={sort}
           onSelect={channel => {
-            const { navigation } = props;
-            setChannel(channel);
-            navigation.navigate('ChannelScreen');
+            if (isLocked) {
+              console.log('locked');
+            } else {
+              const { navigation } = props;
+              setChannel(channel);
+              navigation.navigate('ChannelScreen');
+            }
           }}
-          PreviewAvatar={({ channel }) => (
-            <TouchableOpacity
-              disallowInterruption={true}
-              onPress={() => {
-                // console.log('hello');
-                // console.log('test: ', channel);
-              }}>
-              <ChannelAvatar channel={channel} />
-            </TouchableOpacity>
-          )}
+          PreviewAvatar={({ channel }) => <ChannelAvatar channel={channel} />}
         />
       </View>
 
       {/* Button to initiate direct message */}
-      <TouchableOpacity style={{backgroundColor: '#3E5A47', padding: 20}}
+      <TouchableOpacity
+        style={{ backgroundColor: '#3E5A47', padding: 20 }}
+        disabled={isLocked}
         onPress={() => startDirectMessage(session.warehouseOwner)}>
-        <Text style={{fontFamily: 'Inter-Medium', color: '#FFFFFF', textAlign: 'center'}}>Tap here to start messaging the Owner</Text>
+        <Text
+          style={{
+            fontFamily: 'Inter-Medium',
+            color: '#FFFFFF',
+            textAlign: 'center'
+          }}>
+          {!isLocked ? 'Tap here to start messaging the Owner' : 'Your account must be verified and have the trading plan unlocked to start chatting'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

@@ -60,6 +60,7 @@ export default function LoginForm({ navigation, route }) {
         profile: response.user,
         subPlan: null,
         selectedWarehouse: null,
+        subscription: response.subscription,
         subscription_status: response.subscription.subscription_status
       });
       

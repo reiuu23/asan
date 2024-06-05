@@ -9,6 +9,7 @@ import MonthlySubscription from './subscription/MonthlySubscription';
 import AnnualSubscription from './subscription/AnnualSubscription';
 import PayPalPaymentScreen from './subscription/PaypalPaymentScreen';
 import { BackButtonIcon } from '../../components/Icons';
+import { AuthContext } from '../../context/AuthContext';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createStackNavigator();
@@ -58,13 +59,34 @@ function MainStack() {
 }
 
 export default function Subscription({ navigation }) {
+
+  const { session } = React.useContext(AuthContext);
+
+  console.log("session (payments): ", session);
+
   return (
     <SafeAreaProvider>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <BackButtonIcon color={'#3E5A47'} />
         </TouchableOpacity>
-        <Text style={styles.topHeader}>Upgrade to Premium</Text>
+        {session.subscription_status === 0 ? (
+          <Text style={styles.topHeader}>Upgrade to Premium</Text>
+        ) : (
+          <Text style={styles.topHeader}>Trading Plan (Active)</Text>
+        )}
+      </View>
+      <View style={styles.subscriptionStatusWrapper}>
+        <Text style={styles.subscriptionStatusHeader}>
+          Subscription Status:
+        </Text>
+        {session.subscription_status === 0 ? (
+          <Text style={styles.subscriptionStatusValue}>Inactive</Text>
+        ) : (
+          <Text style={styles.subscriptionStatusValue}>
+            Renews on {session.subscription.subscription_end_date}
+          </Text>
+        )}
       </View>
       <MainStack />
     </SafeAreaProvider>
@@ -85,5 +107,24 @@ const styles = StyleSheet.create({
     color: '#3E5A47',
     fontFamily: 'Inter-Bold',
     fontSize: 22
+  },
+  subscriptionStatusWrapper: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly'
+  },
+  subscriptionStatusHeader: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    textAlign: 'right',
+  },
+  subscriptionStatusValue: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    textAlign: 'right',
   }
 });

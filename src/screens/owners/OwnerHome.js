@@ -57,13 +57,16 @@ export default function OwnerHome({ navigation, route }) {
   const sessionRefetch = async () => {
     try {
       const response = await sessionUpdate(session.profile.id, session.token);
-      setSession(prev => ({
-        ...prev,
-        profile: response?.user,
-        subscription_status: response?.subscription.subscription_status,
-        token: response?.token,
-        verificationStatus: response?.user.verification_status
-      }));
+      if (response) {
+        setSession(prev => ({
+          ...prev,
+          profile: response?.user,
+          verificationStatus: response?.user.verification_status,
+          subscription_status: response?.subscription.subscription_status,
+          subscription: response?.subscription,
+          token: response?.token
+        }));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -114,7 +117,10 @@ export default function OwnerHome({ navigation, route }) {
             <View style={styles.overview}>
               <Text style={styles.overviewHeader}>Overview</Text>
               <View style={styles.overviewStats}>
-                <View style={styles.currentScraps}>
+                <TouchableOpacity
+                  style={styles.currentScraps}
+                  disabled={session.subscription_status === 1 ? false : true}
+                  onPress={() => navigation.navigate('Analytics')}>
                   <View style={styles.scrapsStat}>
                     <Text style={styles.scrapsStatHeader}>
                       Today's Scraps (kg)
@@ -123,29 +129,20 @@ export default function OwnerHome({ navigation, route }) {
                       {dataSession?.todays_scrap}
                     </Text>
                   </View>
-                  {session.subscription_status === 1 && (
-                    <TouchableOpacity
-                      styles={styles.scrapsButton}
-                      onPress={() => navigation.navigate('Analytics')}>
-                      <ArrowIcon />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <View style={styles.currentScraps}>
+                  {session.subscription_status === 1 && <ArrowIcon />}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.currentScraps}
+                  disabled={session.subscription_status === 1 ? false : true}
+                  onPress={() => navigation.navigate('Analytics')}>
                   <View style={styles.scrapsStat}>
                     <Text style={styles.scrapsStatHeader}>Week Total (kg)</Text>
                     <Text style={styles.scrapsStatValue} numberOfLines={1}>
                       {dataSession?.week_total}
                     </Text>
                   </View>
-                  {session.subscription_status === 1 && (
-                    <TouchableOpacity
-                      styles={styles.scrapsButton}
-                      onPress={() => navigation.navigate('Analytics')}>
-                      <ArrowIcon />
-                    </TouchableOpacity>
-                  )}
-                </View>
+                  {session.subscription_status === 1 && <ArrowIcon />}
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.inventoryStat}>
@@ -200,7 +197,7 @@ export default function OwnerHome({ navigation, route }) {
                 </VictoryStack>
               </VictoryChart>
             ) : (
-              <View style={{height: 500}}>
+              <View style={{ height: 500, paddingVertical: 50 }}>
                 <ActivityIndicator size={'large'} color={'#3E5A47'} />
               </View>
             )}

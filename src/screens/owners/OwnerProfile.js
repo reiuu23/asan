@@ -105,20 +105,7 @@ export default function OwnerProfile({ navigation }) {
           verificationStatus: response.user.verification_status,
           profile: response.user
         }));
-
-        // Alert.alert(
-        //   'Profile Update Status',
-        //   `You have successfully updated your profile!`,
-        //   [
-        //     {
-        //       text: 'OK',
-        //       onPress: () => {
-        //         navigation.navigate('Home');
-        //       }
-        //     }
-        //   ]
-        // );
-
+        
         successToast('You have successfully updated your profile!');
         navigation.navigate('Home');
         setLoading(false);

@@ -17,6 +17,7 @@ import { BackButtonIcon, EditIcon } from '../../components/Icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { AuthContext } from '../../context/AuthContext';
 import { updateProfile } from '../../services/authService';
+import { CheckIcon } from '../../components/Icons';
 import useCustomFetch from '../../hooks/useCustomFetch';
 import ImagePicker from 'react-native-image-crop-picker';
 import Toast from 'react-native-toast-message';
@@ -27,6 +28,8 @@ export default function BuyerProfile({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
+
+  console.log(session.subscription);
 
   const {
     control,
@@ -240,8 +243,55 @@ export default function BuyerProfile({ navigation }) {
           </View>
         </View>
 
-        {session.profile ? (
+        {session?.profile ? (
           <View style={{ paddingLeft: 10, paddingRight: 10, flex: 1 }}>
+            <View style={styles.subscriptionStatusWrapper}>
+              <Text style={styles.subscriptionStatusHeader}>
+                Subscription Status:
+              </Text>
+              {session.subscription_status === 0 ? (
+                <Text style={styles.subscriptionStatusValue}>Inactive</Text>
+              ) : (
+                <Text style={styles.subscriptionStatusValue}>
+                  Renews on {session.subscription.subscription_end_date}
+                </Text>
+              )}
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 0,
+                marginLeft: 10,
+                marginBottom: 20
+              }}>
+              {session.verificationStatus !== 0
+                ? session.subscription_status === 1 && (
+                    <>
+                      <Text style={styles.verificationText}>
+                        {' '}
+                        Account Status:{' '}
+                      </Text>
+                      {session.verificationStatus === 0 && (
+                        <Text style={styles.verificationText}>Unverified</Text>
+                      )}
+                      {session.verificationStatus === 1 && (
+                        <Text style={styles.verificationText}>Ongoing</Text>
+                      )}
+                      {session.verificationStatus === 2 && (
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginLeft: 15
+                          }}>
+                          <CheckIcon color={'#3E5A47'} />
+                          <Text style={styles.verificationText}>Verified</Text>
+                        </View>
+                      )}
+                    </>
+                  )
+                : ''}
+            </View>
             <Text style={styles.formInputHeader}>Last Name</Text>
             <Controller
               control={control}
@@ -400,46 +450,13 @@ export default function BuyerProfile({ navigation }) {
 
         {/* Form Footer */}
         <View style={styles.footerContainer}>
-          <View style={{ flexDirection: 'row', gap: 0 }}>
-            {session.verificationStatus !== 0
-              ? session.subscription_status === 1 && (
-                  <>
-                    <Text style={styles.verificationText}>
-                      {' '}
-                      Account Status:{' '}
-                    </Text>
-                    {session.verificationStatus === 0 && (
-                      <Text style={styles.verificationText}>Ongoing</Text>
-                    )}
-                    {session.verificationStatus === 1 && (
-                      <Text style={styles.verificationText}>Ongoing</Text>
-                    )}
-                    {session.verificationStatus === 2 && (
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginLeft: 15,
-                          marginTop: 20
-                        }}>
-                        <CheckIcon color={'#3E5A47'} />
-                        <Text style={styles.verificationText}>Ongoing</Text>
-                      </View>
-                    )}
-                  </>
-                )
-              : ''}
-          </View>
-          {session.verificationStatus === 0 &&
-            session.subscription_status === 1 && (
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Verification')}
-                style={styles.formSubmitBtn}>
-                <Text style={styles.formSubmitBtnText}>
-                  Verify your Account
-                </Text>
-              </TouchableOpacity>
-            )}
+          {session.verificationStatus === 0 && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Verification')}
+              style={styles.formSubmitBtn}>
+              <Text style={styles.formSubmitBtnText}>Verify your Account</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             style={styles.formSubmitBtn}>
@@ -646,5 +663,24 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     fontFamily: 'Inter-Medium',
     color: '#3E5A47'
+  },
+  subscriptionStatusWrapper: {
+    // backgroundColor: '#FFFFFF',
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly'
+  },
+  subscriptionStatusHeader: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    textAlign: 'right'
+  },
+  subscriptionStatusValue: {
+    color: '#3E5A47',
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    textAlign: 'right'
   }
 });

@@ -57,71 +57,90 @@ export default function BuyerAnalytics() {
       <View style={styles.top_bar__container}>
         <Text style={styles.top_bar__container_header}>Analytics</Text>
       </View>
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={fetchSummary}
-            colors={['#3E5A47']}
-          />
-        }>
-        <LinearGradient
-          colors={['#F2F2F2', '#3E5A47']}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 0, y: 0.9 }}
-          style={{
-            height: '100%',
-            marginBottom: 115
-          }}>
-          <View style={styles.stats_daily__container}>
-            {!loading ? (
-              <Text style={styles.stats_daily__topheader}>
-                Stats: Break Down
-              </Text>
-            ) : (
-              <Text style={styles.stats_daily__topheader}>Loading...</Text>
-            )}
-            <Divider
-              color="#3E5A47"
-              style={styles.stats_daily__divider}
-              width={1}
+      {session.subscription_status === 1 ? (
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={fetchSummary}
+              colors={['#3E5A47']}
             />
-            {/* Stats Dates */}
-            <View
-              style={{
-                flexDirection: 'column',
-                flexWrap: 'wrap',
-                gap: 15,
-                height: 280,
-                alignSelf: 'left',
-                paddingBottom: 10,
-                paddingLeft: 20
-              }}>
-              {data ? (
-                data?.week_stacked_data.length !== 0 ? (
-                  data.week_stacked_data?.map((breakdown, index) => {
-                    return (
-                      <View key={index}>
-                        <Text
-                          style={{
-                            color: '#627D6B',
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 17
-                          }}>
-                          {breakdown.day_and_date}
-                        </Text>
-                        <Text
-                          style={{
-                            color: '#3E5A47',
-                            fontFamily: 'Inter-Bold',
-                            fontSize: 20
-                          }}>
-                          {breakdown.scrap_total_weight} kg
-                          {/* {breakdown.total_volume_all_categories} kg */}
-                        </Text>
-                      </View>
-                    );
-                  })
+          }>
+          <LinearGradient
+            colors={['#F2F2F2', '#3E5A47']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 0, y: 0.9 }}
+            style={{
+              height: '100%',
+              marginBottom: 115
+            }}>
+            <View style={styles.stats_daily__container}>
+              {!loading ? (
+                <Text style={styles.stats_daily__topheader}>
+                  Stats: Break Down
+                </Text>
+              ) : (
+                <Text style={styles.stats_daily__topheader}>Loading...</Text>
+              )}
+              <Divider
+                color="#3E5A47"
+                style={styles.stats_daily__divider}
+                width={1}
+              />
+              {/* Stats Dates */}
+              <View
+                style={{
+                  flexDirection: 'column',
+                  flexWrap: 'wrap',
+                  gap: 15,
+                  height: 280,
+                  alignSelf: 'left',
+                  paddingBottom: 10,
+                  paddingLeft: 20
+                }}>
+                {data ? (
+                  data?.week_stacked_data.length !== 0 ? (
+                    data.week_stacked_data?.map((breakdown, index) => {
+                      return (
+                        <View key={index}>
+                          <Text
+                            style={{
+                              color: '#627D6B',
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 17
+                            }}>
+                            {breakdown.day_and_date}
+                          </Text>
+                          <Text
+                            style={{
+                              color: '#3E5A47',
+                              fontFamily: 'Inter-Bold',
+                              fontSize: 20
+                            }}>
+                            {breakdown.scrap_total_weight} kg
+                            {/* {breakdown.total_volume_all_categories} kg */}
+                          </Text>
+                        </View>
+                      );
+                    })
+                  ) : (
+                    <View
+                      style={{
+                        height: '95%',
+                        width: '95%',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                      <Text
+                        style={{
+                          color: '#627D6B',
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 17
+                        }}>
+                        There are no analytics data yet!
+                      </Text>
+                    </View>
+                  )
                 ) : (
                   <View
                     style={{
@@ -130,115 +149,114 @@ export default function BuyerAnalytics() {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                    <Text
-                      style={{
-                        color: '#627D6B',
-                        fontFamily: 'Inter-Regular',
-                        fontSize: 17
-                      }}>
-                      There are no analytics data yet!
-                    </Text>
+                    <ActivityIndicator size={'large'} color={'#3E5A47'} />
                   </View>
+                )}
+              </View>
+              <Divider
+                color="#3E5A47"
+                style={styles.stats_daily__container}
+                width={1}
+              />
+              {data ? (
+                data.length !== 0 ? (
+                  <Text style={styles.stats_daily__header}>
+                    {data[0]?.data_generated_date}
+                  </Text>
+                ) : (
+                  <Text style={styles.stats_daily__header}>
+                    Scrap Statistics
+                  </Text>
                 )
               ) : (
-                <View
-                  style={{
-                    height: '95%',
-                    width: '95%',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                  <ActivityIndicator size={'large'} color={'#3E5A47'} />
-                </View>
+                <Text style={styles.stats_daily__header}>Loading...</Text>
               )}
             </View>
-            <Divider
-              color="#3E5A47"
-              style={styles.stats_daily__container}
-              width={1}
-            />
-            {data ? (
-              data.length !== 0 ? (
-                <Text style={styles.stats_daily__header}>
-                  {data[0]?.data_generated_date}
-                </Text>
-              ) : (
-                <Text style={styles.stats_daily__header}>Scrap Statistics</Text>
-              )
-            ) : (
-              <Text style={styles.stats_daily__header}>Loading...</Text>
-            )}
-          </View>
-          {/* Bar Graph Section */}
-          {!loading ? (
-            data ? (
-              <View style={styles.stats__graphContainer}>
-                <Text style={styles.stats__graphLabelX}>
-                  weight of scrap per types
-                </Text>
-                <VictoryChart
-                  style={styles.chart}
-                  theme={VictoryTheme.material}
-                  padding={{ top: 60, bottom: 60, left: 60, right: 60 }}
-                  maxDomain={{
-                    y: data.overall_stocks === 0 ? 50 : data.overall_stocks + 50
-                  }}
-                  domainPadding={30}>
-                  <VictoryStack>
-                    {data?.week_stacked_data.map((scraps, index) => {
+            {/* Bar Graph Section */}
+            {!loading ? (
+              data ? (
+                <View style={styles.stats__graphContainer}>
+                  <Text style={styles.stats__graphLabelX}>
+                    weight of scrap per types
+                  </Text>
+                  <VictoryChart
+                    style={styles.chart}
+                    theme={VictoryTheme.material}
+                    padding={{ top: 60, bottom: 60, left: 60, right: 60 }}
+                    maxDomain={{
+                      y:
+                        data.overall_stocks === 0
+                          ? 50
+                          : data.overall_stocks + 50
+                    }}
+                    domainPadding={30}>
+                    <VictoryStack>
+                      {data?.week_stacked_data.map((scraps, index) => {
+                        return (
+                          <VictoryBar
+                            key={index}
+                            color={scraps?.scrap_bar_color}
+                            data={[
+                              {
+                                x: scraps?.scrap_issued_day,
+                                y: scraps?.scrap_total_weight
+                              }
+                            ]}></VictoryBar>
+                        );
+                      })}
+                    </VictoryStack>
+                  </VictoryChart>
+                  {/* Graph Legend */}
+                  <View style={styles.stats__graph_legend}>
+                    {legendList.map(category => {
                       return (
-                        <VictoryBar
-                          key={index}
-                          color={scraps?.scrap_bar_color}
-                          data={[
-                            {
-                              x: scraps?.scrap_issued_day,
-                              y: scraps?.scrap_total_weight
-                            }
-                          ]}></VictoryBar>
+                        <View
+                          style={styles.stats__graph_legend_inner}
+                          key={category.scrap_category_id}>
+                          <View
+                            style={{
+                              width: 41,
+                              height: 13,
+                              backgroundColor: category.scrap_bar_color,
+                              margin: 10
+                            }}></View>
+                          <Text
+                            style={{ textAlign: 'center', color: '#3E5A47' }}>
+                            {category.scrap_category}
+                          </Text>
+                        </View>
                       );
                     })}
-                  </VictoryStack>
-                </VictoryChart>
-                {/* Graph Legend */}
-                <View style={styles.stats__graph_legend}>
-                  {legendList.map(category => {
-                    return (
-                      <View
-                        style={styles.stats__graph_legend_inner}
-                        key={category.scrap_category_id}>
-                        <View
-                          style={{
-                            width: 41,
-                            height: 13,
-                            backgroundColor: category.scrap_bar_color,
-                            margin: 10
-                          }}></View>
-                        <Text style={{ textAlign: 'center', color: '#3E5A47' }}>
-                          {category.scrap_category}
-                        </Text>
-                      </View>
-                    );
-                  })}
+                  </View>
+                  {/* --- */}
                 </View>
-                {/* --- */}
-              </View>
+              ) : (
+                <View style={{ height: 50 }}></View>
+              )
             ) : (
-              <View style={{ height: 50 }}></View>
-            )
-          ) : (
-            <View
-              style={{
-                height: '20%',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-              <ActivityIndicator size={'large'} color={'#FFFFFF'} />
-            </View>
-          )}
-          {/* --- */}
-        </LinearGradient>
-      </ScrollView>
+              <View
+                style={{
+                  height: '20%',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+              </View>
+            )}
+            {/* --- */}
+          </LinearGradient>
+        </ScrollView>
+      ) : (
+        <View>
+          <Text style={{
+            color: '#3E5A47',
+            fontSize: 20,
+            fontFamily: 'Inter-Medium',
+            textAlign: 'center',
+            padding: 50
+          }}>Unlock 'Trading' Plan to access this feature.</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

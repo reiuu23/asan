@@ -446,14 +446,16 @@ const UserVerification = ({ navigation }) => {
     const sessionRefetch = async () => {
       try {
         const response = await sessionUpdate(session.profile.id, session.token);
-        setSession(prev => ({
-          ...prev,
-          profile: response?.user,
-          verificationStatus: response?.user.verification_status,
-          subscription_status: response?.subscription.subscription_status,
-          token: response?.token
-        }));
-        return response;
+        if (response) {
+          setSession(prev => ({
+            ...prev,
+            profile: response?.user,
+            verificationStatus: response?.user.verification_status,
+            subscription_status: response?.subscription.subscription_status,
+            subscription: response?.subscription,
+            token: response?.token
+          }));
+        }
       } catch (error) {
         errorToast(
           'Encountered an error while trying to update the session. Please try again later'

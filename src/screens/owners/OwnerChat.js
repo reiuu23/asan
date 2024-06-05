@@ -9,6 +9,7 @@ import { StreamChat } from 'stream-chat';
 import { AuthContext } from '../../context/AuthContext';
 import { STREAM_PB } from '../../../env';
 import ChatHeader from '../../components/ChatHeader';
+import LockScreen from '../shared/LockScreen';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,8 @@ const ChannelListScreen = props => {
   const { session } = useContext(AuthContext);
   const { setChannel } = useChatContext();
 
+  const [isLocked, setisLocked] = useState(true);
+
   const filters = {
     members: {
       $in: [session.userId]
@@ -33,6 +36,13 @@ const ChannelListScreen = props => {
     last_message_at: -1
   };
 
+  useEffect(() => {
+    if (session.verificationStatus === 2 && session.subscription_status === 1) {
+      console.log(session.subscription_status);
+      setisLocked(false);
+    }
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -42,35 +52,40 @@ const ChannelListScreen = props => {
           backgroundColor: '#3E5A47',
           justifyContent: 'center'
         }}>
-        <Text
-          style={{
-            fontFamily: 'Inter-Medium',
-            fontSize: 16,
-            color: '#FFFFFF'
-          }}>
-          Note: You'll only be able to interact with buyers who directly
-          messaged you.
-        </Text>
+        {!isLocked ? (
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontSize: 16,
+              color: '#FFFFFF'
+            }}>
+            Note: You'll only be able to interact with buyers who directly
+            messaged you.
+          </Text>
+        ) : (
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontSize: 16,
+              color: '#FFFFFF'
+            }}>
+            Note: This feature is only available with the Trading Plan and
+            Verified Accounts (Premium).
+          </Text>
+        )}
       </View>
       <View style={{ flex: 8 }}>
         <ChannelList
           filters={filters}
           sort={sort}
           onSelect={channel => {
-            const { navigation } = props;
-            setChannel(channel);
-            navigation.navigate('ChannelScreen');
+            if(!isLocked) {
+              const { navigation } = props;
+              setChannel(channel);
+              navigation.navigate('ChannelScreen');
+            }
           }}
-          PreviewAvatar={({ channel }) => (
-            <TouchableOpacity
-              disallowInterruption={true}
-              onPress={() => {
-                // console.log('hello');
-                // console.log('test: ', channel);
-              }}>
-              <ChannelAvatar channel={channel} />
-            </TouchableOpacity>
-          )}
+          PreviewAvatar={({ channel }) => <ChannelAvatar channel={channel} />}
         />
       </View>
     </View>
@@ -82,6 +97,8 @@ const ChannelScreen = (props) => {
   const { navigation } = props;
   const { channel, setThread } = useChatContext();
   const { session } = useContext(AuthContext); // Assuming session.userId is available
+  
+  const [isLocked, setisLocked] = useState(true);
 
   const [currentPeer, setCurrentPeer] = useState('');
 
@@ -102,6 +119,13 @@ const ChannelScreen = (props) => {
       console.error('Error fetching channel members:', error);
     }
   };
+
+  useEffect(() => {
+    if (session?.verificationStatus === 2 && session?.subscription_status === 1) {
+      console.log(session.subscription_status);
+      setisLocked(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchPeerDisplay();

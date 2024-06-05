@@ -59,15 +59,17 @@ export default function PasswordReset() {
         },
         {
           headers: {
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
           }
         }
       );
       setLoading(false);
-      successToast(`We have successfully sent an email for your password change request.`);
+      console.log(response);
+      successToast(`${response.message}`);
     } catch (error) {
       setLoading(false);
-      errorToast(`Oops, ${error.message}`);
+      errorToast(`Oops, it seems the email is not yet registered on our system as we cannot fid any matching records with it.`);
     }
   };
 

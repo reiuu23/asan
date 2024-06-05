@@ -57,6 +57,7 @@ import {
   SidebarStocks
 } from '../components/Icons';
 import { AuthContext } from '../context/AuthContext';
+import OwnerChat from '../screens/owners/OwnerChat';
 
 const CustomDrawerContent = props => {
 
@@ -117,70 +118,66 @@ const CustomDrawerContent = props => {
           }}>
           {session.firstName}
         </Text>
-        {session.verificationStatus !== 0 ? (
-          session.subscription_status === 1 && (
-            <>
+        <>
+          <Text
+            style={{
+              fontFamily: 'Inter-Bold',
+              fontSize: 14,
+              // textAlign: 'center',
+              color: '#3E5A47',
+              marginTop: 20,
+              marginLeft: 20
+            }}>
+            Account Status:
+          </Text>
+          {session.verificationStatus === 0 && (
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontSize: 14,
+                // textAlign: 'center',
+                color: '#3E5A47',
+                marginTop: 20,
+                marginLeft: 20
+              }}>
+              Not Yet Verified
+            </Text>
+          )}
+          {session.verificationStatus === 1 && (
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontSize: 14,
+                // textAlign: 'center',
+                color: '#3E5A47',
+                marginTop: 20,
+                marginLeft: 20
+              }}>
+              Ongoing Verification
+            </Text>
+          )}
+          {session.verificationStatus === 2 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 15,
+                marginTop: 20
+              }}>
+              <CheckIcon color={'#3E5A47'} />
               <Text
                 style={{
-                  fontFamily: 'Inter-Bold',
+                  fontFamily: 'Inter-Medium',
                   fontSize: 14,
                   // textAlign: 'center',
                   color: '#3E5A47',
-                  marginTop: 20,
-                  marginLeft: 20
+                  marginLeft: 5
                 }}>
-                Account Status:
+                Account Verified
               </Text>
-              {session.verificationStatus === 0 && (
-                <Text
-                  style={{
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 14,
-                    // textAlign: 'center',
-                    color: '#3E5A47',
-                    marginTop: 20,
-                    marginLeft: 20
-                  }}>
-                  Not Yet Verified
-                </Text>
-              )}
-              {session.verificationStatus === 1 && (
-                <Text
-                  style={{
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 14,
-                    // textAlign: 'center',
-                    color: '#3E5A47',
-                    marginTop: 20,
-                    marginLeft: 20
-                  }}>
-                  Ongoing Verification
-                </Text>
-              )}
-              {session.verificationStatus === 2 && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: 15,
-                    marginTop: 20
-                  }}>
-                  <CheckIcon color={'#3E5A47'} />
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Medium',
-                      fontSize: 14,
-                      // textAlign: 'center',
-                      color: '#3E5A47',
-                      marginLeft: 5
-                    }}>
-                    Account Verified
-                  </Text>
-                </View>
-              )}
-            </>
-          )
-        ) : ('')}
+            </View>
+          )}
+        </>
       </View>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
@@ -246,19 +243,17 @@ const BottomTab = () => {
             </View>
           )
         }}></Tab.Screen>
-      {session.subscription_status === 1 && (
-        <Tab.Screen
-          name="Chat"
-          component={Chat}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View
-                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-                <ChatIcon></ChatIcon>
-              </View>
-            )
-          }}></Tab.Screen>
-      )}
+      <Tab.Screen
+        name="Chat"
+        component={OwnerChat}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <ChatIcon></ChatIcon>
+            </View>
+          )
+        }}></Tab.Screen>
       <Tab.Screen
         name="Home1"
         backBehavior={() => {
@@ -273,7 +268,7 @@ const BottomTab = () => {
             </View>
           )
         }}></Tab.Screen>
-      {session.subscription_status === 1 && <Tab.Screen
+      <Tab.Screen
         name="Analytics"
         component={Analytics}
         options={{
@@ -283,7 +278,7 @@ const BottomTab = () => {
               <AnalyticsBottomIcon></AnalyticsBottomIcon>
             </View>
           )
-        }}></Tab.Screen>}
+        }}></Tab.Screen>
     </Tab.Navigator>
   );
 };
@@ -315,7 +310,7 @@ const Sidebar = () => {
         contentContainerStyle: { paddingVertical: 0 }
       }}
       drawerContent={props => <CustomDrawerContent {...props} />}>
-      {session.verificationStatus === 0 && session.subscription_status === 1 && (
+      {session.verificationStatus === 0 && (
         <Drawer.Screen
           name="Verify"
           component={Verify}

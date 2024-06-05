@@ -64,19 +64,17 @@ const TabGroup = () => {
             </View>
           )
         }}></Tab.Screen>
-      {session.subscription_status === 1 && (
-        <Tab.Screen
-          name="Chat"
-          component={BuyerChat}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View
-                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-                <ChatIcon></ChatIcon>
-              </View>
-            )
-          }}></Tab.Screen>
-      )}
+      <Tab.Screen
+        name="Chat"
+        component={BuyerChat}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <ChatIcon></ChatIcon>
+            </View>
+          )
+        }}></Tab.Screen>
       <Tab.Screen
         name="Home"
         component={BuyerHome}
@@ -99,19 +97,17 @@ const TabGroup = () => {
             </View>
           )
         }}></Tab.Screen>
-      {session.subscription_status === 1 && (
-        <Tab.Screen
-          name="Analytics"
-          component={BuyerAnalytics}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View
-                style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
-                <StatsIcon></StatsIcon>
-              </View>
-            )
-          }}></Tab.Screen>
-      )}
+      <Tab.Screen
+        name="Analytics"
+        component={BuyerAnalytics}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[styles.tabBarIcon, focused && styles.activeTabBarIcon]}>
+              <StatsIcon></StatsIcon>
+            </View>
+          )
+        }}></Tab.Screen>
     </Tab.Navigator>
   );
 };

@@ -46,7 +46,7 @@ export default function BuyerHome({ navigation, alert }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const { session, setSession, dataSession, setDataSession } = useContext(AuthContext);
-  const { scrapData, loadScrap } = useContext(ScrapContext);
+
 
   const fetchScraps = async () => {
     try {
@@ -66,6 +66,7 @@ export default function BuyerHome({ navigation, alert }) {
           profile: response?.user,
           verificationStatus: response?.user.verification_status,
           subscription_status: response?.subscription.subscription_status,
+          subscription: response?.subscription,
           token: response?.token
         }));
       }
@@ -103,10 +104,6 @@ export default function BuyerHome({ navigation, alert }) {
   }, [session]);
 
   // Navigation Button Function
-
-  const scrapSetter = categoryName => {
-    setCategory(categoryName);
-  };
 
   const signOut = () => {
     Alert.alert('Are you sure?', 'Do you wish to sign out?', [
