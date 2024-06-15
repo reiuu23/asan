@@ -37,6 +37,16 @@ Welcome to the Scrapyard Warehouse Management App. This application is designed 
 // Username: fslagman
 // Password: password01230
 
+# Owner Account (App)
+
+// Username: testowner
+// Password: password
+
+# Buyer Account (App)
+
+// Username: testbuyer
+// Password: password
+
 ```
 
 #### Introduction:
